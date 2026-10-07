@@ -1,0 +1,1761 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px 20px;
+            border-bottom: 1px solid rgba(0,212,255,0.2);
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .date { color: rgba(255,255,255,0.4); font-size: 0.9em; margin-top: 6px; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 24px 20px; }
+
+        /* ALERT */
+        .alert-banner {
+            background: rgba(255,59,59,0.12);
+            border: 1px solid rgba(255,59,59,0.4);
+            border-radius: 14px;
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            display: none;
+        }
+        .alert-banner.visible { display: block; }
+        .alert-banner h4 { color: #ff6b6b; margin-bottom: 6px; }
+        .alert-item { font-size: 0.83em; color: rgba(255,255,255,0.6); padding: 3px 0; }
+
+        .section-title {
+            font-size: 1.15em;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .section-sub {
+            font-size: 0.75em;
+            font-weight: 400;
+            color: rgba(255,255,255,0.35);
+        }
+
+        /* STATS */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.9em;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label { font-size: 0.78em; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+        /* DNN */
+        .dnn-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .dnn-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 16px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            text-align: center;
+            user-select: none;
+        }
+
+        .dnn-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-2px); }
+        .dnn-card.completed { border-color: rgba(0,255,136,0.5); background: rgba(0,255,136,0.07); }
+        .dnn-icon { font-size: 2em; margin-bottom: 8px; display: block; }
+        .dnn-title { font-weight: 600; font-size: 0.9em; margin-bottom: 4px; }
+        .dnn-sub { font-size: 0.75em; color: rgba(255,255,255,0.4); }
+
+        .check-circle {
+            position: absolute; top: 10px; right: 10px;
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65em; transition: all 0.3s;
+        }
+
+        .dnn-card.completed .check-circle {
+            background: #00ff88; border-color: #00ff88; color: #000; font-weight: 700;
+        }
+
+        /* GOALS GRID */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .life-area {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 22px;
+            transition: all 0.3s;
+        }
+
+        .life-area:hover { border-color: rgba(255,255,255,0.14); }
+        .life-area.warning { border-color: rgba(255,200,0,0.35); background: rgba(255,200,0,0.04); }
+        .life-area.danger  { border-color: rgba(255,59,59,0.4);  background: rgba(255,59,59,0.05); }
+
+        .area-header {
+            display: flex; align-items: center;
+            justify-content: space-between; margin-bottom: 14px;
+        }
+
+        .area-left { display: flex; align-items: center; gap: 10px; }
+        .area-icon { font-size: 1.6em; }
+        .area-name { font-size: 1em; font-weight: 600; }
+        .area-score-wrap { text-align: right; }
+        .area-score-num { font-size: 1.4em; font-weight: 700; }
+        .area-score-lbl { font-size: 0.7em; color: rgba(255,255,255,0.35); }
+
+        .score-bar {
+            width: 100%; height: 5px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px; margin-bottom: 16px; overflow: hidden;
+        }
+
+        .score-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+
+        /* GOAL ITEM */
+        .goal-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .goal-item:last-child { border-bottom: none; }
+
+        .goal-cb {
+            width: 22px; height: 22px; border-radius: 6px;
+            border: 2px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75em; flex-shrink: 0; cursor: pointer;
+            transition: all 0.25s; margin-top: 1px;
+        }
+
+        .goal-cb:hover { border-color: rgba(0,212,255,0.5); }
+        .goal-cb.done { background: #00ff88; border-color: #00ff88; color: #000; font-weight: 700; }
+
+        .goal-body { flex: 1; min-width: 0; }
+        .goal-text { font-size: 0.88em; line-height: 1.4; margin-bottom: 6px; }
+        .goal-text.done-text { text-decoration: line-through; color: rgba(255,255,255,0.35); }
+
+        .goal-type-tag {
+            font-size: 0.65em; padding: 1px 7px; border-radius: 8px;
+            margin-left: 6px; vertical-align: middle;
+        }
+
+        .tag-once { background: rgba(255,200,0,0.15); border: 1px solid rgba(255,200,0,0.3); color: #ffc800; }
+        .tag-ongoing { background: rgba(0,212,255,0.12); border: 1px solid rgba(0,212,255,0.3); color: #00d4ff; }
+
+        /* DUAL SCORE BARS */
+        .dual-score {
+            margin: 8px 0 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-row-label {
+            font-size: 0.68em;
+            color: rgba(255,255,255,0.4);
+            width: 80px;
+            flex-shrink: 0;
+        }
+
+        .mini-bar {
+            flex: 1;
+            height: 5px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .mini-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        .fill-result { background: linear-gradient(90deg, #00d4ff, #0099ff); }
+        .fill-exec   { background: linear-gradient(90deg, #7b2ff7, #b44fff); }
+        .fill-total  { background: linear-gradient(90deg, #00ff88, #00d4ff); }
+
+        .score-row-val {
+            font-size: 0.7em;
+            font-weight: 600;
+            width: 32px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* STATUS INSIGHT */
+        .goal-insight {
+            font-size: 0.72em;
+            padding: 4px 10px;
+            border-radius: 8px;
+            margin-top: 5px;
+            display: inline-block;
+            line-height: 1.4;
+        }
+
+        .insight-great   { background: rgba(0,255,136,0.1);  border: 1px solid rgba(0,255,136,0.2);  color: #00ff88; }
+        .insight-working { background: rgba(0,212,255,0.1);  border: 1px solid rgba(0,212,255,0.2);  color: #00d4ff; }
+        .insight-plan    { background: rgba(255,200,0,0.1);  border: 1px solid rgba(255,200,0,0.2);  color: #ffc800; }
+        .insight-start   { background: rgba(255,59,59,0.1);  border: 1px solid rgba(255,59,59,0.2);  color: #ff6b6b; }
+
+        .goal-actions {
+            display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;
+        }
+
+        .goal-edit-btn {
+            font-size: 0.68em; padding: 3px 10px; border-radius: 8px;
+            border: 1px solid rgba(0,212,255,0.3);
+            background: rgba(0,212,255,0.08); color: #00d4ff;
+            cursor: pointer; transition: all 0.2s;
+        }
+
+        .goal-edit-btn:hover { background: rgba(0,212,255,0.18); }
+
+        .dnn-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+
+        .dnn-badge {
+            font-size: 0.65em; padding: 2px 7px; border-radius: 8px;
+            background: rgba(123,47,247,0.2);
+            border: 1px solid rgba(123,47,247,0.35);
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* NEXT STEPS */
+        .next-steps-panel {
+            background: rgba(123,47,247,0.07);
+            border: 1px solid rgba(123,47,247,0.25);
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 28px;
+        }
+
+        .steps-filter {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px;
+        }
+
+        .filter-btn {
+            font-size: 0.78em; padding: 5px 14px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: transparent; color: rgba(255,255,255,0.5);
+            cursor: pointer; transition: all 0.2s;
+        }
+
+        .filter-btn:hover { border-color: rgba(0,212,255,0.4); color: #00d4ff; }
+        .filter-btn.active { background: rgba(0,212,255,0.15); border-color: rgba(0,212,255,0.5); color: #00d4ff; }
+
+        .step-item {
+            display: flex; gap: 14px; padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            align-items: flex-start;
+        }
+
+        .step-item:last-child { border-bottom: none; }
+        .step-item.hidden { display: none; }
+
+        .step-prio {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72em; font-weight: 700; flex-shrink: 0;
+        }
+
+        .prio-critical { background: rgba(255,0,0,0.25); border: 1px solid rgba(255,0,0,0.5); color: #ff4444; }
+        .prio-h { background: rgba(255,100,59,0.2); border: 1px solid rgba(255,100,59,0.4); color: #ff6b3d; }
+        .prio-m { background: rgba(255,200,0,0.2); border: 1px solid rgba(255,200,0,0.4); color: #ffc800; }
+        .prio-l { background: rgba(0,255,136,0.15); border: 1px solid rgba(0,255,136,0.35); color: #00ff88; }
+
+        .step-content { flex: 1; min-width: 0; }
+        .step-content h4 { font-size: 0.92em; margin-bottom: 3px; }
+        .step-next-action { font-size: 0.85em; color: rgba(255,255,255,0.75); margin: 4px 0; }
+        .step-content p { font-size: 0.8em; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+        .step-meta { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+
+        .step-tag {
+            font-size: 0.68em; padding: 2px 8px; border-radius: 8px;
+        }
+
+        .tag-area  { background: rgba(123,47,247,0.2); border: 1px solid rgba(123,47,247,0.3); color: rgba(200,150,255,0.9); }
+        .tag-time  { background: rgba(0,212,255,0.12); border: 1px solid rgba(0,212,255,0.25); color: #00d4ff; }
+        .tag-score { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.45); }
+
+        /* Insight tag in step */
+        .tag-insight-great   { background: rgba(0,255,136,0.12); border: 1px solid rgba(0,255,136,0.25); color: #00ff88; }
+        .tag-insight-working { background: rgba(0,212,255,0.12); border: 1px solid rgba(0,212,255,0.25); color: #00d4ff; }
+        .tag-insight-plan    { background: rgba(255,200,0,0.12); border: 1px solid rgba(255,200,0,0.25); color: #ffc800; }
+        .tag-insight-start   { background: rgba(255,59,59,0.12); border: 1px solid rgba(255,59,59,0.25); color: #ff6b6b; }
+
+        .step-btns { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
+
+        .step-done-btn {
+            font-size: 0.72em; padding: 4px 12px; border-radius: 10px;
+            border: 1px solid rgba(0,255,136,0.3);
+            background: rgba(0,255,136,0.08); color: #00ff88;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+
+        .step-done-btn:hover { background: rgba(0,255,136,0.18); }
+        .step-done-btn.done-step { opacity: 0.5; text-decoration: line-through; }
+
+        /* TIPS */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .tip-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px; padding: 18px;
+            transition: all 0.3s; position: relative;
+        }
+
+        .tip-card:hover { border-color: rgba(0,212,255,0.25); transform: translateY(-2px); }
+
+        .tip-relevance {
+            position: absolute; top: 12px; right: 12px;
+            font-size: 0.68em; padding: 2px 8px; border-radius: 8px;
+        }
+
+        .rel-high { background: rgba(255,59,59,0.2); border: 1px solid rgba(255,59,59,0.3); color: #ff6b6b; }
+        .rel-med  { background: rgba(255,200,0,0.15); border: 1px solid rgba(255,200,0,0.25); color: #ffc800; }
+        .rel-low  { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
+
+        .tip-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .tip-icon { font-size: 1.4em; }
+        .tip-title { font-weight: 600; font-size: 0.9em; padding-right: 70px; }
+        .tip-content { font-size: 0.82em; color: rgba(255,255,255,0.55); line-height: 1.6; }
+        .tip-tools { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+
+        .tool-tag {
+            font-size: 0.7em; padding: 2px 9px; border-radius: 9px;
+            background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.25); color: #00d4ff;
+        }
+
+        /* SCORE LEGEND */
+        .score-legend {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin-bottom: 28px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+
+        .legend-item {
+            display: flex; flex-direction: column; gap: 4px;
+        }
+
+        .legend-title {
+            font-size: 0.8em; font-weight: 600;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .legend-bar-demo {
+            height: 5px; border-radius: 3px; width: 100%;
+        }
+
+        .legend-desc { font-size: 0.72em; color: rgba(255,255,255,0.4); }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 22px; padding: 28px;
+            width: 100%; max-width: 620px;
+            max-height: 88vh; overflow-y: auto;
+        }
+
+        .modal h3 { margin-bottom: 4px; font-size: 1.15em; }
+        .modal .modal-sub { font-size: 0.82em; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+
+        /* Score summary in modal */
+        .modal-score-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 14px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .modal-score-item { text-align: center; }
+        .modal-score-val { font-size: 1.4em; font-weight: 700; }
+        .modal-score-lbl { font-size: 0.68em; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+        /* Exec plan */
+        .exec-phase { margin-bottom: 22px; }
+
+        .exec-phase-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(0,212,255,0.15);
+        }
+
+        .exec-phase-title { font-size: 0.82em; font-weight: 700; color: rgba(0,212,255,0.8); }
+        .exec-phase-prog  { font-size: 0.72em; color: rgba(255,255,255,0.35); }
+
+        .exec-step {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .exec-step:last-child { border-bottom: none; }
+
+        .exec-step-num {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(123,47,247,0.3); border: 1px solid rgba(123,47,247,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7em; font-weight: 700; flex-shrink: 0;
+            color: rgba(200,150,255,0.9);
+        }
+
+        .exec-step-cb {
+            width: 20px; height: 20px; border-radius: 5px;
+            border: 2px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65em; flex-shrink: 0; cursor: pointer;
+            transition: all 0.2s; margin-top: 1px;
+        }
+
+        .exec-step-cb:hover { border-color: rgba(0,212,255,0.5); }
+        .exec-step-cb.done { background: #00ff88; border-color: #00ff88; color: #000; font-weight: 700; }
+
+        .exec-step-body { flex: 1; }
+        .exec-step-title { font-size: 0.87em; margin-bottom: 2px; }
+        .exec-step-title.done-text { text-decoration: line-through; color: rgba(255,255,255,0.35); }
+        .exec-step-desc { font-size: 0.76em; color: rgba(255,255,255,0.4); line-height: 1.5; }
+        .exec-step-tags { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; }
+
+        .exec-tag {
+            font-size: 0.65em; padding: 1px 7px; border-radius: 7px;
+            background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2);
+            color: rgba(0,212,255,0.8);
+        }
+
+        /* Impact note in exec modal */
+        .exec-impact-note {
+            font-size: 0.72em;
+            padding: 10px 14px;
+            background: rgba(123,47,247,0.1);
+            border: 1px solid rgba(123,47,247,0.2);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            color: rgba(200,150,255,0.8);
+            line-height: 1.5;
+        }
+
+        /* Progress modal */
+        .modal-field { margin-bottom: 18px; }
+        .modal-field label { display: block; font-size: 0.83em; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+
+        .modal-field input[type="number"] {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px; padding: 10px 14px;
+            color: #fff; font-size: 0.9em;
+            outline: none; transition: border-color 0.2s;
+        }
+
+        .modal-field input:focus { border-color: rgba(0,212,255,0.5); }
+        .modal-field .unit { font-size: 0.78em; color: rgba(255,255,255,0.35); margin-top: 4px; }
+
+        .modal-preview-bars {
+            margin-top: 14px;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .preview-row {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+        }
+
+        .preview-row:last-child { margin-bottom: 0; }
+
+        .preview-label { font-size: 0.72em; color: rgba(255,255,255,0.4); width: 100px; flex-shrink: 0; }
+
+        .preview-bar {
+            flex: 1; height: 6px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px; overflow: hidden;
+        }
+
+        .preview-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+        .preview-val { font-size: 0.72em; font-weight: 600; width: 35px; text-align: right; }
+
+        .btn {
+            padding: 11px 22px; border-radius: 12px; border: none;
+            cursor: pointer; font-size: 0.88em; font-weight: 600; transition: all 0.25s;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, #7b2ff7, #00d4ff); color: #fff; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 18px rgba(123,47,247,0.35); }
+        .btn-secondary { background: rgba(255,255,255,0.08); color: #fff; margin-left: 10px; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.13); }
+
+        /* WEEKLY */
+        .weekly-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            gap: 8px; margin-bottom: 12px;
+        }
+
+        .day-col {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px; padding: 10px 4px; text-align: center;
+        }
+
+        .day-col.today { border-color: rgba(0,212,255,0.35); background: rgba(0,212,255,0.05); }
+        .day-name { font-size: 0.68em; color: rgba(255,255,255,0.35); margin-bottom: 7px; }
+        .day-dots { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+        .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.08); }
+        .dot.done   { background: #00ff88; }
+        .dot.missed { background: rgba(255,59,59,0.45); }
+        .day-score-lbl { font-size: 0.7em; margin-top: 6px; font-weight: 600; }
+
+        .week-legend {
+            display: flex; gap: 16px; flex-wrap: wrap;
+            margin-bottom: 28px; font-size: 0.78em; color: rgba(255,255,255,0.4);
+        }
+
+        .week-legend-item { display: flex; align-items: center; gap: 6px; }
+        .week-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .no-steps {
+            text-align: center; padding: 30px;
+            color: rgba(255,255,255,0.3); font-size: 0.9em;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.6em; }
+            .weekly-grid { gap: 4px; }
+            .modal { padding: 18px; }
+            .modal-score-summary { grid-template-columns: repeat(3,1fr); gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🎯 Life Dashboard</h1>
+    <div class="date" id="dateDisplay"></div>
+</div>
+
+<div class="container">
+
+    <!-- Alert -->
+    <div class="alert-banner" id="alertBanner">
+        <h4>⚠️ Diese Bereiche brauchen sofort Aufmerksamkeit</h4>
+        <div id="alertList"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="section-title">📊 Dein heutiger Stand</div>
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value" id="statToday">0/5</div>
+            <div class="stat-label">DNNs heute ✅</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statDone">0/0</div>
+            <div class="stat-label">Ziele erreicht 🏆</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statExec">0%</div>
+            <div class="stat-label">Ø Umsetzung 📋</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statResult">0%</div>
+            <div class="stat-label">Ø Ergebnis 🎯</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statBalance">0%</div>
+            <div class="stat-label">Life Balance Score</div>
+        </div>
+    </div>
+
+    <!-- Score Legend -->
+    <div class="section-title">ℹ️ So funktioniert der Score</div>
+    <div class="score-legend">
+        <div class="legend-item">
+            <div class="legend-title">
+                <div style="width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,#00d4ff,#0099ff);flex-shrink:0"></div>
+                Ergebnis-Score (60%)
+            </div>
+            <div class="legend-bar-demo" style="background:linear-gradient(90deg,#00d4ff,#0099ff);opacity:0.6"></div>
+            <div class="legend-desc">Echter messbarer Wert — kg, Bücher, €, Selbsteinschätzung. Was du wirklich erreicht hast.</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-title">
+                <div style="width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,#7b2ff7,#b44fff);flex-shrink:0"></div>
+                Umsetzungs-Score (40%)
+            </div>
+            <div class="legend-bar-demo" style="background:linear-gradient(90deg,#7b2ff7,#b44fff);opacity:0.6"></div>
+            <div class="legend-desc">Wie viele Execution-Schritte erledigt. Zeigt ob du aktiv am Ziel arbeitest.</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-title">
+                <div style="width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,#00ff88,#00d4ff);flex-shrink:0"></div>
+                Gesamt-Score
+            </div>
+            <div class="legend-bar-demo" style="background:linear-gradient(90deg,#00ff88,#00d4ff);opacity:0.6"></div>
+            <div class="legend-desc">60% Ergebnis + 40% Umsetzung = ehrlichster Fortschrittsindikator.</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-title">💡 Die 4 Zustände</div>
+            <div class="legend-desc">
+                🏆 Hoch + Hoch = Perfekt<br>
+                💪 Hoch Exec + Niedrig Result = Du arbeitest dran!<br>
+                ⚡ Niedrig Exec + Hoch Result = Kein Plan<br>
+                🚨 Niedrig + Niedrig = Sofort handeln
+            </div>
+        </div>
+    </div>
+
+    <!-- DNN -->
+    <div class="section-title">⚡ Daily Non-Negotiables</div>
+    <div class="dnn-grid" id="dnnGrid"></div>
+
+    <!-- Weekly -->
+    <div class="section-title">📅 Diese Woche</div>
+    <div class="weekly-grid" id="weeklyGrid"></div>
+    <div class="week-legend">
+        <div class="week-legend-item"><div class="week-legend-dot" style="background:#00ff88"></div> Erledigt</div>
+        <div class="week-legend-item"><div class="week-legend-dot" style="background:rgba(255,59,59,0.5)"></div> Verpasst</div>
+        <div class="week-legend-item"><div class="week-legend-dot" style="background:rgba(255,255,255,0.1)"></div> Offen</div>
+    </div>
+
+    <!-- Goals -->
+    <div class="section-title">🌟 Lebensbereiche & Ziele</div>
+    <div class="goals-grid" id="goalsGrid"></div>
+
+    <!-- Next Steps -->
+    <div class="section-title">
+        🗺️ Dynamischer Execution-Plan
+        <span class="section-sub">— automatisch priorisiert nach deinem Score</span>
+    </div>
+    <div class="next-steps-panel">
+        <div class="steps-filter" id="stepsFilter"></div>
+        <div id="nextStepsList"></div>
+    </div>
+
+    <!-- Tips -->
+    <div class="section-title">
+        💡 Tipps & Tools
+        <span class="section-sub">— sortiert nach deinen schwächsten Bereichen</span>
+    </div>
+    <div class="tips-grid" id="tipsGrid"></div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3 id="modalTitle"></h3>
+        <p class="modal-sub" id="modalSub"></p>
+        <div id="modalBody"></div>
+        <div style="margin-top:20px" id="modalButtons"></div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  EXECUTION PLANS
+// ═══════════════════════════════════════════
+const EXECUTION_PLANS = {
+    salary: {
+        phases: [
+            { title: '📋 Phase 1 — Analyse & Vorbereitung', steps: [
+                { id:'sal_1', title:'Aktuelles Gehalt + Benefits dokumentieren', desc:'Brutto, Boni, Benefits, Urlaubstage — vollständige Bestandsaufnahme als Verhandlungsbasis.', time:'30 Min', dnn:'goals' },
+                { id:'sal_2', title:'Marktgehalt recherchieren', desc:'Gehalt.de, StepStone, LinkedIn Salary, Glassdoor — für deine exakte Rolle + Erfahrungsjahre.', time:'1 Std', dnn:'goals' },
+                { id:'sal_3', title:'Eigene Erfolge der letzten 12 Monate auflisten', desc:'Konkrete Zahlen: Projekte, Einsparungen, Umsatz, Teamgröße. Je messbarer, desto stärker.', time:'1 Std', dnn:'share' },
+                { id:'sal_4', title:'Verhandlungsziel definieren + Anker setzen', desc:'Ziel: 100k+. Anker: 10-15% über Ziel nennen. Nie als Erster eine Zahl nennen.', time:'20 Min', dnn:'goals' },
+            ]},
+            { title: '🎯 Phase 2 — Skills & Positionierung', steps: [
+                { id:'sal_5', title:'Skill-Gap zu 100k-Profilen identifizieren', desc:'LinkedIn: Profile mit 100k+ in deiner Branche. Was haben die, was du noch nicht hast?', time:'2 Std', dnn:'connect' },
+                { id:'sal_6', title:'High-Impact-Zertifizierung starten', desc:'PMP, Scrum Master, AWS, ITIL — je nach Branche. Zeigt Eigeninitiative und steigert Marktwert.', time:'Laufend', dnn:'read' },
+                { id:'sal_7', title:'Sichtbarkeit im Unternehmen erhöhen', desc:'Präsentationen übernehmen, Projekte leiten, Ideen vorstellen. Wer nicht gesehen wird, wird nicht befördert.', time:'Laufend', dnn:'share' },
+                { id:'sal_8', title:'Mentor finden', desc:'Jemanden der schon dort ist wo du hinwillst. 1x/Monat Kaffee kann Karriere um Jahre beschleunigen.', time:'30 Min', dnn:'connect' },
+            ]},
+            { title: '💬 Phase 3 — Das Gespräch', steps: [
+                { id:'sal_9',  title:'Gespräch mit Vorgesetztem anfragen', desc:'Nicht "über Gehalt reden" — "über meine Entwicklung und nächste Schritte sprechen."', time:'5 Min', dnn:'connect' },
+                { id:'sal_10', title:'Verhandlungsgespräch vorbereiten + üben', desc:'Argumente: Marktwert + Leistungen + Zukunftspläne. Mit Partner üben bis es flüssig klingt.', time:'2 Std', dnn:'goals' },
+                { id:'sal_11', title:'Gespräch führen + Ergebnis dokumentieren', desc:'Falls Ablehnung: konkrete Bedingungen für nächste Erhöhung klären. Schriftlich bestätigen lassen.', time:'1 Std', dnn:'share' },
+                { id:'sal_12', title:'Externe Angebote als Hebel einholen', desc:'Externes Angebot ist der stärkste Verhandlungshebel. Mindestens 2 Benchmarks einholen.', time:'Laufend', dnn:'connect' },
+            ]}
+        ]
+    },
+    leadership: {
+        phases: [
+            { title: '📚 Phase 1 — Fundament aufbauen', steps: [
+                { id:'lead_1', title:'"Extreme Ownership" lesen (Jocko Willink)', desc:'Das Standardwerk für Führung. Kernbotschaft: Alles ist deine Verantwortung. Sofort umsetzbar.', time:'1 Woche', dnn:'read' },
+                { id:'lead_2', title:'"The 21 Irrefutable Laws of Leadership" lesen', desc:'John Maxwell — systematisches Führungsverständnis. Jede Law direkt nach dem Kapitel anwenden.', time:'2 Wochen', dnn:'read' },
+                { id:'lead_3', title:'Eigene Führungsschwächen identifizieren', desc:'Feedback von 3 Personen: Was kann ich als Leader besser? Journaling: Wo verliere ich die Kontrolle?', time:'1 Std', dnn:'goals' },
+                { id:'lead_4', title:'Leadership-Stil definieren', desc:'Servant Leader? Transformational? Situativ? Bewusste Entscheidung treffen und konsistent leben.', time:'30 Min', dnn:'goals' },
+            ]},
+            { title: '🔧 Phase 2 — Praxis täglich', steps: [
+                { id:'lead_5', title:'Täglich eine Führungsentscheidung bewusst treffen', desc:'Keine passiven Entscheidungen. Aktiv führen: klare Ansage, klare Erwartung, klares Feedback.', time:'Täglich', dnn:'goals' },
+                { id:'lead_6', title:'Wöchentliches 1:1 mit direkten Kollegen', desc:'20 Min pro Person: Was blockiert dich? Was brauchst du von mir? Wie geht es dir wirklich?', time:'20 Min/Wo', dnn:'connect' },
+                { id:'lead_7', title:'Feedback-Kultur aktiv aufbauen', desc:'Erst selbst um Feedback bitten, dann regelmäßig geben. Modell: Situation → Verhalten → Wirkung.', time:'Laufend', dnn:'connect' },
+                { id:'lead_8', title:'Schwierige Gespräche führen', desc:'"Crucial Conversations" lesen oder Kurs. Konflikte früh ansprechen, nicht eskalieren lassen.', time:'1 Woche', dnn:'connect' },
+            ]},
+            { title: '🚀 Phase 3 — Rolle ausbauen', steps: [
+                { id:'lead_9',  title:'Nächste Führungsverantwortung aktiv suchen', desc:'Projekt übernehmen, Team leiten, Workshop moderieren. Wer führen will muss es tun — nicht warten.', time:'Nächste 4 Wo', dnn:'share' },
+                { id:'lead_10', title:'Executive Presence entwickeln', desc:'Körpersprache, Stimme, Präsenz. Eigene Präsentationen aufnehmen und analysieren.', time:'Laufend', dnn:'share' },
+                { id:'lead_11', title:'Leadership-Community beitreten', desc:'LinkedIn-Gruppen, lokale Meetups, Mastermind. Von anderen Führungskräften lernen beschleunigt.', time:'1 Std', dnn:'connect' },
+            ]}
+        ]
+    },
+    pm: {
+        phases: [
+            { title: '📋 Phase 1 — Methodik & Zertifizierung', steps: [
+                { id:'pm_1', title:'PM-Methode wählen: Agil oder Klassisch', desc:'Scrum/Kanban für iterative, Wasserfall/PRINCE2 für lineare Projekte. Beides kennen ist ideal.', time:'1 Tag', dnn:'read' },
+                { id:'pm_2', title:'Scrum Master Zertifizierung (PSM I) machen', desc:'Online-Kurs + Exam: ~200€. Scrumguide.org kostenlos lesen. Sehr arbeitsmarktrelevant.', time:'4 Wochen', dnn:'read' },
+                { id:'pm_3', title:'PMP oder IPMA langfristig einplanen', desc:'PMP = globaler Standard. Voraussetzung: 36 Monate Projekterfahrung. In 12 Monaten angehen.', time:'6-12 Mo', dnn:'goals' },
+                { id:'pm_4', title:'"The Art of Project Management" lesen', desc:'Scott Berkun — praxisnahes PM-Wissen ohne Theorie-Ballast. Direkt auf echte Projekte anwendbar.', time:'2 Wochen', dnn:'read' },
+            ]},
+            { title: '🔧 Phase 2 — Tools & Prozesse', steps: [
+                { id:'pm_5', title:'PM-Tool professionell einrichten', desc:'Jira, Asana, Monday oder Notion — eines vollständig beherrschen. Templates für Standardprojekte bauen.', time:'2 Std', dnn:'goals' },
+                { id:'pm_6', title:'Projektstrukturplan für laufende Projekte', desc:'Jedes Projekt in Arbeitspakete zerlegen. Wer macht was bis wann? Klare Verantwortlichkeiten.', time:'2 Std', dnn:'share' },
+                { id:'pm_7', title:'Risikomanagement-Prozess einführen', desc:'Risikoregister anlegen: Was kann schiefgehen? Wahrscheinlichkeit × Auswirkung = Priorität.', time:'1 Std', dnn:'goals' },
+                { id:'pm_8', title:'Stakeholder-Map erstellen', desc:'Wer hat Einfluss? Wer muss informiert werden? Wöchentlicher Update-Rhythmus festlegen.', time:'1 Std', dnn:'connect' },
+            ]},
+            { title: '🎯 Phase 3 — Praxis & Sichtbarkeit', steps: [
+                { id:'pm_9',  title:'Nächstes Projekt proaktiv übernehmen', desc:'Nicht zugewiesen werden — selbst anfragen: "Ich möchte die Projektleitung übernehmen."', time:'Jetzt', dnn:'share' },
+                { id:'pm_10', title:'Post-Mortem nach jedem Projekt', desc:'Was lief gut? Was nicht? Was ändern wir? Dokumentieren und mit Team teilen.', time:'1 Std/Projekt', dnn:'goals' },
+                { id:'pm_11', title:'PM-Workshop intern anbieten', desc:'Wer andere lehrt vertieft eigenes Wissen. Kurzen PM-Workshop im Team anbieten.', time:'2 Std', dnn:'share' },
+            ]}
+        ]
+    },
+    selfled: {
+        phases: [
+            { title: '🌅 Phase 1 — Morgenroutine & Struktur', steps: [
+                { id:'sl_1', title:'Feste Aufwachzeit etablieren (auch Wochenende)', desc:'Gleiche Aufwachzeit = stabiler Biorhythmus = mehr Energie. Ziel: 6:00-6:30 Uhr.', time:'21 Tage', dnn:'move' },
+                { id:'sl_2', title:'Morgenroutine in 3 Blöcke aufteilen', desc:'Körper (Bewegung/kalt duschen) → Geist (Lesen/Journaling) → Tag planen (Top 3 Aufgaben).', time:'60 Min täglich', dnn:'read' },
+                { id:'sl_3', title:'Abend-Review einführen (5 Min)', desc:'Was war gut? Was würde ich anders machen? Was ist morgen das Wichtigste? Schriftlich festhalten.', time:'5 Min täglich', dnn:'goals' },
+                { id:'sl_4', title:'"Atomic Habits" von James Clear lesen', desc:'Standardwerk für Gewohnheitsaufbau. 1% besser täglich = 37x besser in einem Jahr.', time:'1 Woche', dnn:'read' },
+            ]},
+            { title: '🧠 Phase 2 — Mentale Stärke', steps: [
+                { id:'sl_5', title:'Tägliches Journaling starten (10 Min)', desc:'3 Dankbarkeiten + 1 Affirmation + Tagesziel. Morning Pages für tiefere Selbstreflexion.', time:'10 Min täglich', dnn:'goals' },
+                { id:'sl_6', title:'Wöchentliches Review einführen (Sonntag)', desc:'30 Min: letzte Woche → nächste Woche planen → Kalender blocken → Ziele abgleichen.', time:'30 Min/Woche', dnn:'goals' },
+                { id:'sl_7', title:'Ablenkungen eliminieren', desc:'Handy-freie Morgen, App-Timer, Social-Media-Zeiten fixieren. Fokus ist die neue Superkraft.', time:'Laufend', dnn:'goals' },
+                { id:'sl_8', title:'Energie-Management verstehen', desc:'Wann bist du am produktivsten? High-Energy-Zeit für wichtigste Aufgaben reservieren.', time:'1 Woche Test', dnn:'move' },
+            ]},
+            { title: '🔥 Phase 3 — Disziplin & Execution', steps: [
+                { id:'sl_9',  title:'"Can\'t Hurt Me" von David Goggins lesen', desc:'Extreme Selbstdisziplin aufbauen. Die 40%-Regel: wenn du denkst du bist fertig, bist du bei 40%.', time:'2 Wochen', dnn:'read' },
+                { id:'sl_10', title:'Jede Woche 1 uncomfortable Sache tun', desc:'Eis Baden, schwieriges Gespräch, fremde Person ansprechen. Komfortzone wächst durch Dehnung.', time:'Wöchentlich', dnn:'move' },
+                { id:'sl_11', title:'90-Tage-Ziel setzen und täglich tracken', desc:'Ein konkretes messbares Ziel für 90 Tage. Täglich prüfen: bin ich auf Kurs?', time:'90 Tage', dnn:'goals' },
+            ]}
+        ]
+    },
+    biz: {
+        phases: [
+            { title: '💡 Phase 1 — Idee validieren (Woche 1-2)', steps: [
+                { id:'biz_1', title:'Problem klar definieren (nicht die Lösung)', desc:'Für wen? Welches Problem? Wie schmerzhaft (1-10)? Wer zahlt? Ohne klares Problem kein Business.', time:'2 Std', dnn:'goals' },
+                { id:'biz_2', title:'10 Zielkunden-Gespräche führen', desc:'Nicht verkaufen — verstehen. "The Mom Test" lesen. Wie gehen sie aktuell damit um? Was kostet es?', time:'1 Woche', dnn:'connect' },
+                { id:'biz_3', title:'Wettbewerb analysieren', desc:'5 direkte Konkurrenten: Was machen die? Was fehlt? Wo ist die Lücke? Preise notieren.', time:'2 Std', dnn:'goals' },
+                { id:'biz_4', title:'Erste Zahlungsbereitschaft testen', desc:'"Ich baue das — würdest du X€ zahlen?" Erst wenn jemand zahlt ist Validierung real.', time:'1 Woche', dnn:'connect' },
+            ]},
+            { title: '🔨 Phase 2 — MVP bauen (Woche 3-6)', steps: [
+                { id:'biz_5', title:'Kleinsten möglichen MVP definieren', desc:'Was ist das MINIMUM das einen Kunden glücklich macht? Alles andere streichen. Liste halbieren.', time:'1 Std', dnn:'goals' },
+                { id:'biz_6', title:'Landing Page erstellen', desc:'Carrd.co oder Notion: Problem → Lösung → Preis → Kontakt. Live in 2 Stunden. Kein Perfektionismus.', time:'2 Std', dnn:'share' },
+                { id:'biz_7', title:'Zahlungsinfrastruktur einrichten', desc:'Stripe oder PayPal Business. Rechtsform prüfen (Gewerbe anmelden). Geschäftskonto trennen.', time:'1 Tag', dnn:'goals' },
+                { id:'biz_8', title:'Ersten zahlenden Kunden gewinnen', desc:'Direkt ansprechen: "Ich biete X an — willst du der erste Kunde sein?" 50% Early-Adopter-Rabatt.', time:'1-2 Wochen', dnn:'connect' },
+            ]},
+            { title: '📈 Phase 3 — Wachstum', steps: [
+                { id:'biz_9',  title:'5 Referenzkunden aufbauen', desc:'Erste Kunden = Testimonials = Vertrauen für alle weiteren. Ergebnisse dokumentieren lassen.', time:'1-3 Monate', dnn:'connect' },
+                { id:'biz_10', title:'Content-Marketing starten', desc:'LinkedIn, Newsletter oder YouTube: Wissen teilen. 1 Post/Woche. Wer gibt, gewinnt Vertrauen.', time:'Laufend', dnn:'share' },
+                { id:'biz_11', title:'Prozesse automatisieren', desc:'Was wiederholst du jede Woche? → Template, Tool oder Outsource. Zeit = wichtigste Ressource.', time:'2-4 Wo', dnn:'goals' },
+                { id:'biz_12', title:'Monatliche Umsatzziele setzen', desc:'Monat 1: erster Umsatz. Monat 3: 1.000€. Monat 6: 3.000€. Ohne Zahlen kein messbares Wachstum.', time:'Laufend', dnn:'goals' },
+            ]}
+        ]
+    },
+    idea: {
+        phases: [
+            { title: '🧪 Phase 1 — Idee wählen', steps: [
+                { id:'idea_1', title:'Alle Ideen aufschreiben (Braindump)', desc:'Keine Wertung — alles raus. Digitale Produkte, Services, Tools, Kurse. Ziel: 10+ Ideen.', time:'30 Min', dnn:'goals' },
+                { id:'idea_2', title:'Bewertungsmatrix ausfüllen', desc:'Je Idee: Leidenschaft × Kompetenz × Marktpotenzial (je 1-5). Top-Score gewinnt.', time:'1 Std', dnn:'goals' },
+                { id:'idea_3', title:'Experiment-Rahmen definieren', desc:'Zeit: max 30 Tage. Budget: max 200€. Erfolgskriterium festlegen: Was muss passieren?', time:'30 Min', dnn:'goals' },
+            ]},
+            { title: '🚀 Phase 2 — Experiment durchführen', steps: [
+                { id:'idea_4', title:'Woche 1: Bauen + live gehen', desc:'MVP bauen, Landing Page live, ersten Inhalt erstellen. Fertig schlägt perfekt.', time:'1 Woche', dnn:'share' },
+                { id:'idea_5', title:'Woche 2-3: Testen mit echten Menschen', desc:'10 echte Personen zeigen. Ehrliches Feedback einholen. Iterieren ohne Drama.', time:'2 Wochen', dnn:'connect' },
+                { id:'idea_6', title:'Ergebnis messen und entscheiden', desc:'Kriterium erreicht → weitermachen. Nicht erreicht → Pivot oder nächste Idee. Kein Drama.', time:'1 Tag', dnn:'goals' },
+            ]}
+        ]
+    },
+    beyond: {
+        phases: [
+            { title: '🔍 Phase 1 — Selbsterkenntnis', steps: [
+                { id:'bey_1', title:'Persönlichkeitstest machen (Big Five)', desc:'Nicht für Labels — für Mustererkennung. Was sind deine Kernstärken? Was blockiert dich?', time:'1 Std', dnn:'goals' },
+                { id:'bey_2', title:'Lebenswerte identifizieren (Top 5)', desc:'Was ist dir wirklich wichtig? Leben deine Entscheidungen diese Werte?', time:'1 Std', dnn:'goals' },
+                { id:'bey_3', title:'"Man\'s Search for Meaning" lesen (Viktor Frankl)', desc:'Sinn finden in allem. Das tiefgründigste Buch über menschliche Existenz. Lebensverändernd.', time:'1 Woche', dnn:'read' },
+                { id:'bey_4', title:'Eigene Geschichte aufschreiben', desc:'Wer hat dich geprägt? Welche Glaubenssätze trage ich? Was sage ich dem 20-jährigen mir?', time:'2 Std', dnn:'goals' },
+            ]},
+            { title: '🌱 Phase 2 — Transformation', steps: [
+                { id:'bey_5', title:'Coaching oder Therapie starten', desc:'Kein Zeichen von Schwäche — das klügste Investment. 1x/2 Wochen als Start ist ausreichend.', time:'Laufend', dnn:'connect' },
+                { id:'bey_6', title:'Tägliche Meditation (10 Min)', desc:'App: Headspace oder Waking Up. Ziel: Gedanken beobachten, nicht auf sie reagieren.', time:'10 Min täglich', dnn:'move' },
+                { id:'bey_7', title:'Komfortzone systematisch erweitern', desc:'Eine Angst pro Monat angehen. Öffentlich sprechen, fremde ansprechen, Nein sagen.', time:'Monatlich', dnn:'move' },
+                { id:'bey_8', title:'Männer-Gruppe / Mastermind finden', desc:'Echte Verbindung mit Männern die wachsen wollen. Verletzlichkeit zeigen dürfen. Selten und wertvoll.', time:'1 Monat', dnn:'connect' },
+            ]}
+        ]
+    },
+    weight: {
+        phases: [
+            { title: '🍽️ Phase 1 — Ernährung einrichten', steps: [
+                { id:'wt_1', title:'Täglichen Kalorienbedarf berechnen (TDEE)', desc:'TDEE-Rechner online. Für Gewichtszunahme: TDEE + 300-500 kcal. Protein: 1.6-2g/kg Körpergewicht.', time:'30 Min', dnn:'goals' },
+                { id:'wt_2', title:'MyFitnessPal 4 Wochen täglich tracken', desc:'Nicht für immer — für das Gefühl für Portionen und Makros. Wissen ist der erste Schritt.', time:'5 Min täglich', dnn:'goals' },
+                { id:'wt_3', title:'Meal Prep Sonntag einführen', desc:'Proteinquellen vorkochen: Hühnchen, Eier, Quark, Linsen. Vorbereitung verhindert schlechte Entscheidungen.', time:'2 Std/Woche', dnn:'move' },
+                { id:'wt_4', title:'Wöchentlich wiegen (gleiche Bedingung)', desc:'Morgens nüchtern nach dem Toilettengang. Trend über 4 Wochen zählt — nicht tägliche Schwankung.', time:'1 Min/Woche', dnn:'goals' },
+            ]},
+            { title: '💪 Phase 2 — Training optimieren', steps: [
+                { id:'wt_5', title:'Trainingsplan wählen (PPL oder GZCLP)', desc:'Für Körperzusammensetzung: Hypertrophie-Plan mit Fokus auf Grundübungen. Kraft vor Ausdauer.', time:'1 Std', dnn:'move' },
+                { id:'wt_6', title:'Progressive Overload konsequent einhalten', desc:'Jede Woche mehr Gewicht oder eine Wiederholung mehr. Ohne Progression kein Wachstum.', time:'Laufend', dnn:'move' },
+                { id:'wt_7', title:'Schlaf auf 7-8 Stunden optimieren', desc:'Muskel wächst beim Schlafen nicht im Gym. Vor 23 Uhr ins Bett. Handy aus dem Schlafzimmer.', time:'Laufend', dnn:'move' },
+            ]}
+        ]
+    },
+    bodyfat: {
+        phases: [
+            { title: '🔥 Phase 1 — Defizit etablieren', steps: [
+                { id:'bf_1', title:'Kaloriendefizit berechnen (300-500 unter TDEE)', desc:'Zu aggressiv = Muskelverlust. 0.5kg/Woche ist das Optimum für nachhaltigen Erfolg.', time:'30 Min', dnn:'goals' },
+                { id:'bf_2', title:'Proteinzufuhr erhöhen (2-2.4g/kg)', desc:'Beim Abnehmen besonders wichtig: Muskelmasse schützen, Sättigung erhöhen, Thermogenese steigern.', time:'Laufend', dnn:'move' },
+                { id:'bf_3', title:'Flüssigkalorien eliminieren', desc:'Alkohol, Säfte, Milchkaffee-Spezialitäten = unsichtbare Kalorienbomben. Wasser + schwarzer Kaffee.', time:'Ab sofort', dnn:'goals' },
+                { id:'bf_4', title:'NEAT erhöhen (Alltagsbewegung)', desc:'Treppe, 10.000 Schritte/Tag, Stehpult. Verbrennt oft mehr als explizites Sport-Training.', time:'Laufend', dnn:'move' },
+            ]},
+            { title: '📊 Phase 2 — Messen & Anpassen', steps: [
+                { id:'bf_5', title:'Körperfett alle 6-8 Wochen messen (InBody)', desc:'Im Fitnessstudio oder Arzt. Trend zählt — nicht die absolute Zahl. Fotos als Vergleich.', time:'30 Min/Quartal', dnn:'goals' },
+                { id:'bf_6', title:'Refeed-Tage bei langer Diätphase einplanen', desc:'1x/Woche auf Erhaltungskalorien. Hält Leptin hoch, verhindert Metabolismus-Adaption.', time:'1x/Woche', dnn:'move' },
+            ]}
+        ]
+    },
+    training: {
+        phases: [
+            { title: '📅 Phase 1 — System aufbauen', steps: [
+                { id:'tr_1', title:'3 Trainingstage in Kalender blockieren', desc:'Mo/Mi/Fr oder Di/Do/Sa — wie Business-Meeting behandeln. Nicht verschieben.', time:'10 Min', dnn:'move' },
+                { id:'tr_2', title:'Gym-Bag immer gepackt lassen', desc:'Friction reduzieren. Wenn die Tasche steht gibt es keine Ausrede. Abends vorbereiten.', time:'10 Min', dnn:'move' },
+                { id:'tr_3', title:'Trainingsplan in Strong App eintragen', desc:'Kein Denken im Gym — einfach ausführen. Fortschritt automatisch getrackt.', time:'1 Std', dnn:'goals' },
+                { id:'tr_4', title:'Trainings-Buddy finden', desc:'Accountability verdoppelt Erfolgsrate. Kollege, Freund oder Partner als Sparringspartner.', time:'1 Gespräch', dnn:'connect' },
+            ]},
+            { title: '🔥 Phase 2 — Gewohnheit verankern', steps: [
+                { id:'tr_5', title:'66-Tage-Streak anstreben', desc:'Nicht 21 — Forschung: 66 Tage für echte Habitformierung. Nie zweimal hintereinander auslassen.', time:'66 Tage', dnn:'move' },
+                { id:'tr_6', title:'Kleine Belohnung nach jedem Training', desc:'Proteinshake, Lieblingspodcast, heißes Bad. Positiver Reiz verankert die Gewohnheit.', time:'Nach Training', dnn:'move' },
+            ]}
+        ]
+    },
+    ice: {
+        phases: [
+            { title: '❄️ Schrittweise zum Eisbaden', steps: [
+                { id:'ice_1', title:'Wim Hof Methode lernen', desc:'Atemübung vor dem Bad ist entscheidend. YouTube: Wim Hof Breathing kostenlos. Ohne Vorbereitung unnötig unangenehm.', time:'30 Min', dnn:'move' },
+                { id:'ice_2', title:'7 Tage: kalt duschen (30 Sek am Ende)', desc:'Tag 1-3: 10 Sek. Tag 4-7: 30 Sek. Körper akklimatisieren. Kein Schock — kein Aufgeben.', time:'7 Tage', dnn:'move' },
+                { id:'ice_3', title:'Termin für echtes Eisbaden buchen', desc:'Eisbaden München, See im Winter oder Eiswanne. Mit einer Person zusammen — sicherer und motivierender.', time:'10 Min', dnn:'goals' },
+                { id:'ice_4', title:'Eisbaden durchführen + dokumentieren', desc:'2-5 Minuten. Danach aktiv aufwärmen (Bewegung, nicht sofort Sauna). Foto oder Video für Motivation.', time:'1 Nachmittag', dnn:'share' },
+            ]}
+        ]
+    },
+    wife: {
+        phases: [
+            { title: '❤️ Phase 1 — Verbindung verstehen', steps: [
+                { id:'wife_1', title:'"Die 5 Sprachen der Liebe" lesen', desc:'Herausfinden was IHRE Liebessprache ist — nicht deine. Viele Konflikte = falsche Liebessprache.', time:'1 Woche', dnn:'read' },
+                { id:'wife_2', title:'Offenes Gespräch: Was braucht sie wirklich?', desc:'Nicht raten — fragen. "Was kann ich tun damit du dich mehr geliebt und gesehen fühlst?"', time:'1 Abend', dnn:'connect' },
+                { id:'wife_3', title:'Eigene Stärken/Schwächen als Partner kennen', desc:'Was bringe ich in die Beziehung? Wo bin ich unzuverlässig? Ehrlichkeit schafft echte Intimität.', time:'1 Std', dnn:'goals' },
+            ]},
+            { title: '🌹 Phase 2 — Rituale aufbauen', steps: [
+                { id:'wife_4', title:'Wöchentliches Date Night (fixer Termin)', desc:'Geplant, nicht spontan. Abwechselnd planen. Kein Restaurant-Thema — wirklich präsent sein.', time:'1x/Woche', dnn:'connect' },
+                { id:'wife_5', title:'Tägliches 10-Min-Gespräch ohne Ablenkung', desc:'Handy weg, TV aus. "Wie war dein Tag wirklich?" Zuhören ohne direkt zu lösen.', time:'10 Min täglich', dnn:'connect' },
+                { id:'wife_6', title:'Regelmäßige kleine Überraschungen planen', desc:'Lieblingsessen kochen, Brief schreiben, spontaner Spaziergang. Kleine Gesten > große Events.', time:'1x/Woche', dnn:'connect' },
+                { id:'wife_7', title:'Gemeinsames Ziel oder Projekt finden', desc:'Urlaub planen, Wohnung einrichten, gemeinsames Hobby. Gemeinsame Richtung verbindet tief.', time:'1 Abend', dnn:'goals' },
+            ]},
+            { title: '🔑 Phase 3 — Langfristig', steps: [
+                { id:'wife_8', title:'Lebensziele gemeinsam abgleichen', desc:'5-Jahres-Plan besprechen. Wo soll die Familie stehen? Was wollen wir zusammen erleben?', time:'1 Abend', dnn:'goals' },
+                { id:'wife_9', title:'Paartherapie oder Paar-Workshop', desc:'Nicht nur für Krisen. "Hold Me Tight" Workshop. Stärkste Beziehungen investieren in sich.', time:'1 Wochenende', dnn:'connect' },
+            ]}
+        ]
+    },
+    family: {
+        phases: [
+            { title: '👨‍👩‍👧‍👦 Phase 1 — Präsenz & Rituale', steps: [
+                { id:'fam_1', title:'Wöchentlicher Familientag einführen', desc:'Sonntag = Familientag. Kein Handy, keine Arbeit. Ausflug, kochen, spielen. Sacred Time.', time:'1x/Woche', dnn:'connect' },
+                { id:'fam_2', title:'Tägliches Abendessen gemeinsam', desc:'Ohne Bildschirm. Wie war der Tag? Was war schön? Was war schwer? Einfachstes Ritual mit größter Wirkung.', time:'Täglich', dnn:'connect' },
+                { id:'fam_3', title:'Monatlich etwas Besonderes planen', desc:'Wildtierpark, Kino, Wanderung. Im Kalender planen = es passiert auch wirklich.', time:'1x/Monat', dnn:'goals' },
+            ]},
+            { title: '💪 Phase 2 — Als Vater führen', steps: [
+                { id:'fam_4', title:'Eigenes Wohlbefinden priorisieren', desc:'Leerer Tank kann nicht geben. Deine Energie und Stimmung prägen die Familienatmosphäre täglich.', time:'Laufend', dnn:'move' },
+                { id:'fam_5', title:'"The Conscious Parent" lesen', desc:'Dr. Shefali Tsabary — Elternschaft als Spiegel für eigene Entwicklung. Tiefgehend und praktisch.', time:'2-3 Wochen', dnn:'read' },
+                { id:'fam_6', title:'Familien-Meeting einführen (2x/Monat)', desc:'Was war gut? Was verbessern? Was planen wir? Alle haben eine Stimme — auch Kinder.', time:'30 Min/Monat', dnn:'connect' },
+            ]}
+        ]
+    },
+    zoo: {
+        phases: [
+            { title: '🦁 Wildtierpark Poing — Planung', steps: [
+                { id:'zoo_1', title:'Datum festlegen', desc:'Jetzt Kalender öffnen, Datum mit Familie abstimmen. Wochenende oder Brückentag wählen.', time:'5 Min', dnn:'goals' },
+                { id:'zoo_2', title:'Tickets online kaufen', desc:'wildtierpark-poing.de — günstiger online. Öffnungszeiten prüfen. Parkplatz vorhanden.', time:'10 Min', dnn:'goals' },
+                { id:'zoo_3', title:'Ausflug vorbereiten', desc:'Picknick mitnehmen spart Kosten. Route vorbereiten. Bequeme Schuhe für alle einpacken.', time:'30 Min', dnn:'goals' },
+                { id:'zoo_4', title:'Ausflug genießen + Erinnerung festhalten', desc:'Fotos machen, Präsent sein. Handy in die Tasche. Diese Momente bauen Familienerinnerungen.', time:'1 Tag', dnn:'connect' },
+            ]}
+        ]
+    },
+    books: {
+        phases: [
+            { title: '📚 Phase 1 — System aufbauen', steps: [
+                { id:'book_1', title:'Buchliste für alle 12 Bücher erstellen', desc:'Vorschlag: 4 Leadership/PM, 3 Business, 2 Gesundheit, 2 Persönlichkeit, 1 Beziehung.', time:'30 Min', dnn:'goals' },
+                { id:'book_2', title:'Lesesession täglich blocken', desc:'30 Min = mind. 10 Seiten. Morgen nach Aufwachen oder vor dem Schlafen. Gleiche Zeit = Habit.', time:'Täglich', dnn:'read' },
+                { id:'book_3', title:'Notion-Template für Buchnotizen anlegen', desc:'Pro Buch: Kernaussagen, Zitate, 3 Umsetzungen. Wissen ohne Notizen geht zu 80% verloren.', time:'1 Std', dnn:'goals' },
+            ]},
+            { title: '🎯 Phase 2 — Mit Intention lesen', steps: [
+                { id:'book_4', title:'Vor jedem Buch: Eine Leitfrage definieren', desc:'Was soll dieses Buch für mich beantworten? Aktives Lesen = 10x mehr Retention.', time:'5 Min/Buch', dnn:'read' },
+                { id:'book_5', title:'Nach jedem Buch: 3 konkrete Umsetzungen', desc:'Was ändere ich? Was probiere ich? Was teile ich? Lesen ohne Umsetzung ist Unterhaltung.', time:'30 Min/Buch', dnn:'share' },
+                { id:'book_6', title:'Audible für Pendelzeit nutzen', desc:'30 Min Fahrt × 2 = 1 Std/Tag. 1 Buch in 1-2 Wochen. Lesen und Hören kombinieren.', time:'Laufend', dnn:'read' },
+            ]}
+        ]
+    },
+    tattoo: {
+        phases: [
+            { title: '🎨 Tattoo — Von Idee zur Umsetzung', steps: [
+                { id:'tat_1', title:'Motiv und Bedeutung definieren', desc:'Was bedeutet es in 10-30 Jahren noch? Idee mindestens 3 Monate reifen lassen. Keine Spontanentscheidung.', time:'3 Monate', dnn:'goals' },
+                { id:'tat_2', title:'Körperstelle wählen', desc:'Sichtbarkeit (Job!), Schmerzempfindlichkeit, Größe. Tattoo Pain Chart recherchieren.', time:'1 Std', dnn:'goals' },
+                { id:'tat_3', title:'Künstler recherchieren', desc:'Stil ist wichtiger als Preis. Instagram-Portfolios vergleichen. Reviews lesen. Qualität ist permanent.', time:'2 Std', dnn:'goals' },
+                { id:'tat_4', title:'Termin buchen und anzahlen', desc:'Gute Künstler: Wartezeiten Wochen bis Monate. Frühzeitig buchen und Anzahlung leisten.', time:'30 Min', dnn:'goals' },
+                { id:'tat_5', title:'Vorbereitung am Tag davor', desc:'Gut schlafen, gut essen, Haut eincremen. Bequeme Kleidung. Snacks für lange Sessions mitnehmen.', time:'1 Tag', dnn:'move' },
+            ]}
+        ]
+    }
+};
+
+// ═══════════════════════════════════════════
+//  CORE DATA
+// ═══════════════════════════════════════════
+const DNN_LIST = [
+    { id:'read',    icon:'📚', title:'10 Seiten lesen',      sub:'Leadership · 12 Bücher' },
+    { id:'goals',   icon:'🎯', title:'Ziele reviewen',       sub:'Alle Bereiche' },
+    { id:'move',    icon:'💪', title:'Body bewegen',          sub:'80kg · Training · KF' },
+    { id:'connect', icon:'🤝', title:'5 Menschen verbinden', sub:'Familie · Business' },
+    { id:'share',   icon:'🚀', title:'Arbeit teilen',         sub:'Business · 100k · Ideen' }
+];
+
+const LIFE_AREAS = [
+    { id:'career', name:'Karriere & Finanzen', icon:'💼', goals:[
+        { id:'salary',    text:'100k+ Jahresgehalt',              type:'progress', current:0,  target:100, unit:'k€/Jahr', dnn:['goals','share','connect'] },
+        { id:'leadership',text:'Leadership verbessern',           type:'progress', current:0,  target:10,  unit:'von 10',  dnn:['read','goals','connect'] },
+        { id:'pm',        text:'Projektleiter Skills verbessern', type:'progress', current:0,  target:10,  unit:'von 10',  dnn:['read','goals','share'] },
+        { id:'selfled',   text:'Selbstführung verbessern',        type:'progress', current:0,  target:10,  unit:'von 10',  dnn:['read','goals','move'] },
+    ]},
+    { id:'business', name:'Business & Ideen', icon:'🚀', goals:[
+        { id:'biz',    text:'Start a business',                   type:'progress', current:0, target:12, unit:'Meilensteine', dnn:['share','connect','goals'] },
+        { id:'idea',   text:'Eine Idee als Experiment umsetzen',  type:'once',                                                dnn:['share','goals'] },
+        { id:'beyond', text:'Discover the man beyond the surface',type:'progress', current:0, target:10, unit:'von 10',       dnn:['read','goals'] },
+    ]},
+    { id:'health', name:'Gesundheit & Fitness', icon:'🏋️', goals:[
+        { id:'weight',   text:'80kg Körpergewicht',     type:'progress', current:0,  target:80, unit:'kg',      dnn:['move','goals'] },
+        { id:'bodyfat',  text:'20% Körperfett',         type:'progress', current:30, target:20, unit:'% KF',    dnn:['move','goals'], reverseProgress:true },
+        { id:'training', text:'3x/Woche trainieren',    type:'progress', current:0,  target:3,  unit:'x/Woche', dnn:['move'] },
+        { id:'ice',      text:'Eis Baden ausprobieren', type:'once',                                             dnn:['move','goals'] },
+    ]},
+    { id:'family', name:'Familie & Beziehungen', icon:'❤️', goals:[
+        { id:'wife',   text:'Beziehung zu meiner Frau stärken', type:'progress', current:0, target:10, unit:'von 10', dnn:['connect','goals'] },
+        { id:'family', text:'Meine Familie stärken',             type:'progress', current:0, target:10, unit:'von 10', dnn:['connect','goals'] },
+        { id:'zoo',    text:'Ausflug Wildtierpark Poing',        type:'once',                                          dnn:['goals'] },
+    ]},
+    { id:'personal', name:'Persönliche Entwicklung', icon:'📖', goals:[
+        { id:'books',  text:'12 Bücher lesen',       type:'progress', current:0, target:12, unit:'Bücher', dnn:['read','goals'] },
+        { id:'tattoo', text:'Tattoo stechen lassen', type:'once',                                          dnn:['goals'] },
+    ]}
+];
+
+const ALL_TIPS = [
+    { icon:'💼', title:'Karriere & Gehalt',        areaId:'career',   content:'Dokumentiere Erfolge laufend. Wer Leistungen nicht zeigt wird nicht befördert. Monatliche Selbst-Reviews helfen enorm.', tools:['Gehalt.de','LinkedIn','Notion'] },
+    { icon:'👑', title:'Leadership aufbauen',       areaId:'career',   content:'Leadership lernt man durch Tun. Suche aktiv Führungsverantwortung — auch kleine Projekte zählen und bauen Erfahrung auf.', tools:['Extreme Ownership','Blinkist','Coursera'] },
+    { icon:'🚀', title:'Business starten',          areaId:'business', content:'MVP schlägt Perfektion immer. Erst 10 Kunden-Gespräche, dann bauen. "The Mom Test" lesen bevor du eine Stunde investierst.', tools:['Carrd.co','Stripe','Notion','Canva'] },
+    { icon:'💪', title:'Fitness & Körper',          areaId:'health',   content:'Progressive Overload ist das Einzige was zählt. Wer jede Woche ein bisschen mehr schafft wächst garantiert — ohne Ausnahme.', tools:['Strong App','MyFitnessPal','Cronometer'] },
+    { icon:'🥗', title:'Ernährung & Körperfett',   areaId:'health',   content:'Protein first — 2g/kg Körpergewicht. Flüssigkalorien eliminieren. Meal Prep Sonntag verhindert schlechte Spontanentscheidungen.', tools:['MyFitnessPal','Yazio','Cronometer'] },
+    { icon:'❤️', title:'Beziehung & Familie',       areaId:'family',   content:'10 Minuten echte Präsenz täglich > 2 Stunden mit Handy in der Hand. Qualität schlägt immer Quantität bei Beziehungen.', tools:['Paired App','5 Sprachen der Liebe'] },
+    { icon:'🎯', title:'Selbstführung & Disziplin', areaId:'career',   content:'Morgenroutine + Sonntagsplanung = Fundament für alles. Wer sich selbst nicht führt lässt sich von Umständen führen.', tools:['Notion','Day One','Obsidian'] },
+    { icon:'📚', title:'Effektives Lesen',          areaId:'personal', content:'Lies mit einer Frage im Kopf. Notiere 3 Umsetzungen nach jedem Buch. Audible für Pendelzeit — so liest du doppelt so viel.', tools:['Audible','Readwise','Blinkist'] },
+    { icon:'🧊', title:'Mental Resilience',         areaId:'personal', content:'Kältebaden + Wim Hof + Meditation: Dreifachkombo für mentale Stärke. Start heute: 30 Sek kalt duschen am Ende der Dusche.', tools:['Wim Hof App','Headspace','Othership'] },
+    { icon:'💡', title:'Ideen validieren',          areaId:'business', content:'Keine Idee ist zu gut um validiert zu werden. 10 echte Gespräche verraten mehr als 100 Stunden eigene Research-Arbeit.', tools:['Typeform','Calendly','The Mom Test'] },
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = {
+    dnn: { read:false, goals:false, move:false, connect:false, share:false },
+    goals: {},
+    execSteps: {},
+    week: {},
+    lastDay: null
+};
+
+let activeFilter = 'all';
+let modalGoalId  = null;
+let modalMode    = null;
+
+// ═══════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════
+function loadState() {
+    const raw = localStorage.getItem('lifeDashV4');
+    if (raw) { try { state = JSON.parse(raw); } catch(e) {} }
+
+    const todayKey = todayISO();
+    if (state.lastDay !== todayKey) {
+        if (state.lastDay) {
+            state.week[state.lastDay] = {
+                dnn: { ...state.dnn },
+                doneCount: Object.values(state.dnn).filter(Boolean).length
+            };
+        }
+        state.dnn = { read:false, goals:false, move:false, connect:false, share:false };
+        state.lastDay = todayKey;
+    }
+
+    LIFE_AREAS.forEach(area => area.goals.forEach(g => {
+        if (!state.goals[g.id]) state.goals[g.id] = { done:false, current: g.current ?? 0 };
+    }));
+
+    if (!state.execSteps) state.execSteps = {};
+}
+
+function saveState() { localStorage.setItem('lifeDashV4', JSON.stringify(state)); }
+function todayISO()  { return new Date().toISOString().split('T')[0]; }
+
+// ═══════════════════════════════════════════
+//  DUAL SCORE ENGINE
+// ═══════════════════════════════════════════
+
+// Ergebnis-Score (60%): echter messbarer Wert
+function getResultScore(g) {
+    const gs = state.goals[g.id] || { done:false, current: g.current ?? 0 };
+    if (gs.done) return 100;
+    if (g.type === 'once') return 0;
+    if (g.reverseProgress) {
+        const start = g.current || 30;
+        return Math.max(0, Math.min(100, ((start - gs.current) / (start - g.target)) * 100));
+    }
+    return g.target > 0 ? Math.min(100, (gs.current / g.target) * 100) : 0;
+}
+
+// Umsetzungs-Score (40%): abgehakte Execution-Schritte
+function getExecScore(goalId) {
+    const plan = EXECUTION_PLANS[goalId];
+    if (!plan) return 0;
+    let total = 0, done = 0;
+    plan.phases.forEach(ph => ph.steps.forEach(s => {
+        total++;
+        if (state.execSteps[s.id]) done++;
+    }));
+    return total > 0 ? Math.round((done / total) * 100) : 0;
+}
+
+function getExecProgress(goalId) {
+    const plan = EXECUTION_PLANS[goalId];
+    if (!plan) return { done:0, total:0 };
+    let total = 0, done = 0;
+    plan.phases.forEach(ph => ph.steps.forEach(s => {
+        total++;
+        if (state.execSteps[s.id]) done++;
+    }));
+    return { done, total };
+}
+
+// Gesamt-Score: 60% Ergebnis + 40% Umsetzung
+function getTotalScore(g) {
+    if (state.goals[g.id]?.done) return 100;
+    const resultScore = getResultScore(g);
+    const execScore   = getExecScore(g.id);
+    return Math.round(resultScore * 0.6 + execScore * 0.4);
+}
+
+// Area Score = Durchschnitt aller Ziele
+function calcAreaScore(area) {
+    if (!area.goals.length) return 0;
+    return Math.round(area.goals.reduce((s, g) => s + getTotalScore(g), 0) / area.goals.length);
+}
+
+function calcOverallBalance() {
+    const scores = LIFE_AREAS.map(a => calcAreaScore(a));
+    return Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);
+}
+
+// Insight: welcher Zustand ist das Ziel gerade?
+function getInsight(g) {
+    if (state.goals[g.id]?.done) return { cls:'insight-great', icon:'🏆', text:'Ziel erreicht!' };
+    const rs = Math.round(getResultScore(g));
+    const es = getExecScore(g.id);
+
+    if (rs >= 60 && es >= 60) return { cls:'insight-great',   icon:'🏆', text:'Perfekt — du lieferst Ergebnisse mit Plan!' };
+    if (es >= 50 && rs < 40)  return { cls:'insight-working', icon:'💪', text:'Du arbeitest dran — Ergebnis kommt! Bleib dran.' };
+    if (es < 30  && rs >= 50) return { cls:'insight-plan',    icon:'⚡', text:'Gutes Ergebnis — aber kein strukturierter Plan. Execution starten!' };
+    if (es < 20  && rs < 20)  return { cls:'insight-start',   icon:'🚨', text:'Noch kein Fortschritt — jetzt ersten Schritt machen!' };
+    return { cls:'insight-working', icon:'📈', text:'In Arbeit — weiter so!' };
+}
+
+// ═══════════════════════════════════════════
+//  RENDER DNN
+// ═══════════════════════════════════════════
+function renderDNN() {
+    document.getElementById('dnnGrid').innerHTML = DNN_LIST.map(d => `
+        <div class="dnn-card ${state.dnn[d.id] ? 'completed' : ''}" onclick="toggleDNN('${d.id}')">
+            <div class="check-circle">${state.dnn[d.id] ? '✓' : ''}</div>
+            <span class="dnn-icon">${d.icon}</span>
+            <div class="dnn-title">${d.title}</div>
+            <div class="dnn-sub">${d.sub}</div>
+        </div>
+    `).join('');
+}
+
+function toggleDNN(id) {
+    state.dnn[id] = !state.dnn[id];
+    saveState(); renderAll();
+}
+
+// ═══════════════════════════════════════════
+//  RENDER WEEKLY
+// ═══════════════════════════════════════════
+function renderWeekly() {
+    const labels   = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+    const todayDow = new Date().getDay();
+    const todayIdx = todayDow === 0 ? 6 : todayDow - 1;
+    const now      = new Date();
+    const monday   = new Date(now);
+    monday.setDate(now.getDate() - todayIdx);
+
+    document.getElementById('weeklyGrid').innerHTML = labels.map((lbl, i) => {
+        const d   = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const key     = d.toISOString().split('T')[0];
+        const isToday = i === todayIdx;
+        const isPast  = i < todayIdx;
+        const saved   = state.week[key];
+
+        const dots = ['read','goals','move','connect','share'].map(k => {
+            let cls = '';
+            if (isToday)     cls = state.dnn[k] ? 'done' : '';
+            else if (isPast) cls = saved?.dnn?.[k] ? 'done' : 'missed';
+            return `<div class="dot ${cls}"></div>`;
+        }).join('');
+
+        const score = isToday ? Object.values(state.dnn).filter(Boolean).length : (saved?.doneCount || 0);
+        const col   = score >= 4 ? '#00ff88' : score >= 2 ? '#ffc800' : isPast ? '#ff6b6b' : 'rgba(255,255,255,0.25)';
+
+        return `
+            <div class="day-col ${isToday ? 'today' : ''}">
+                <div class="day-name">${lbl}</div>
+                <div class="day-dots">${dots}</div>
+                <div class="day-score-lbl" style="color:${col}">${(isToday||isPast) ? score+'/5' : '–'}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  RENDER GOALS
+// ═══════════════════════════════════════════
+const DNN_LABELS = { read:'📚 Lesen', goals:'🎯 Review', move:'💪 Bewegen', connect:'🤝 Verbinden', share:'🚀 Teilen' };
+
+function renderGoals() {
+    document.getElementById('goalsGrid').innerHTML = LIFE_AREAS.map(area => {
+        const score = calcAreaScore(area);
+        const col   = score >= 70 ? '#00ff88' : score >= 40 ? '#00d4ff' : score >= 20 ? '#ffc800' : '#ff6b6b';
+        const cls   = score < 20 ? 'danger' : score < 35 ? 'warning' : '';
+
+        const goalsHTML = area.goals.map(g => {
+            const gs        = state.goals[g.id] || { done:false, current: g.current ?? 0 };
+            const rs        = Math.round(getResultScore(g));
+            const es        = getExecScore(g.id);
+            const ts        = getTotalScore(g);
+            const execProg  = getExecProgress(g.id);
+            const insight   = getInsight(g);
+            const badges    = g.dnn.map(k => `<span class="dnn-badge">${DNN_LABELS[k]}</span>`).join('');
+            const typeTag   = g.type === 'once'
+                ? `<span class="goal-type-tag tag-once">einmalig</span>`
+                : `<span class="goal-type-tag tag-ongoing">laufend</span>`;
+
+            const totalCol  = ts >= 70 ? '#00ff88' : ts >= 40 ? '#00d4ff' : ts >= 20 ? '#ffc800' : '#ff6b6b';
+
+            const dualBars = !gs.done ? `
+                <div class="dual-score">
+                    <div class="score-row">
+                        <div class="score-row-label">Ergebnis (60%)</div>
+                        <div class="mini-bar"><div class="mini-fill fill-result" style="width:${rs}%"></div></div>
+                        <div class="score-row-val" style="color:#00d4ff">${rs}%</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="score-row-label">Umsetzung (40%)</div>
+                        <div class="mini-bar"><div class="mini-fill fill-exec" style="width:${es}%"></div></div>
+                        <div class="score-row-val" style="color:#b44fff">${es}%</div>
+                    </div>
+                    <div class="score-row">
+                        <div class="score-row-label" style="font-weight:600;color:rgba(255,255,255,0.6)">Gesamt</div>
+                        <div class="mini-bar"><div class="mini-fill fill-total" style="width:${ts}%"></div></div>
+                        <div class="score-row-val" style="color:${totalCol};font-weight:700">${ts}%</div>
+                    </div>
+                </div>
+            ` : '';
+
+            const resultInput = (g.type === 'progress' && !gs.done) ? `
+                <div class="goal-actions">
+                    <button class="goal-edit-btn" onclick="openProgressModal('${g.id}')">✏️ Ergebnis eintragen (${gs.current} ${g.unit})</button>
+                    <button class="goal-edit-btn" onclick="openExecModal('${g.id}')">📋 Plan (${execProg.done}/${execProg.total})</button>
+                </div>
+            ` : g.type === 'once' && !gs.done ? `
+                <div class="goal-actions">
+                    <button class="goal-edit-btn" onclick="openExecModal('${g.id}')">📋 Plan (${execProg.done}/${execProg.total})</button>
+                </div>
+            ` : '';
+
+            return `
+                <div class="goal-item">
+                    <div class="goal-cb ${gs.done ? 'done' : ''}" onclick="toggleGoal('${g.id}')">${gs.done ? '✓' : ''}</div>
+                    <div class="goal-body">
+                        <div class="goal-text ${gs.done ? 'done-text' : ''}">${g.text}${typeTag}</div>
+                        ${dualBars}
+                        <div class="goal-insight ${insight.cls}">${insight.icon} ${insight.text}</div>
+                        ${resultInput}
+                        <div class="dnn-badges">${badges}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="life-area ${cls}">
+                <div class="area-header">
+                    <div class="area-left">
+                        <span class="area-icon">${area.icon}</span>
+                        <span class="area-name">${area.name}</span>
+                    </div>
+                    <div class="area-score-wrap">
+                        <div class="area-score-num" style="color:${col}">${score}%</div>
+                        <div class="area-score-lbl">Gesamt-Score</div>
+                    </div>
+                </div>
+                <div class="score-bar">
+                    <div class="score-fill" style="width:${score}%; background:linear-gradient(90deg,${col},rgba(0,212,255,0.4))"></div>
+                </div>
+                ${goalsHTML}
+            </div>
+        `;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  DYNAMIC NEXT STEPS
+// ═══════════════════════════════════════════
+function generateDynamicSteps() {
+    const steps = [];
+
+    LIFE_AREAS.forEach(area => {
+        area.goals.forEach(goal => {
+            const gs = state.goals[goal.id] || { done:false, current: goal.current ?? 0 };
+            if (gs.done) return;
+
+            const plan = EXECUTION_PLANS[goal.id];
+            if (!plan) return;
+
+            const ts        = getTotalScore(goal);
+            const rs        = Math.round(getResultScore(goal));
+            const es        = getExecScore(goal.id);
+            const areaScore = calcAreaScore(area);
+            const insight   = getInsight(goal);
+            const execProg  = getExecProgress(goal.id);
+
+            // Next uncompleted step
+            let nextStep = null;
+            for (const phase of plan.phases) {
+                for (const step of phase.steps) {
+                    if (!state.execSteps[step.id]) {
+                        nextStep = { ...step, phaseName: phase.title };
+                        break;
+                    }
+                }
+                if (nextStep) break;
+            }
+
+            if (!nextStep) return;
+
+            // Priority
+            let priority = 'l';
+            if (areaScore < 15 || ts < 10)  priority = 'critical';
+            else if (areaScore < 30 || ts < 25) priority = 'h';
+            else if (areaScore < 50 || ts < 50) priority = 'm';
+            else priority = 'l';
+
+            // DNN not done boost
+            const dnnNotDone = goal.dnn?.some(d => !state.dnn[d]);
+            if (dnnNotDone && priority === 'l') priority = 'm';
+
+            steps.push({
+                goalId: goal.id, stepId: nextStep.id,
+                areaId: area.id, areaName: area.name, areaIcon: area.icon,
+                priority,
+                title: `${area.icon} ${goal.text}`,
+                nextAction: nextStep.title,
+                desc: nextStep.desc,
+                time: nextStep.time,
+                insight,
+                rs, es, ts,
+                execDone: execProg.done, execTotal: execProg.total,
+            });
+        });
+    });
+
+    const order = { critical:0, h:1, m:2, l:3 };
+    steps.sort((a, b) => {
+        const pd = order[a.priority] - order[b.priority];
+        return pd !== 0 ? pd : a.ts - b.ts;
+    });
+
+    return steps;
+}
+
+function renderDynamicSteps() {
+    const steps   = generateDynamicSteps();
+    const areaMap = {};
+    LIFE_AREAS.forEach(a => areaMap[a.id] = a);
+    const areas   = ['all', ...new Set(steps.map(s => s.areaId))];
+
+    document.getElementById('stepsFilter').innerHTML = areas.map(a => {
+        const lbl = a === 'all' ? '🌟 Alle' : `${areaMap[a]?.icon} ${areaMap[a]?.name}`;
+        return `<button class="filter-btn ${activeFilter === a ? 'active' : ''}" onclick="setFilter('${a}')">${lbl}</button>`;
+    }).join('');
+
+    if (!steps.length) {
+        document.getElementById('nextStepsList').innerHTML = `<div class="no-steps">🎉 Alle Schritte erledigt — du rockst!</div>`;
+        return;
+    }
+
+    const prioLabel = { critical:'🚨', h:'H', m:'M', l:'L' };
+    const prioClass = { critical:'prio-critical', h:'prio-h', m:'prio-m', l:'prio-l' };
+    const insightTagClass = { 'insight-great':'tag-insight-great', 'insight-working':'tag-insight-working', 'insight-plan':'tag-insight-plan', 'insight-start':'tag-insight-start' };
+
+    document.getElementById('nextStepsList').innerHTML = steps.map(s => {
+        const hidden = (activeFilter !== 'all' && s.areaId !== activeFilter) ? 'hidden' : '';
+        return `
+            <div class="step-item ${hidden}">
+                <div class="step-prio ${prioClass[s.priority]}">${prioLabel[s.priority]}</div>
+                <div class="step-content">
+                    <h4>${s.title}</h4>
+                    <div class="step-next-action">▶ ${s.nextAction}</div>
+                    <p>${s.desc}</p>
+                    <div class="step-meta">
+                        <span class="step-tag tag-area">${s.areaIcon} ${s.areaName}</span>
+                        ${s.time ? `<span class="step-tag tag-time">⏱ ${s.time}</span>` : ''}
+                        <span class="step-tag tag-score">📊 Ergebnis ${s.rs}% · Umsetzung ${s.es}% · Gesamt ${s.ts}%</span>
+                        <span class="step-tag tag-score">📋 ${s.execDone}/${s.execTotal} Schritte</span>
+                        <span class="step-tag ${insightTagClass[s.insight.cls]}">${s.insight.icon} ${s.insight.text}</span>
+                    </div>
+                </div>
+                <div class="step-btns">
+                    <button class="step-done-btn ${state.execSteps[s.stepId] ? 'done-step' : ''}"
+                            onclick="markStepDone('${s.stepId}','${s.goalId}')">
+                        ${state.execSteps[s.stepId] ? '✓ Erledigt' : '✓ Abhaken'}
+                    </button>
+                    <button class="goal-edit-btn" onclick="openExecModal('${s.goalId}')">📋 Vollplan</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function setFilter(id) { activeFilter = id; renderDynamicSteps(); }
+
+function markStepDone(stepId, goalId) {
+    state.execSteps[stepId] = !state.execSteps[stepId];
+    saveState(); renderAll();
+}
+
+// ═══════════════════════════════════════════
+//  RENDER TIPS
+// ═══════════════════════════════════════════
+function renderTips() {
+    const areaScores = {};
+    LIFE_AREAS.forEach(a => areaScores[a.id] = calcAreaScore(a));
+
+    const sorted = [...ALL_TIPS].sort((a, b) =>
+        (areaScores[a.areaId] ?? 50) - (areaScores[b.areaId] ?? 50)
+    );
+
+    document.getElementById('tipsGrid').innerHTML = sorted.map(tip => {
+        const score    = areaScores[tip.areaId] ?? 50;
+        const relClass = score < 25 ? 'rel-high' : score < 50 ? 'rel-med' : 'rel-low';
+        const relLabel = score < 25 ? '🔥 Dringend' : score < 50 ? '📌 Relevant' : '💡 Nützlich';
+
+        return `
+            <div class="tip-card">
+                <div class="tip-relevance ${relClass}">${relLabel}</div>
+                <div class="tip-header">
+                    <span class="tip-icon">${tip.icon}</span>
+                    <span class="tip-title">${tip.title}</span>
+                </div>
+                <div class="tip-content">${tip.content}</div>
+                <div class="tip-tools">${tip.tools.map(t => `<span class="tool-tag">${t}</span>`).join('')}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  RENDER STATS
+// ═══════════════════════════════════════════
+function renderStats() {
+    const dnnDone = Object.values(state.dnn).filter(Boolean).length;
+    let totalGoals = 0, doneGoals = 0, totalExec = 0, totalResult = 0;
+
+    LIFE_AREAS.forEach(area => area.goals.forEach(g => {
+        totalGoals++;
+        if (state.goals[g.id]?.done) doneGoals++;
+        totalExec   += getExecScore(g.id);
+        totalResult += Math.round(getResultScore(g));
+    }));
+
+    const avgExec   = totalGoals > 0 ? Math.round(totalExec / totalGoals) : 0;
+    const avgResult = totalGoals > 0 ? Math.round(totalResult / totalGoals) : 0;
+
+    document.getElementById('statToday').textContent  = `${dnnDone}/5`;
+    document.getElementById('statDone').textContent   = `${doneGoals}/${totalGoals}`;
+    document.getElementById('statExec').textContent   = `${avgExec}%`;
+    document.getElementById('statResult').textContent = `${avgResult}%`;
+    document.getElementById('statBalance').textContent= calcOverallBalance() + '%';
+}
+
+// ═══════════════════════════════════════════
+//  ALERTS
+// ═══════════════════════════════════════════
+function checkAlerts() {
+    const danger = LIFE_AREAS.filter(a => calcAreaScore(a) < 20);
+    const banner = document.getElementById('alertBanner');
+    if (danger.length) {
+        document.getElementById('alertList').innerHTML = danger.map(a => {
+            const score     = calcAreaScore(a);
+            const notDone   = a.goals.flatMap(g => g.dnn || []).filter(d => !state.dnn[d]);
+            const hint      = notDone.length ? ` · Starte mit: ${[...new Set(notDone)].map(d => DNN_LABELS[d]).join(', ')}` : '';
+            return `<div class="alert-item">▸ ${a.icon} <strong>${a.name}</strong> — ${score}% Gesamt-Score${hint}</div>`;
+        }).join('');
+        banner.classList.add('visible');
+    } else {
+        banner.classList.remove('visible');
+    }
+}
+
+// ═══════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════
+function openProgressModal(goalId) {
+    modalMode = 'progress'; modalGoalId = goalId;
+    const goal = findGoal(goalId);
+    const gs   = state.goals[goalId];
+    const rs   = Math.round(getResultScore(goal));
+    const es   = getExecScore(goalId);
+    const ts   = getTotalScore(goal);
+
+    document.getElementById('modalTitle').textContent = '✏️ Ergebnis eintragen';
+    document.getElementById('modalSub').textContent   = goal.text;
+
+    document.getElementById('modalBody').innerHTML = `
+        <div class="modal-score-summary">
+            <div class="modal-score-item">
+                <div class="modal-score-val" style="color:#00d4ff">${rs}%</div>
+                <div class="modal-score-lbl">Ergebnis (60%)</div>
+            </div>
+            <div class="modal-score-item">
+                <div class="modal-score-val" style="color:#b44fff">${es}%</div>
+                <div class="modal-score-lbl">Umsetzung (40%)</div>
+            </div>
+            <div class="modal-score-item">
+                <div class="modal-score-val" style="color:#00ff88">${ts}%</div>
+                <div class="modal-score-lbl">Gesamt</div>
+            </div>
+        </div>
+        <div class="modal-field">
+            <label>Aktueller Wert (${goal.unit})</label>
+            <input type="number" id="progressInput" value="${gs.current}"
+                   step="0.1" oninput="updatePreview('${goalId}')">
+            <div class="unit">Ziel: ${goal.target} ${goal.unit}
+                ${goal.reverseProgress ? ' (niedriger = besser)' : ''}</div>
+        </div>
+        <div class="modal-preview-bars">
+            <div class="preview-row">
+                <div class="preview-label">Ergebnis (60%)</div>
+                <div class="preview-bar"><div class="preview-fill fill-result" id="prev-result" style="width:${rs}%"></div></div>
+                <div class="preview-val" id="prev-result-val" style="color:#00d4ff">${rs}%</div>
+            </div>
+            <div class="preview-row">
+                <div class="preview-label">Umsetzung (40%)</div>
+                <div class="preview-bar"><div class="preview-fill fill-exec" style="width:${es}%"></div></div>
+                <div class="preview-val" style="color:#b44fff">${es}%</div>
+            </div>
+            <div class="preview-row">
+                <div class="preview-label" style="font-weight:600">Gesamt</div>
+                <div class="preview-bar"><div class="preview-fill fill-total" id="prev-total" style="width:${ts}%"></div></div>
+                <div class="preview-val" id="prev-total-val" style="color:#00ff88;font-weight:700">${ts}%</div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modalButtons').innerHTML = `
+        <button class="btn btn-primary" onclick="saveProgress()">Speichern</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+    `;
+
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
+function updatePreview(goalId) {
+    const goal    = findGoal(goalId);
+    const val     = parseFloat(document.getElementById('progressInput').value) || 0;
+    const origGs  = state.goals[goalId];
+    state.goals[goalId] = { ...origGs, current: val };
+    const newRs   = Math.round(getResultScore(goal));
+    const es      = getExecScore(goalId);
+    const newTs   = Math.round(newRs * 0.6 + es * 0.4);
+    state.goals[goalId] = origGs;
+
+    document.getElementById('prev-result').style.width     = newRs + '%';
+    document.getElementById('prev-result-val').textContent = newRs + '%';
+    document.getElementById('prev-total').style.width      = newTs + '%';
+    document.getElementById('prev-total-val').textContent  = newTs + '%';
+}
+
+function saveProgress() {
+    const val  = parseFloat(document.getElementById('progressInput').value) || 0;
+    const goal = findGoal(modalGoalId);
+    state.goals[modalGoalId].current = val;
+
+    if (goal.reverseProgress && val <= goal.target) state.goals[modalGoalId].done = true;
+    else if (goal.type === 'progress' && val >= goal.target) state.goals[modalGoalId].done = true;
+
+    saveState(); renderAll(); closeModal();
+}
+
+function openExecModal(goalId) {
+    modalMode = 'exec'; modalGoalId = goalId;
+    const plan  = EXECUTION_PLANS[goalId];
+    const goal  = findGoal(goalId);
+    if (!plan || !goal) return;
+
+    const ep  = getExecProgress(goalId);
+    const rs  = Math.round(getResultScore(goal));
+    const es  = getExecScore(goalId);
+    const ts  = getTotalScore(goal);
+
+    document.getElementById('modalTitle').textContent = '📋 Execution Plan';
+    document.getElementById('modalSub').textContent   = goal.text;
+
+    document.getElementById('modalBody').innerHTML = `
+        <div class="modal-score-summary">
+            <div class="modal-score-item">
+                <div class="modal-score-val" style="color:#00d4ff">${rs}%</div>
+                <div class="modal-score-lbl">Ergebnis (60%)</div>
+            </div>
+            <div class="modal-score-item">
+                <div class="modal-score-val" style="color:#b44fff">${es}%</div>
+                <div class="modal-score-lbl">Umsetzung ${ep.done}/${ep.total}</div>
+            </div>
+            <div class="modal-score-item">
+                <div class="modal-score-val" style="color:#00ff88">${ts}%</div>
+                <div class="modal-score-lbl">Gesamt-Score</div>
+            </div>
+        </div>
+        <div class="exec-impact-note">
+            💡 <strong>So wirkt der Plan auf deinen Score:</strong>
+            Jeder abgehakte Schritt erhöht deinen Umsetzungs-Score (40% Gewichtung).
+            Den Ergebnis-Score (60%) trägst du über "✏️ Ergebnis eintragen" ein.
+            Zusammen ergibt das deinen ehrlichen Gesamt-Fortschritt.
+        </div>
+        ${plan.phases.map(phase => {
+            const phaseDone  = phase.steps.filter(s => state.execSteps[s.id]).length;
+            const phaseTotal = phase.steps.length;
+            return `
+                <div class="exec-phase">
+                    <div class="exec-phase-header">
+                        <div class="exec-phase-title">${phase.title}</div>
+                        <div class="exec-phase-prog">${phaseDone}/${phaseTotal} erledigt</div>
+                    </div>
+                    ${phase.steps.map((step, i) => `
+                        <div class="exec-step">
+                            <div class="exec-step-num">${i+1}</div>
+                            <div class="exec-step-cb ${state.execSteps[step.id] ? 'done' : ''}"
+                                 onclick="toggleExecStep('${step.id}','${goalId}')">
+                                ${state.execSteps[step.id] ? '✓' : ''}
+                            </div>
+                            <div class="exec-step-body">
+                                <div class="exec-step-title ${state.execSteps[step.id] ? 'done-text' : ''}">${step.title}</div>
+                                <div class="exec-step-desc">${step.desc}</div>
+                                <div class="exec-step-tags">
+                                    ${step.time ? `<span class="exec-tag">⏱ ${step.time}</span>` : ''}
+                                    ${step.dnn  ? `<span class="exec-tag">${DNN_LABELS[step.dnn]||step.dnn}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }).join('')}
+    `;
+
+    document.getElementById('modalButtons').innerHTML = `
+        <button class="btn btn-secondary" onclick="closeModal()">Schließen</button>
+    `;
+
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
+function toggleExecStep(stepId, goalId) {
+    state.execSteps[stepId] = !state.execSteps[stepId];
+    saveState();
+    openExecModal(goalId); // refresh modal
+    renderGoals(); renderStats(); renderDynamicSteps(); checkAlerts();
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    modalMode = modalGoalId = null;
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+function toggleGoal(id) {
+    state.goals[id].done = !state.goals[id].done;
+    const goal = findGoal(id);
+    if (goal?.type === 'progress' && state.goals[id].done) state.goals[id].current = goal.target;
+    saveState(); renderAll();
+}
+
+function findGoal(id) {
+    for (const area of LIFE_AREAS) {
+        const g = area.goals.find(g => g.id === id);
+        if (g) return g;
+    }
+    return null;
+}
+
+// ═══════════════════════════════════════════
+//  RENDER ALL + INIT
+// ═══════════════════════════════════════════
+function renderAll() {
+    renderDNN();
+    renderWeekly();
+    renderGoals();
+    renderDynamicSteps();
+    renderTips();
+    renderStats();
+    checkAlerts();
+}
+
+function init() {
+    document.getElementById('dateDisplay').textContent =
+        new Date().toLocaleDateString('de-DE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    loadState();
+    renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
