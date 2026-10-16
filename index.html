@@ -612,6 +612,100 @@
             .modal { padding: 18px; }
             .modal-score-summary { grid-template-columns: repeat(3,1fr); gap: 6px; }
         }
+    
+        /* LifeOS refinement: calmer contrast, clearer hierarchy, less visual noise */
+        body { background:#f4f6fa; color:#202939; font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+        .header { background:#fff; text-align:left; padding:22px max(22px,calc((100% - 1320px)/2)); border-bottom:1px solid #e5e9f1; display:flex; align-items:center; justify-content:space-between; gap:18px; }
+        .header h1 { font-size:1.55em; background:none; color:#182230; -webkit-text-fill-color:initial; letter-spacing:-.035em; }
+        .header .date { color:#667085; font-size:.82em; margin-top:4px; }
+        .lifeos-toolbar { justify-content:flex-end; }
+        .container { max-width:1320px; padding:26px 22px 52px; }
+        .section-title { color:#344054; font-size:1.02em; font-weight:700; margin:26px 0 12px; letter-spacing:-.015em; }
+        .section-sub { color:#98a2b3; }
+        .stat-card,.dnn-card,.life-area,.tip-card,.score-legend,.next-steps-panel { background:#fff; border:1px solid #e4e8f0; border-radius:14px; box-shadow:0 2px 7px rgba(16,24,40,.025); }
+        .stat-card { padding:15px 12px; }
+        .stat-value { background:none; color:#2447a8; -webkit-text-fill-color:initial; font-size:1.65em; }
+        .stat-label { color:#667085; }
+        .dnn-card { color:#202939; padding:16px; }
+        .dnn-card:hover,.tip-card:hover { border-color:#b8c6e6; transform:translateY(-1px); box-shadow:0 5px 15px rgba(16,24,40,.05); }
+        .dnn-card.completed { border-color:#9bd8b4; background:#f0fbf4; }
+        .dnn-sub,.day-name,.legend-desc,.area-score-lbl { color:#98a2b3; }
+        .check-circle { border-color:#d0d5dd; }
+        .dnn-card.completed .check-circle { background:#16834a; border-color:#16834a; color:#fff; }
+        .life-area { padding:20px; }
+        .life-area:hover { border-color:#cfd7e6; }
+        .life-area.warning,.life-area.danger { background:#fff; }
+        .goal-item,.step-item,.exec-step { border-bottom-color:#edf0f5; }
+        .goal-text,.step-next-action { color:#344054; }
+        .goal-text.done-text,.exec-step-title.done-text { color:#98a2b3; }
+        .score-bar,.mini-bar,.preview-bar { background:#eaedf3; }
+        .score-legend { padding:16px 18px; }
+        .next-steps-panel { padding:20px; background:#fff; }
+        .tips-grid { gap:12px; }
+        .tip-card { padding:16px; }
+        .tip-content,.step-content p,.exec-step-desc { color:#667085; }
+        .day-col { background:#fff; border-color:#e4e8f0; }
+        .day-col.today { border-color:#9db4ee; background:#f5f8ff; }
+        .dot { background:#e4e7ec; }
+        .modal { background:#fff; color:#202939; border:1px solid #dfe4ec; box-shadow:0 20px 60px rgba(16,24,40,.2); }
+        .modal .modal-sub,.modal-score-lbl { color:#667085; }
+        .modal-score-summary { background:#f8f9fc; border-color:#eaecf0; }
+        .btn-secondary { background:#f2f4f7; color:#344054; }
+        .btn-secondary:hover { background:#e9edf3; }
+        .goal-edit-btn { border-color:#c9d5f0; background:#f5f8ff; color:#2447a8; }
+        .tag-once,.tag-ongoing,.tag-area,.tag-time,.tag-score,.tool-tag,.dnn-badge { border-color:#e4e7ec; background:#f2f4f7; color:#475467; }
+        .fill-result { background:#5579ce; } .fill-exec { background:#8b78c9; } .fill-total { background:#299764; }
+        .life-scorecard { background:#fff; border:1px solid #e1e6ef; border-radius:16px; padding:22px; margin:0 0 28px; box-shadow:0 2px 7px rgba(16,24,40,.025); }
+        .life-score-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:16px; }
+        .life-score-head h3 { color:#202939; font-size:1.1em; margin-bottom:4px; letter-spacing:-.02em; }
+        .life-score-head p,.life-score-muted { color:#667085; font-size:.82em; line-height:1.5; }
+        .life-score-summary { display:flex; align-items:center; gap:12px; color:#667085; font-size:.8em; flex-wrap:wrap; }
+        .life-score-summary strong { color:#202939; font-size:1.05em; }
+        .life-score-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .life-score-row { border:1px solid #eaecf0; border-radius:11px; padding:13px 14px; min-width:0; }
+        .life-score-row.is-low { border-color:#e7c98b; background:#fffcf5; }
+        .life-score-row-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+        .life-score-name { color:#202939; font-size:.88em; font-weight:700; }
+        .life-score-question { color:#667085; font-size:.76em; line-height:1.45; margin:4px 0 10px; }
+        .life-score-pills { display:flex; gap:5px; }
+        .life-score-pill { min-width:30px; height:30px; border:1px solid #d0d5dd; background:#fff; color:#475467; border-radius:8px; font-size:.8em; font-weight:700; cursor:pointer; }
+        .life-score-pill:hover { border-color:#8ca5df; background:#f5f8ff; }
+        .life-score-pill.active { background:#2447a8; color:#fff; border-color:#2447a8; }
+        .life-score-note { width:100%; border:0; border-top:1px solid #f0f1f4; margin-top:10px; padding:9px 0 0; outline:none; background:transparent; color:#475467; font:inherit; font-size:.76em; }
+        .life-score-note::placeholder { color:#98a2b3; }
+        .life-score-actions { margin-top:20px; border-top:1px solid #eaecf0; padding-top:17px; }
+        .life-score-actions-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+        .life-score-actions-head h4 { font-size:.95em; color:#202939; }
+        .life-score-btn { border:1px solid #d0d5dd; border-radius:9px; padding:8px 11px; background:#fff; color:#344054; font-weight:650; font-size:.78em; cursor:pointer; }
+        .life-score-btn.primary { background:#2447a8; border-color:#2447a8; color:#fff; }
+        .life-score-btn:hover { filter:brightness(.97); }
+        .life-score-suggestions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .life-score-suggestion { background:#f8f9fc; border:1px solid #eaecf0; border-radius:11px; padding:13px; }
+        .life-score-suggestion strong { display:block; font-size:.82em; color:#344054; margin-bottom:5px; }
+        .life-score-suggestion p { font-size:.8em; line-height:1.5; color:#667085; margin-bottom:10px; }
+        .life-score-suggestion small { display:block; color:#98a2b3; margin-bottom:9px; font-size:.72em; }
+        .life-score-action { display:flex; align-items:flex-start; gap:10px; padding:11px 0; border-bottom:1px solid #f0f1f4; }
+        .life-score-action:last-child { border-bottom:0; }
+        .life-score-action input[type=checkbox] { margin-top:4px; accent-color:#2447a8; }
+        .life-score-action-main { flex:1; min-width:0; }
+        .life-score-action-title { color:#344054; font-size:.84em; line-height:1.45; }
+        .life-score-action-title.done { color:#98a2b3; text-decoration:line-through; }
+        .life-score-action-meta { color:#98a2b3; font-size:.72em; margin-top:4px; }
+        .life-score-history { margin-top:18px; border-top:1px solid #eaecf0; padding-top:14px; }
+        .life-score-history summary { cursor:pointer; color:#475467; font-size:.82em; font-weight:700; }
+        .life-score-history-list { display:grid; gap:7px; margin-top:12px; }
+        .life-score-history-item { display:flex; justify-content:space-between; gap:12px; color:#667085; font-size:.78em; padding:7px 0; border-bottom:1px solid #f2f4f7; }
+        .life-score-history-item strong { color:#344054; }
+        .life-score-empty { color:#98a2b3; font-size:.82em; padding:12px 0; }
+        @media(max-width:760px) {
+          .header { padding:18px 20px; align-items:flex-start; flex-direction:column; }
+          .lifeos-toolbar { justify-content:flex-start; }
+          .container { padding:18px 14px 36px; }
+          .life-score-grid,.life-score-suggestions { grid-template-columns:1fr; }
+          .life-scorecard { padding:16px; }
+          .life-score-head { flex-direction:column; }
+        }
+
     </style>
 </head>
 <body><style>
@@ -734,6 +828,32 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
         <div class="week-legend-item"><div class="week-legend-dot" style="background:rgba(255,59,59,0.5)"></div> Verpasst</div>
         <div class="week-legend-item"><div class="week-legend-dot" style="background:rgba(255,255,255,0.1)"></div> Offen</div>
     </div>
+
+
+    <!-- Weekly Life Scorecard -->
+    <section class="life-scorecard" aria-labelledby="lifeScoreTitle">
+      <div class="life-score-head">
+        <div>
+          <h3 id="lifeScoreTitle">Weekly Life Scorecard</h3>
+          <p>Ein ehrlicher Wochencheck. Erkenne, was Aufmerksamkeit braucht – und wähle höchstens zwei machbare Schritte.</p>
+        </div>
+        <div class="life-score-summary" id="lifeScoreSummary" aria-live="polite"></div>
+      </div>
+      <div class="life-score-grid" id="lifeScoreGrid"></div>
+      <div class="life-score-actions">
+        <div class="life-score-actions-head">
+          <h4>Dein Fokus für die kommende Woche</h4>
+          <button type="button" class="life-score-btn" onclick="lifeScoreRefreshSuggestions()">Vorschläge aktualisieren</button>
+        </div>
+        <p class="life-score-muted" id="lifeScoreActionIntro">Bewerte deine Bereiche, dann schlägt LifeOS kleine, konkrete Maßnahmen für die zwei niedrigsten Scores vor.</p>
+        <div class="life-score-suggestions" id="lifeScoreSuggestions"></div>
+        <div id="lifeScoreActionList"></div>
+      </div>
+      <details class="life-score-history">
+        <summary>Verlauf der letzten sechs Monate</summary>
+        <div class="life-score-history-list" id="lifeScoreHistory"></div>
+      </details>
+    </section>
 
     <!-- Goals -->
     <div class="section-title">🌟 Lebensbereiche & Ziele</div>
@@ -1094,6 +1214,7 @@ let state = {
     goals: {},
     execSteps: {},
     week: {},
+    lifeScorecard: { weeks: {} },
     lastDay: null
 };
 
@@ -1125,6 +1246,8 @@ function loadState() {
     }));
 
     if (!state.execSteps) state.execSteps = {};
+    if (!state.lifeScorecard || typeof state.lifeScorecard !== 'object') state.lifeScorecard = { weeks: {} };
+    if (!state.lifeScorecard.weeks || typeof state.lifeScorecard.weeks !== 'object') state.lifeScorecard.weeks = {};
 }
 
 function saveState() { localStorage.setItem('lifeDashV4', JSON.stringify(state)); }
@@ -1746,9 +1869,178 @@ function findGoal(id) {
 // ═══════════════════════════════════════════
 //  RENDER ALL + INIT
 // ═══════════════════════════════════════════
+
+const LIFE_SCORE_AREAS = [
+  {id:'mission',name:'Mission',icon:'◎',question:'Habe ich an etwas gearbeitet, das mir langfristig wichtig ist?',ideas:[
+    '25 Minuten an einer persönlichen Priorität arbeiten – ohne nebenbei Nachrichten zu prüfen.',
+    'Eine Sache notieren, die ich diese Woche voranbringen will, und den ersten Schritt terminieren.'
+  ]},
+  {id:'health',name:'Health',icon:'+',question:'Wie gut habe ich Bewegung, Training, Ernährung und Schlaf unterstützt?',ideas:[
+    'Zwei realistische Trainingsfenster von 25–40 Minuten direkt im Kalender blocken.',
+    'An drei Tagen einen 20-minütigen Spaziergang einplanen und eine einfache proteinreiche Mahlzeit vorbereiten.'
+  ]},
+  {id:'love',name:'Love',icon:'♡',question:'Habe ich meine Partnerschaft bewusst gepflegt?',ideas:[
+    'Mit meiner Frau einen konkreten gemeinsamen Abend oder 30 Minuten ungestörte Zeit vereinbaren.',
+    'Heute eine kleine, konkrete Aufmerksamkeit zeigen und nachfragen, was ihr diese Woche guttun würde.'
+  ]},
+  {id:'family',name:'Family',icon:'⌂',question:'War ich präsent und habe ich bewusste Zeit mit meiner Familie erlebt?',ideas:[
+    'Zwei handyfreie Zeitfenster mit meiner Tochter fest einplanen – auch 15 Minuten zählen.',
+    'Eine einfache gemeinsame Aktivität für das Wochenende auswählen, ohne daraus ein großes Event zu machen.'
+  ]},
+  {id:'friends',name:'Friends & Network',icon:'↗',question:'Habe ich wichtige Beziehungen oder mein berufliches Netzwerk gepflegt?',ideas:[
+    'Einer Person eine persönliche Nachricht schreiben und eine konkrete Frage stellen.',
+    'Einen 15-minütigen Austausch mit einem relevanten Kontakt anbahnen – ohne sofort etwas erreichen zu müssen.'
+  ]},
+  {id:'hobbies',name:'Hobbies & Joy',icon:'✳',question:'Habe ich etwas nur aus Freude getan – ohne Leistungsziel?',ideas:[
+    'Eine Stunde für ein Hobby oder ein Spiel reservieren und sie bewusst als Erholung behandeln.',
+    'Eine kleine Aktivität auswählen, auf die ich mich freue, und sie mit einem festen Termin schützen.'
+  ]},
+  {id:'finance',name:'Finance',icon:'€',question:'Hatte ich Klarheit über mein Geld und meine nächsten finanziellen Entscheidungen?',ideas:[
+    '15 Minuten Konten, Ausgaben und Sparziele prüfen – nur eine nötige Entscheidung treffen.',
+    'Eine konkrete Finanzfrage klären oder einen kleinen automatisierten Schritt für die langfristige Sicherheit einrichten.'
+  ]}
+];
+
+function lifeScoreLocalDate(date) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function lifeScoreWeekStart(date = new Date()) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = (d.getDay()+6)%7;
+  d.setDate(d.getDate()-day);
+  return lifeScoreLocalDate(d);
+}
+function lifeScoreShiftWeek(weekKey, amount) {
+  const d = new Date(weekKey+'T12:00:00');
+  d.setDate(d.getDate()+amount*7);
+  return lifeScoreLocalDate(d);
+}
+function lifeScoreCurrentWeek() {
+  if (!state.lifeScorecard) state.lifeScorecard={weeks:{}};
+  if (!state.lifeScorecard.weeks) state.lifeScorecard.weeks={};
+  const key=lifeScoreWeekStart();
+  if (!state.lifeScorecard.weeks[key]) state.lifeScorecard.weeks[key]={scores:{},actions:[]};
+  const week=state.lifeScorecard.weeks[key];
+  if (!week.scores) week.scores={};
+  if (!Array.isArray(week.actions)) week.actions=[];
+  return {key,week};
+}
+function lifeScoreEscape(value) {
+  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function lifeScoreDateLabel(key) {
+  return new Date(key+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'short'});
+}
+function lifeScoreGetLowest(week) {
+  return LIFE_SCORE_AREAS.filter(a=>Number.isInteger(Number(week.scores[a.id]?.score)) && Number(week.scores[a.id].score)>=1 && Number(week.scores[a.id].score)<=5)
+    .sort((a,b)=>Number(week.scores[a.id].score)-Number(week.scores[b.id].score))
+    .slice(0,2);
+}
+function lifeScoreSet(areaId, score) {
+  const {key,week}=lifeScoreCurrentWeek();
+  week.scores[areaId]={...(week.scores[areaId]||{}),score:Number(score)};
+  saveState(); renderLifeScorecard();
+}
+function lifeScoreNote(areaId,value) {
+  const {week}=lifeScoreCurrentWeek();
+  week.scores[areaId]={...(week.scores[areaId]||{}),note:value};
+  saveState();
+}
+function lifeScoreSuggestionsFor(area) {
+  const score=Number(lifeScoreCurrentWeek().week.scores[area.id]?.score||0);
+  const ideas=area.ideas;
+  if(score>=4) return [{title:'Gutes Niveau bewusst halten',text:'Schütze, was funktioniert, ohne diesen Bereich künstlich weiter zu optimieren.',time:'10 Minuten'}];
+  if(score===3) return [{title:'Kleine Verbesserung statt Großprojekt',text:ideas[1],time:'10–25 Minuten'}];
+  return [{title:'Ein kleiner, konkreter Schritt',text:ideas[0],time:'15–40 Minuten'}];
+}
+function lifeScoreRefreshSuggestions() { renderLifeScorecard(true); }
+function lifeScoreAddAction(areaId, title) {
+  const {key,week}=lifeScoreCurrentWeek();
+  if (week.actions.length>=2) {
+    alert('Für die kommende Woche bleiben wir bewusst bei höchstens zwei Maßnahmen. Erledige, ändere oder entferne zuerst eine bestehende Maßnahme.');
+    return;
+  }
+  const titleText=title || prompt('Welche konkrete Maßnahme möchtest du übernehmen?');
+  if (!titleText || !titleText.trim()) return;
+  const dateDefault=lifeScoreLocalDate(new Date(Date.now()+86400000));
+  const date=prompt('Bis wann möchtest du das erledigen? (JJJJ-MM-TT)',dateDefault);
+  if (date===null) return;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(new Date(date+'T12:00:00').getTime())) {
+    alert('Bitte ein Datum im Format JJJJ-MM-TT eingeben.'); return;
+  }
+  week.actions.push({id:'lsa_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),areaId,title:titleText.trim(),date,done:false,createdWeek:key});
+  saveState(); renderLifeScorecard();
+}
+function lifeScoreToggleAction(actionId, checked) {
+  const {week}=lifeScoreCurrentWeek();
+  const action=week.actions.find(a=>a.id===actionId);
+  if(action) action.done=checked;
+  saveState(); renderLifeScorecard();
+}
+function lifeScoreRemoveAction(actionId) {
+  const {week}=lifeScoreCurrentWeek();
+  week.actions=week.actions.filter(a=>a.id!==actionId);
+  saveState(); renderLifeScorecard();
+}
+function renderLifeScorecard(forceSuggestions=false) {
+  const {key,week}=lifeScoreCurrentWeek();
+  const previousKey=lifeScoreShiftWeek(key,-1);
+  const previous=state.lifeScorecard.weeks[previousKey];
+  const scored=LIFE_SCORE_AREAS.filter(a=>Number(week.scores[a.id]?.score)>=1 && Number(week.scores[a.id]?.score)<=5);
+  const avg=scored.length ? (scored.reduce((sum,a)=>sum+Number(week.scores[a.id].score),0)/scored.length).toFixed(1) : '–';
+  const prevScored=previous?LIFE_SCORE_AREAS.filter(a=>Number(previous.scores?.[a.id]?.score)>=1&&Number(previous.scores[a.id].score)<=5):[];
+  const prevAvg=prevScored.length?(prevScored.reduce((sum,a)=>sum+Number(previous.scores[a.id].score),0)/prevScored.length).toFixed(1):null;
+  document.getElementById('lifeScoreSummary').innerHTML =
+    '<span>Woche ab <strong>'+lifeScoreDateLabel(key)+'</strong></span><span>Bewertet <strong>'+scored.length+'/7</strong></span><span>Ø <strong>'+avg+'</strong>'+(prevAvg?' <span class="life-score-muted">('+ (Number(avg)-Number(prevAvg)>0?'+':'')+(Number(avg)-Number(prevAvg)).toFixed(1)+' zur Vorwoche)</span>':'')+'</span>';
+  document.getElementById('lifeScoreGrid').innerHTML=LIFE_SCORE_AREAS.map(area=>{
+    const item=week.scores[area.id]||{};
+    const score=Number(item.score)||0;
+    const low=lifeScoreGetLowest(week).some(a=>a.id===area.id);
+    return '<div class="life-score-row '+(low?'is-low':'')+'"><div class="life-score-row-top"><div class="life-score-name">'+area.icon+' &nbsp;'+area.name+'</div><span class="life-score-muted">'+(score?score+'/5':'Offen')+'</span></div><div class="life-score-question">'+area.question+'</div><div class="life-score-pills" role="group" aria-label="'+area.name+' bewerten">'+[1,2,3,4,5].map(n=>'<button type="button" class="life-score-pill '+(score===n?'active':'')+'" aria-pressed="'+(score===n)+'" onclick="lifeScoreSet(\''+area.id+'\','+n+')">'+n+'</button>').join('')+'</div><input class="life-score-note" aria-label="Notiz zu '+area.name+'" placeholder="Optional: Was steckt hinter dem Score?" value="'+lifeScoreEscape(item.note||'')+'" onchange="lifeScoreNote(\''+area.id+'\',this.value)"></div>';
+  }).join('');
+  const lows=lifeScoreGetLowest(week);
+  const allScored=scored.length===LIFE_SCORE_AREAS.length;
+  const intro=document.getElementById('lifeScoreActionIntro');
+  const sugg=document.getElementById('lifeScoreSuggestions');
+  if(!allScored){
+    intro.textContent='Bewerte alle sieben Bereiche, um die zwei niedrigsten zu erkennen. Es geht um ehrliche Orientierung, nicht um perfekte Werte.';
+    sugg.innerHTML='';
+  } else {
+    intro.textContent='Deine zwei niedrigsten Bereiche sind '+lows.map(a=>a.name+' ('+week.scores[a.id].score+'/5)').join(' und ')+'. Wähle maximal zwei kleine Schritte; bei Gleichstand kannst du bewusst priorisieren.';
+    const existing=week.actions||[];
+    const chosen=new Set(existing.map(a=>a.areaId));
+    const candidates=lows.filter(a=>!chosen.has(a.id));
+    if(existing.length>=2) {
+      sugg.innerHTML='<p class="life-score-empty">Du hast bereits zwei Maßnahmen ausgewählt. Halte den Fokus klein.</p>';
+    } else if(!candidates.length) {
+      sugg.innerHTML='<p class="life-score-empty">Für die beiden Fokusbereiche sind bereits Maßnahmen angelegt. Du kannst sie unten abhaken oder entfernen.</p>';
+    } else {
+      sugg.innerHTML=candidates.slice(0,2-existing.length).map(area=>{
+        const suggestion=lifeScoreSuggestionsFor(area)[0];
+        return '<div class="life-score-suggestion"><strong>'+area.name+' · Score '+week.scores[area.id].score+'/5</strong><p>'+suggestion.text+'</p><small>Vorgeschlagen: '+suggestion.time+' · bewusst klein halten</small><button type="button" class="life-score-btn primary" onclick="lifeScoreAddAction(\''+area.id+'\',\''+lifeScoreEscape(suggestion.text).replace(/'/g,"\\'")+'\')">Als Maßnahme übernehmen</button> <button type="button" class="life-score-btn" onclick="lifeScoreAddAction(\''+area.id+'\')">Anpassen …</button></div>';
+      }).join('');
+    }
+  }
+  const actions=week.actions||[];
+  document.getElementById('lifeScoreActionList').innerHTML=actions.length?'<div style="margin-top:12px"><p class="life-score-muted" style="margin-bottom:4px">Ausgewählte Maßnahmen ('+actions.filter(a=>a.done).length+'/'+actions.length+' erledigt)</p>'+actions.map(a=>{
+    const area=LIFE_SCORE_AREAS.find(x=>x.id===a.areaId);
+    return '<div class="life-score-action"><input type="checkbox" aria-label="Maßnahme erledigt" '+(a.done?'checked':'')+' onchange="lifeScoreToggleAction(\''+a.id+'\',this.checked)"><div class="life-score-action-main"><div class="life-score-action-title '+(a.done?'done':'')+'">'+lifeScoreEscape(a.title)+'</div><div class="life-score-action-meta">'+lifeScoreEscape(area?.name||'Fokus')+' · Termin '+lifeScoreEscape(a.date||'offen')+'</div></div><button type="button" class="life-score-btn" aria-label="Maßnahme entfernen" onclick="lifeScoreRemoveAction(\''+a.id+'\')">Entfernen</button></div>';
+  }).join('')+'</div>':'';
+  const historyKeys=Object.keys(state.lifeScorecard.weeks).filter(k=>k<=key).sort((a,b)=>b.localeCompare(a)).slice(0,26);
+  document.getElementById('lifeScoreHistory').innerHTML=historyKeys.length?historyKeys.map(k=>{
+    const w=state.lifeScorecard.weeks[k], arr=LIFE_SCORE_AREAS.filter(a=>Number(w.scores?.[a.id]?.score)>=1&&Number(w.scores[a.id].score)<=5);
+    const a=arr.length?(arr.reduce((s,x)=>s+Number(w.scores[x.id].score),0)/arr.length).toFixed(1):'–';
+    const done=(w.actions||[]).filter(x=>x.done).length, total=(w.actions||[]).length;
+    return '<div class="life-score-history-item"><span>Woche ab '+lifeScoreDateLabel(k)+'</span><span><strong>'+a+'/5</strong> · '+arr.length+'/7 bewertet'+(total?' · Maßnahmen '+done+'/'+total:'')+'</span></div>';
+  }).join(''):'<p class="life-score-empty">Dein Verlauf erscheint, sobald du die erste Woche bewertet hast.</p>';
+}
+
+
 function renderAll() {
     renderDNN();
     renderWeekly();
+    renderLifeScorecard();
     renderGoals();
     renderDynamicSteps();
     renderTips();
