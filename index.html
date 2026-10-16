@@ -856,6 +856,11 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
 @media(max-width:760px){.life-focus-grid{grid-template-columns:1fr}.life-focus-top{display:block}.life-focus-pill{margin-top:12px}.life-plan-goal-head{grid-template-columns:auto 1fr}.life-plan-goal-head select{grid-column:1/-1;width:100%}}
 @media(prefers-reduced-motion:reduce){.life-focus *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+
+.life-focus-secondary{min-height:44px;padding:10px 15px;border:1px solid #98a2b3;border-radius:10px;background:#fff;color:#182230;font-weight:700;cursor:pointer}
+.life-focus-secondary:hover{background:#f2f4f7}
+.life-focus-primary:disabled,.life-focus-secondary:disabled{opacity:.5;cursor:not-allowed}
+.exec-step-cb{cursor:pointer;flex-shrink:0}
 </style>
 <section id="lifeosAuth" class="auth-screen"><div class="auth-card">
 <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#2146a5;font-weight:800">Persönlicher Zugriff</div>
@@ -1400,7 +1405,11 @@ let modalMode    = null;
 // ═══════════════════════════════════════════
 function loadState() {
     const raw = localStorage.getItem('lifeDashV4');
-    if (raw) { try { state = JSON.parse(raw); } catch(e) {} }
+    if (raw) { try { state = { ...state, ...JSON.parse(raw) }; } catch(e) {} }
+    if (!state.dnn || typeof state.dnn !== 'object') state.dnn = { read:false, goals:false, move:false, connect:false, share:false };
+    if (!state.goals || typeof state.goals !== 'object') state.goals = {};
+    if (!state.execSteps || typeof state.execSteps !== 'object') state.execSteps = {};
+    if (!state.week || typeof state.week !== 'object') state.week = {};
 
     const todayKey = todayISO();
     if (state.lastDay !== todayKey) {
@@ -2089,10 +2098,13 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
 });
 
 function toggleGoal(id) {
-    state.goals[id].done = !state.goals[id].done;
     const goal = findGoal(id);
-    if (goal?.type === 'progress' && state.goals[id].done) state.goals[id].current = goal.target;
-    saveState(); renderAll();
+    if (!goal) return;
+    if (!state.goals[id]) state.goals[id] = { done:false, current:goal.current ?? 0 };
+    state.goals[id].done = !state.goals[id].done;
+    if (goal.type === 'progress' && state.goals[id].done) state.goals[id].current = goal.target;
+    saveState();
+    renderAll();
 }
 
 function findGoal(id) {
