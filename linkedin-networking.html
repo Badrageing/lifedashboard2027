@@ -54,9 +54,10 @@ body.authed #authPanel{display:none}
   <div class="stat"><div class="label">Berufliche Gespräche</div><div class="num" id="statConversations">0</div><div class="goal">Ziel: 3–5</div></div>
 </section>
 <nav class="tabs">
-<button class="tab active" data-tab="overview">Übersicht & Aufgaben</button><button class="tab" data-tab="scout">Kontakt-Scout</button><button class="tab" data-tab="contacts">Kontakt-CRM</button><button class="tab" data-tab="templates">Textvorschläge</button><button class="tab" data-tab="followup">Follow-ups</button><button class="tab" data-tab="progress">Ziele & Auswertung</button>
+<button class="tab active" data-tab="overview">Übersicht & Aufgaben</button><button class="tab" data-tab="scout">Kontakt-Scout</button><button class="tab" data-tab="contacts">Kontakt-CRM</button><button class="tab" data-tab="opportunities">Chancen-Pipeline</button><button class="tab" data-tab="templates">Textvorschläge</button><button class="tab" data-tab="followup">Follow-ups</button><button class="tab" data-tab="progress">Ziele & Auswertung</button>
 </nav>
 <section class="view active" id="view-overview">
+  <div class="panel" id="priorityQueuePanel"><div class="panel-head"><div><h3>Diese Woche zuerst</h3><p class="sub">Automatisch priorisierte Kontaktaktionen nach Fälligkeit und nächstem Schritt.</p></div><button class="btn" id="refreshPriorityQueue">↻ Aktualisieren</button></div><div id="priorityQueue" class="task-list"></div></div>
  <div class="grid-main">
   <div>
    <div class="panel"><div class="panel-head"><div><h3>Dein 20-Minuten-Rhythmus</h3><p class="sub">Vier kurze Sessions pro Woche – ohne LinkedIn zum zweiten Job zu machen.</p></div><span class="badge">80 Min./Woche</span></div>
@@ -166,6 +167,26 @@ body.authed #authPanel{display:none}
   </div><p class="sub" style="margin-top:15px">Nicht schreiben: „Wollte mich nur mal melden.“ Das ist Aufwand ohne Mehrwert für den Empfänger.</p></div>
  </div>
 </section>
+<section class="view" id="view-opportunities">
+ <div class="grid-main">
+  <div class="panel">
+   <div class="panel-head"><div><h3 id="opportunityFormTitle">Neue Karrierechance erfassen</h3><p class="sub">Empfehlungen, Rollen, Recruiter-Hinweise und berufliche Gespräche zentral nachhalten.</p></div></div>
+   <form id="opportunityForm">
+    <input id="oppId" type="hidden">
+    <div class="field"><label for="oppTitle">Chance / Rolle *</label><input id="oppTitle" required placeholder="z. B. Head of PMO – vertrauliche Empfehlung"></div>
+    <div class="field" style="margin-top:10px"><label for="oppCompany">Unternehmen</label><input id="oppCompany" placeholder="Unternehmen oder Recruiter"></div>
+    <div class="field" style="margin-top:10px"><label for="oppStage">Status</label><select id="oppStage"><option>Identifiziert</option><option>Recherche abgeschlossen</option><option>Kontaktaufnahme geplant</option><option>Kontaktiert</option><option>Austausch</option><option>Konkrete Chance</option><option>Abgeschlossen</option><option>Verworfen</option></select></div>
+    <div class="field" style="margin-top:10px"><label for="oppContact">Auslöser / Kontakt</label><select id="oppContact"><option value="">Kein Kontakt verknüpft</option></select></div>
+    <div class="field" style="margin-top:10px"><label for="oppSalary">Gehalt / Rahmen (optional)</label><input id="oppSalary" placeholder="z. B. 110–125k €"></div>
+    <div class="field" style="margin-top:10px"><label for="oppNextStep">Nächster Schritt</label><input id="oppNextStep" placeholder="z. B. Recruiter um Rollenprofil bitten"></div>
+    <div class="field" style="margin-top:10px"><label for="oppNextDate">Wiedervorlage</label><input id="oppNextDate" type="date"></div>
+    <div class="field" style="margin-top:10px"><label for="oppNotes">Notizen</label><textarea id="oppNotes" rows="3" placeholder="Kontext, Quelle, offene Fragen …"></textarea></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn btn-primary" type="submit">Chance speichern</button><button class="btn" type="button" id="cancelOpportunityEdit" style="display:none">Bearbeiten abbrechen</button></div>
+   </form>
+  </div>
+  <div class="panel"><div class="panel-head"><div><h3>Deine Chancen</h3><p class="sub">Ein Datensatz pro konkreter Möglichkeit. Bestehende Kontakte bleiben separat erhalten.</p></div><span class="badge" id="opportunityCount">0 Chancen</span></div><div id="opportunityList" class="task-list"></div></div>
+ </div>
+</section>
 <section class="view" id="view-progress">
  <div class="grid-main">
   <div class="panel"><div class="panel-head"><div><h3>Fortschritt gegen deine Ziele</h3><p class="sub">Erfasse echte Interaktionen. Zahlen ohne Gespräche sind kein Erfolg.</p></div></div><div class="metric-list" id="metricsList"></div></div>
@@ -188,7 +209,7 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const STORAGE_KEY='linkedin-networking-os-v1';
 let currentUser=null,remoteReady=false,loadedUserId=null,saveQueue=Promise.resolve();
 const defaults={
- contacts:[],scoutLeads:[],completedTasks:{},day:'Mo',metrics:{conversations:0,reactivated:0,notes:'',reviewDate:''},templateEdits:{},
+ contacts:[],scoutLeads:[],opportunities:[],completedTasks:{},day:'Mo',metrics:{conversations:0,reactivated:0,notes:'',reviewDate:''},templateEdits:{},
  tasks:{
  Mo:[['Research: 5 relevante Personen identifizieren','Zielgruppe: Headhunter, Führungskräfte oder frühere Kontakte. Qualität vor Masse.'],['2–3 individuelle Kontaktanfragen senden','Jede Einladung mit echtem beruflichem Bezug personalisieren.']],
  Di:[['Netzwerk pflegen und sinnvoll interagieren','Beiträge relevanter Kontakte lesen und nur dann kommentieren, wenn du etwas beitragen kannst.'],['Interessante berufliche Neuigkeiten notieren','Themen, gemeinsame Interessen und mögliche Anknüpfungspunkte im CRM festhalten.']],
@@ -222,7 +243,7 @@ function save(){
 function id(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200)}
 function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function switchTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+tab));if(tab==='contacts')renderContacts();if(tab==='scout')renderScout();if(tab==='followup')renderFollowups();if(tab==='progress')renderMetrics()}
+function switchTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+tab));if(tab==='contacts')renderContacts();if(tab==='scout')renderScout();if(tab==='followup')renderFollowups();if(tab==='opportunities')renderOpportunities();if(tab==='progress')renderMetrics()}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.goto)));
 document.getElementById('quickAdd').addEventListener('click',()=>{switchTab('contacts');document.getElementById('cName').focus();document.getElementById('contactFormPanel').scrollIntoView({behavior:'smooth',block:'start'})});
@@ -279,8 +300,55 @@ function clampScore(v,max,def){const n=Number(v);return v===''||v===undefined?de
 function renderCountdown(){const target=new Date('2026-11-15T23:59:59');const now=new Date();const days=Math.max(0,Math.ceil((target-now)/86400000));document.getElementById('daysLeft').textContent=days+' Tage';const start=new Date('2026-10-16T00:00:00');const pct=Math.min(100,Math.max(0,(now-start)/(target-start)*100));document.getElementById('timeProgress').style.width=pct+'%'}
 
 function setAuthMessage(message,isError=false){const el=document.getElementById('authMessage');if(el){el.textContent=message;el.style.color=isError?'var(--red)':'var(--muted)'}}
-function normalizeState(value){return {...structuredClone(defaults),...(value||{}),contacts:Array.isArray(value?.contacts)?value.contacts:[],scoutLeads:Array.isArray(value?.scoutLeads)?value.scoutLeads:[],completedTasks:value?.completedTasks||{},metrics:{...defaults.metrics,...(value?.metrics||{})},templateEdits:value?.templateEdits||{},tasks:value?.tasks||structuredClone(defaults.tasks),review:value?.review||structuredClone(defaults.review)}}
-function renderApp(){renderTasks();renderContacts();renderStats();renderScout();renderCountdown()}
+function normalizeState(value){return {...structuredClone(defaults),...(value||{}),contacts:Array.isArray(value?.contacts)?value.contacts:[],scoutLeads:Array.isArray(value?.scoutLeads)?value.scoutLeads:[],opportunities:Array.isArray(value?.opportunities)?value.opportunities:[],completedTasks:value?.completedTasks||{},metrics:{...defaults.metrics,...(value?.metrics||{})},templateEdits:value?.templateEdits||{},tasks:value?.tasks||structuredClone(defaults.tasks),review:value?.review||structuredClone(defaults.review)}}
+
+function renderPriorityQueue(){
+ const box=document.getElementById('priorityQueue');if(!box)return;
+ const today=localDateISO(),end=new Date();end.setDate(end.getDate()+7);const endISO=end.getFullYear()+'-'+String(end.getMonth()+1).padStart(2,'0')+'-'+String(end.getDate()).padStart(2,'0');
+ const eligible=state.contacts.filter(c=>c&&c.status!=='Kein Fit'&&c.status!=='Gespräch geführt');
+ const due=eligible.filter(c=>c.nextDate&&c.nextDate<=today).sort((a,b)=>(a.nextDate||'9999').localeCompare(b.nextDate||'9999'));
+ const soon=eligible.filter(c=>c.nextDate&&c.nextDate>today&&c.nextDate<=endISO).sort((a,b)=>(a.nextDate||'9999').localeCompare(b.nextDate||'9999'));
+ const noDate=eligible.filter(c=>!c.nextDate&&c.next);
+ const picks=[...due.map(c=>({...c,_priority:'Überfällig'})),...soon.map(c=>({...c,_priority:'Diese Woche'})),...noDate.map(c=>({...c,_priority:'Termin fehlt'}))].slice(0,5);
+ box.innerHTML=picks.length?picks.map(c=>'<div class="task"><div style="flex:1"><strong>'+esc(c.name)+' · '+esc(c.company||c.role||'Kontakt')+'</strong><div class="detail">'+esc(c.next||'Nächsten sinnvollen Schritt festlegen')+' · '+esc(c._priority)+(c.nextDate?' · '+esc(c.nextDate):'')+'</div></div><button class="btn" data-priority-contact="'+esc(c.id)+'">Kontakt öffnen</button></div>').join(''):'<div class="empty">Keine fälligen oder zeitnahen Aktionen. Nutze den Kontakt-Scout, um neue passende Personen zu finden.</div>';
+ box.querySelectorAll('[data-priority-contact]').forEach(b=>b.addEventListener('click',()=>{switchTab('contacts');editContact(b.dataset.priorityContact)}));
+}
+document.getElementById('refreshPriorityQueue')?.addEventListener('click',renderPriorityQueue);
+function renderOpportunityContactOptions(selected=''){
+ const el=document.getElementById('oppContact');if(!el)return;
+ el.innerHTML='<option value="">Kein Kontakt verknüpft</option>'+state.contacts.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+(c.company?' · '+esc(c.company):'')+'</option>').join('');
+ el.value=selected||'';
+}
+function renderOpportunities(){
+ const box=document.getElementById('opportunityList');if(!box)return;
+ renderOpportunityContactOptions(document.getElementById('oppContact')?.value||'');
+ const rows=(state.opportunities||[]).slice().sort((a,b)=>(a.nextDate||'9999').localeCompare(b.nextDate||'9999'));
+ document.getElementById('opportunityCount').textContent=rows.length+' Chancen';
+ box.innerHTML=rows.length?rows.map(o=>{
+  const contact=state.contacts.find(c=>c.id===o.contactId);
+  return '<div class="task"><div style="flex:1"><strong>'+esc(o.title||'Unbenannte Chance')+'</strong><div class="detail">'+esc(o.company||'Unternehmen offen')+' · '+esc(o.stage||'Identifiziert')+(contact?' · Kontakt: '+esc(contact.name):'')+'</div>'+(o.nextStep?'<div class="detail">Nächster Schritt: '+esc(o.nextStep)+(o.nextDate?' · '+esc(o.nextDate):'')+'</div>':'')+(o.salary?'<div class="detail">Rahmen: '+esc(o.salary)+'</div>':'')+(o.notes?'<div class="detail">'+esc(o.notes)+'</div>':'')+'</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-opp-edit="'+esc(o.id)+'">Bearbeiten</button><button class="btn" data-opp-delete="'+esc(o.id)+'">Löschen</button></div></div>';
+ }).join(''):'<div class="empty">Noch keine Chancen erfasst. Lege hier Möglichkeiten an, die aus Kontakten, Empfehlungen oder Recherchen entstehen.</div>';
+ box.querySelectorAll('[data-opp-edit]').forEach(b=>b.addEventListener('click',()=>editOpportunity(b.dataset.oppEdit)));
+ box.querySelectorAll('[data-opp-delete]').forEach(b=>b.addEventListener('click',()=>deleteOpportunity(b.dataset.oppDelete)));
+}
+function editOpportunity(oid){
+ const o=(state.opportunities||[]).find(x=>x.id===oid);if(!o)return;
+ document.getElementById('oppId').value=o.id;document.getElementById('oppTitle').value=o.title||'';document.getElementById('oppCompany').value=o.company||'';document.getElementById('oppStage').value=o.stage||'Identifiziert';document.getElementById('oppSalary').value=o.salary||'';document.getElementById('oppNextStep').value=o.nextStep||'';document.getElementById('oppNextDate').value=o.nextDate||'';document.getElementById('oppNotes').value=o.notes||'';
+ renderOpportunityContactOptions(o.contactId||'');document.getElementById('opportunityFormTitle').textContent='Karrierechance bearbeiten';document.getElementById('cancelOpportunityEdit').style.display='inline-block';document.getElementById('opportunityForm').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function resetOpportunityForm(){document.getElementById('opportunityForm').reset();document.getElementById('oppId').value='';document.getElementById('opportunityFormTitle').textContent='Neue Karrierechance erfassen';document.getElementById('cancelOpportunityEdit').style.display='none';renderOpportunityContactOptions('')}
+function deleteOpportunity(oid){const o=(state.opportunities||[]).find(x=>x.id===oid);if(!o||!confirm('Diese Chance wirklich löschen?'))return;state.opportunities=state.opportunities.filter(x=>x.id!==oid);save();renderOpportunities();renderPriorityQueue()}
+document.getElementById('opportunityForm')?.addEventListener('submit',e=>{
+ e.preventDefault();const oid=document.getElementById('oppId').value;
+ const row={id:oid||id(),title:document.getElementById('oppTitle').value.trim(),company:document.getElementById('oppCompany').value.trim(),stage:document.getElementById('oppStage').value,contactId:document.getElementById('oppContact').value,salary:document.getElementById('oppSalary').value.trim(),nextStep:document.getElementById('oppNextStep').value.trim(),nextDate:document.getElementById('oppNextDate').value,notes:document.getElementById('oppNotes').value.trim(),updatedAt:new Date().toISOString()};
+ if(!row.title){toast('Bitte einen Titel für die Chance eingeben.');return}
+ if(!Array.isArray(state.opportunities))state.opportunities=[];
+ const ix=state.opportunities.findIndex(x=>x.id===row.id);if(ix>=0)state.opportunities[ix]={...state.opportunities[ix],...row};else state.opportunities.push({...row,createdAt:row.updatedAt});
+ save();resetOpportunityForm();renderOpportunities();renderPriorityQueue();toast('Chance gespeichert');
+});
+document.getElementById('cancelOpportunityEdit')?.addEventListener('click',resetOpportunityForm);
+
+function renderApp(){renderTasks();renderContacts();renderStats();renderScout();renderCountdown();renderPriorityQueue();renderOpportunities()}
 async function handleSession(session){
  if(!session){currentUser=null;remoteReady=false;loadedUserId=null;document.body.classList.remove('authed');setAuthMessage('Bitte mit deinem Konto anmelden.');return}
  if(loadedUserId===session.user.id&&remoteReady){document.body.classList.add('authed');return}
