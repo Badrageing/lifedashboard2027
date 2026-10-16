@@ -622,6 +622,14 @@
 .auth-form input{width:100%;border:1px solid #d8deea;border-radius:9px;padding:11px}.auth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .auth-actions button{border:1px solid #d8deea;border-radius:9px;padding:10px 13px;cursor:pointer;font-weight:700}.auth-actions .primary{background:#2146a5;color:#fff;border-color:#2146a5}
 .auth-message{margin-top:12px;font-size:13px;color:#667085;overflow-wrap:anywhere}
+.lifeos-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.lifeos-sync{display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid #d8deea;border-radius:999px;background:#fff;font-size:12px;font-weight:700;color:#475467}
+.lifeos-sync[data-state="syncing"]{color:#805b10;background:#fff8e5;border-color:#f2d48b}
+.lifeos-sync[data-state="synced"]{color:#167647;background:#ecfdf3;border-color:#abefc6}
+.lifeos-sync[data-state="error"]{color:#b42318;background:#fef3f2;border-color:#fecdca}
+.lifeos-logout{padding:7px 10px;border:1px solid #d8deea;border-radius:9px;background:#fff;color:#475467;font-size:12px;font-weight:700;cursor:pointer}
+.lifeos-logout:disabled{opacity:.55;cursor:wait}
+@media(max-width:700px){.lifeos-toolbar{justify-content:flex-start}.lifeos-sync{font-size:11px}}
 body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{display:none}
 </style>
 <section id="lifeosAuth" class="auth-screen"><div class="auth-card">
@@ -636,7 +644,11 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
 
 <div class="header">
     <h1>🎯 Life Dashboard</h1>
-    <div class="date" id="dateDisplay"></div>
+    <div class="lifeos-toolbar">
+        <span id="lifeosSyncStatus" class="lifeos-sync" data-state="syncing" role="status" aria-live="polite">☁️ Verbinde …</span>
+        <button id="lifeosLogout" class="lifeos-logout" type="button">Abmelden</button>
+        <div class="date" id="dateDisplay"></div>
+    </div>
 </div>
 
 <div class="container">
@@ -1762,48 +1774,141 @@ const LIFEOS_SUPABASE_KEY='sb_publishable_CQBqODnDyv7dWEkwqsxBUA_bzf5LqWF';
 const lifeosSb=window.supabase.createClient(LIFEOS_SUPABASE_URL,LIFEOS_SUPABASE_KEY);
 const LIFEOS_STORAGE_KEY='lifeDashV4';
 let lifeosUser=null,lifeosRemoteReady=false,lifeosSaveQueue=Promise.resolve(),lifeosLoadedUserId=null;
-function lifeosMessage(msg,isError=false){const el=document.getElementById('lifeosAuthMessage');el.textContent=msg;el.style.color=isError?'#b42318':'#667085'}
-function lifeosLocalState(){try{const raw=localStorage.getItem(LIFEOS_STORAGE_KEY);return raw?JSON.parse(raw):null}catch(e){return null}}
+let lifeosSyncError=null,lifeosPendingSaves=0,lifeosSessionRun=0;
+const lifeosSyncEl=document.getElementById('lifeosSyncStatus');
+const lifeosLogoutEl=document.getElementById('lifeosLogout');
+function lifeosMessage(msg,isError=false){
+ const el=document.getElementById('lifeosAuthMessage');
+ if(el){el.textContent=msg;el.style.color=isError?'#b42318':'#667085'}
+}
+function lifeosSetSyncStatus(state,label){
+ if(!lifeosSyncEl)return;
+ lifeosSyncEl.dataset.state=state;
+ lifeosSyncEl.textContent=label;
+}
+function lifeosLocalState(){
+ try{const raw=localStorage.getItem(LIFEOS_STORAGE_KEY);return raw?JSON.parse(raw):null}catch(e){return null}
+}
 function lifeosSaveRemote(snapshot,userId){
  if(!lifeosRemoteReady||!lifeosUser||lifeosUser.id!==userId)return;
+ lifeosPendingSaves++;
+ lifeosSyncError=null;
+ lifeosSetSyncStatus('syncing','☁️ Speichert …');
  lifeosSaveQueue=lifeosSaveQueue.then(async()=>{
   if(!lifeosRemoteReady||!lifeosUser||lifeosUser.id!==userId)return;
-  const {error}=await lifeosSb.from('lifeos_state').upsert({user_id:userId,state:snapshot,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-  if(error){console.error('LifeOS cloud save failed',error);lifeosMessage('Cloud-Speicherung fehlgeschlagen: '+error.message,true)}
- }).catch(err=>{console.error(err);lifeosMessage('Synchronisierung fehlgeschlagen.',true)});
+  const {error}=await lifeosSb.from('lifeos_state').upsert(
+   {user_id:userId,state:snapshot,updated_at:new Date().toISOString()},
+   {onConflict:'user_id'}
+  );
+  if(error)throw error;
+ }).then(()=>{
+  lifeosPendingSaves=Math.max(0,lifeosPendingSaves-1);
+  if(lifeosPendingSaves===0&&!lifeosSyncError&&lifeosUser&&lifeosUser.id===userId)
+   lifeosSetSyncStatus('synced','☁️ Synchronisiert');
+ }).catch(err=>{
+  lifeosPendingSaves=Math.max(0,lifeosPendingSaves-1);
+  lifeosSyncError=err;
+  console.error('LifeOS cloud save failed',err);
+  lifeosSetSyncStatus('error','⚠️ Sync fehlgeschlagen – erneut ändern zum Wiederholen');
+  lifeosMessage('Cloud-Speicherung fehlgeschlagen: '+(err.message||'Unbekannter Fehler'),true);
+ });
 }
 const lifeosOriginalSaveState=saveState;
-saveState=function(){lifeosOriginalSaveState();if(lifeosRemoteReady&&lifeosUser)lifeosSaveRemote(JSON.parse(JSON.stringify(state)),lifeosUser.id)};
+saveState=function(){
+ lifeosOriginalSaveState();
+ if(lifeosRemoteReady&&lifeosUser)lifeosSaveRemote(JSON.parse(JSON.stringify(state)),lifeosUser.id);
+};
 async function lifeosHandleSession(session){
- if(!session){lifeosRemoteReady=false;lifeosUser=null;lifeosLoadedUserId=null;document.body.classList.remove('lifeos-authed');lifeosMessage('Bitte anmelden oder ein Konto erstellen.');return}
- if(lifeosLoadedUserId===session.user.id&&lifeosRemoteReady){document.body.classList.add('lifeos-authed');return}
- lifeosUser=session.user;lifeosRemoteReady=false;lifeosMessage('Lade deine gespeicherten Daten …');
- const {data,error}=await lifeosSb.from('lifeos_state').select('state').eq('user_id',session.user.id).maybeSingle();
- if(error){console.error(error);lifeosMessage('Datenbankzugriff fehlgeschlagen. '+error.message,true);return}
- if(data&&data.state){state={...state,...data.state,dnn:{...state.dnn,...(data.state.dnn||{})},goals:data.state.goals||{},execSteps:data.state.execSteps||{},week:data.state.week||{},lastDay:data.state.lastDay||null}}
- else{
-  const local=lifeosLocalState();
-  if(local)state={...state,...local,dnn:{...state.dnn,...(local.dnn||{})},goals:local.goals||{},execSteps:local.execSteps||{},week:local.week||{},lastDay:local.lastDay||null};
-  const {error:writeError}=await lifeosSb.from('lifeos_state').upsert({user_id:session.user.id,state,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-  if(writeError){console.error(writeError);lifeosMessage('Erstsicherung fehlgeschlagen: '+writeError.message,true);return}
+ const run=++lifeosSessionRun;
+ if(!session){
+  lifeosRemoteReady=false;lifeosUser=null;lifeosLoadedUserId=null;
+  document.body.classList.remove('lifeos-authed');
+  lifeosSetSyncStatus('syncing','☁️ Nicht angemeldet');
+  lifeosMessage('Bitte anmelden oder ein Konto erstellen.');
+  return;
  }
- localStorage.setItem(LIFEOS_STORAGE_KEY,JSON.stringify(state));lifeosLoadedUserId=session.user.id;lifeosRemoteReady=true;
- document.body.classList.add('lifeos-authed');lifeosMessage('Synchronisierung aktiv.');renderAll();
+ if(lifeosLoadedUserId===session.user.id&&lifeosRemoteReady){
+  document.body.classList.add('lifeos-authed');
+  return;
+ }
+ lifeosUser=session.user;lifeosRemoteReady=false;
+ lifeosSetSyncStatus('syncing','☁️ Lade Daten …');
+ lifeosMessage('Lade deine gespeicherten Daten …');
+ const {data,error}=await lifeosSb.from('lifeos_state').select('state').eq('user_id',session.user.id).maybeSingle();
+ if(run!==lifeosSessionRun)return;
+ if(error){
+  console.error('LifeOS cloud load failed',error);
+  lifeosSetSyncStatus('error','⚠️ Laden fehlgeschlagen');
+  lifeosMessage('Datenbankzugriff fehlgeschlagen. Bitte erneut anmelden oder die Seite neu laden. '+error.message,true);
+  return;
+ }
+ if(data&&data.state){
+  state={...state,...data.state,
+   dnn:{...state.dnn,...(data.state.dnn||{})},
+   goals:{...(data.state.goals||{})},
+   execSteps:{...(data.state.execSteps||{})},
+   week:{...(data.state.week||{})},
+   lastDay:data.state.lastDay||null
+  };
+ }else{
+  const local=lifeosLocalState();
+  if(local)state={...state,...local,
+   dnn:{...state.dnn,...(local.dnn||{})},
+   goals:{...(local.goals||{})},
+   execSteps:{...(local.execSteps||{})},
+   week:{...(local.week||{})},
+   lastDay:local.lastDay||null
+  };
+ }
+ // Run the original state normalisation (daily rollover and defaults) only after
+ // the cloud state has been loaded, never before it.
+ localStorage.setItem(LIFEOS_STORAGE_KEY,JSON.stringify(state));
+ loadState();
+ localStorage.setItem(LIFEOS_STORAGE_KEY,JSON.stringify(state));
+ lifeosLoadedUserId=session.user.id;
+ lifeosRemoteReady=true;
+ document.getElementById('dateDisplay').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+ document.body.classList.add('lifeos-authed');
+ renderAll();
+ // Upsert both new accounts and any normalised/rolled-over state to the cloud.
+ lifeosSaveRemote(JSON.parse(JSON.stringify(state)),session.user.id);
 }
 document.getElementById('lifeosAuthForm').addEventListener('submit',async e=>{
- e.preventDefault();const email=document.getElementById('lifeosEmail').value.trim(),password=document.getElementById('lifeosPassword').value;
- lifeosMessage('Anmeldung läuft …');const {error}=await lifeosSb.auth.signInWithPassword({email,password});
- if(error){lifeosMessage('Anmeldung fehlgeschlagen: '+error.message,true);return}lifeosMessage('Angemeldet – Daten werden geladen …');
+ e.preventDefault();
+ const email=document.getElementById('lifeosEmail').value.trim();
+ const password=document.getElementById('lifeosPassword').value;
+ lifeosMessage('Anmeldung läuft …');
+ const {error}=await lifeosSb.auth.signInWithPassword({email,password});
+ if(error){lifeosMessage('Anmeldung fehlgeschlagen: '+error.message,true);return}
+ lifeosMessage('Angemeldet – Daten werden geladen …');
 });
 document.getElementById('lifeosSignUp').addEventListener('click',async()=>{
- const email=document.getElementById('lifeosEmail').value.trim(),password=document.getElementById('lifeosPassword').value;
+ const email=document.getElementById('lifeosEmail').value.trim();
+ const password=document.getElementById('lifeosPassword').value;
  if(!email||password.length<8){lifeosMessage('Bitte E-Mail und ein Passwort mit mindestens 8 Zeichen eingeben.',true);return}
- lifeosMessage('Konto wird erstellt …');const {data,error}=await lifeosSb.auth.signUp({email,password,options:{emailRedirectTo:window.location.href}});
+ lifeosMessage('Konto wird erstellt …');
+ const {data,error}=await lifeosSb.auth.signUp({email,password,options:{emailRedirectTo:window.location.href}});
  if(error){lifeosMessage('Konto konnte nicht erstellt werden: '+error.message,true);return}
- if(data.session)lifeosMessage('Konto erstellt – Daten werden geladen …');else lifeosMessage('Konto angelegt. Bitte den Bestätigungslink per E-Mail öffnen und danach anmelden.');
+ if(data.session)lifeosMessage('Konto erstellt – Daten werden geladen …');
+ else lifeosMessage('Konto angelegt. Bitte den Bestätigungslink per E-Mail öffnen und danach anmelden.');
+});
+lifeosLogoutEl.addEventListener('click',async()=>{
+ lifeosLogoutEl.disabled=true;
+ lifeosMessage('Wird abgemeldet …');
+ try{
+  await lifeosSaveQueue;
+  const {error}=await lifeosSb.auth.signOut();
+  if(error)throw error;
+  lifeosMessage('Erfolgreich abgemeldet.');
+ }catch(err){
+  lifeosMessage('Abmelden fehlgeschlagen: '+(err.message||'Unbekannter Fehler'),true);
+ }finally{lifeosLogoutEl.disabled=false}
 });
 lifeosSb.auth.onAuthStateChange((event,session)=>{setTimeout(()=>lifeosHandleSession(session),0)});
-(async()=>{const {data}=await lifeosSb.auth.getSession();await lifeosHandleSession(data.session)})();
-</script>
+(async()=>{
+ const {data,error}=await lifeosSb.auth.getSession();
+ if(error){lifeosSetSyncStatus('error','⚠️ Sitzung nicht verfügbar');lifeosMessage('Sitzung konnte nicht geladen werden: '+error.message,true);return}
+ await lifeosHandleSession(data.session);
+})();
 </body>
 </html>
