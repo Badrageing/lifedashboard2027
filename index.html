@@ -922,16 +922,16 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
             <div class="stat-label">Ziele erreicht 🏆</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value" id="statExec">0%</div>
-            <div class="stat-label">Ø Umsetzung 📋</div>
+            <div class="stat-value" id="statExec">0/0</div>
+            <div class="stat-label">Plan-Schritte erledigt 📋</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value" id="statResult">0%</div>
-            <div class="stat-label">Ø Ergebnis 🎯</div>
+            <div class="stat-value" id="statResult">–/5</div>
+            <div class="stat-label">Life Score diese Woche</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value" id="statBalance">0%</div>
-            <div class="stat-label">Life Balance Score</div>
+            <div class="stat-value" id="statBalance">0/7</div>
+            <div class="stat-label">Lebensbereiche bewertet</div>
         </div>
     </div>
 
@@ -956,39 +956,9 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
     <!-- Score Legend -->
     <div class="section-title">ℹ️ So funktioniert der Score</div>
     <div class="score-legend">
-        <div class="legend-item">
-            <div class="legend-title">
-                <div style="width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,#00d4ff,#0099ff);flex-shrink:0"></div>
-                Ergebnis-Score (60%)
-            </div>
-            <div class="legend-bar-demo" style="background:linear-gradient(90deg,#00d4ff,#0099ff);opacity:0.6"></div>
-            <div class="legend-desc">Echter messbarer Wert — kg, Bücher, €, Selbsteinschätzung. Was du wirklich erreicht hast.</div>
-        </div>
-        <div class="legend-item">
-            <div class="legend-title">
-                <div style="width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,#7b2ff7,#b44fff);flex-shrink:0"></div>
-                Umsetzungs-Score (40%)
-            </div>
-            <div class="legend-bar-demo" style="background:linear-gradient(90deg,#7b2ff7,#b44fff);opacity:0.6"></div>
-            <div class="legend-desc">Wie viele Execution-Schritte erledigt. Zeigt ob du aktiv am Ziel arbeitest.</div>
-        </div>
-        <div class="legend-item">
-            <div class="legend-title">
-                <div style="width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,#00ff88,#00d4ff);flex-shrink:0"></div>
-                Gesamt-Score
-            </div>
-            <div class="legend-bar-demo" style="background:linear-gradient(90deg,#00ff88,#00d4ff);opacity:0.6"></div>
-            <div class="legend-desc">60% Ergebnis + 40% Umsetzung = ehrlichster Fortschrittsindikator.</div>
-        </div>
-        <div class="legend-item">
-            <div class="legend-title">💡 Die 4 Zustände</div>
-            <div class="legend-desc">
-                🏆 Hoch + Hoch = Perfekt<br>
-                💪 Hoch Exec + Niedrig Result = Du arbeitest dran!<br>
-                ⚡ Niedrig Exec + Hoch Result = Kein Plan<br>
-                🚨 Niedrig + Niedrig = Sofort handeln
-            </div>
-        </div>
+        <div class="legend-item"><div class="legend-title">🎯 Zielfortschritt</div><div class="legend-desc">Bei messbaren Zielen zählt der Weg vom Ausgangswert zum Ziel. Entwicklungsziele zeigen eine 1–10-Selbsteinschätzung als Standortbestimmung.</div></div>
+        <div class="legend-item"><div class="legend-title">📋 Planfortschritt</div><div class="legend-desc">Zeigt ausschließlich abgehakte Schritte im jeweiligen Plan. Ein erledigter Schritt ist Aktivität – nicht automatisch ein erreichtes Ergebnis.</div></div>
+        <div class="legend-item"><div class="legend-title">📅 Weekly Life Score</div><div class="legend-desc">Deine separate wöchentliche Bewertung von 1–5. Sie hilft bei der Fokuswahl, wird aber nicht mit Zielfortschritt verrechnet.</div></div>
     </div>
 
     <!-- DNN -->
@@ -1424,7 +1394,8 @@ function loadState() {
         if (!state.goals[g.id]) state.goals[g.id] = { done:false, current: g.current ?? 0 };
     }));
 
-    // Migrate stale default values to the last known baseline, but preserve later user entries.
+    // Restore known baselines only when the saved value is an old placeholder.
+    if (state.goals.salary && state.goals.salary.current === 0 && !state.goals.salary.done) state.goals.salary.current = 88;
     if (state.goals.weight && state.goals.weight.current === 0 && !state.goals.weight.done) state.goals.weight.current = 84;
     if (state.goals.bodyfat && state.goals.bodyfat.current === 30 && !state.goals.bodyfat.done) state.goals.bodyfat.current = 25;
 
@@ -1442,76 +1413,53 @@ function saveState() { localStorage.setItem('lifeDashV4', JSON.stringify(state))
 function todayISO()  { return new Date().toISOString().split('T')[0]; }
 
 // ═══════════════════════════════════════════
-//  DUAL SCORE ENGINE
+//  TRANSPARENT GOAL PROGRESS
 // ═══════════════════════════════════════════
-
-// Ergebnis-Score (60%): echter messbarer Wert
-function getResultScore(g) {
-    const gs = state.goals[g.id] || { done:false, current: g.current ?? 0 };
-    if (gs.done) return 100;
-    if (g.type === 'once') return 0;
-    if (g.reverseProgress) {
-        const start = g.current || 30;
-        return Math.max(0, Math.min(100, ((start - gs.current) / (start - g.target)) * 100));
+function getGoalMetricMeta(g) {
+    if (['salary','weight','bodyfat'].includes(g.id)) return {kind:'trajectory', baseline:({salary:88,weight:84,bodyfat:25})[g.id], label:'Fortschritt vom Ausgangswert'};
+    if (['leadership','pm','selfled','beyond','wife','family'].includes(g.id)) return {kind:'rating',label:'Selbsteinschätzung'};
+    if (g.id === 'training') return {kind:'weekly',label:'Aktueller Wochenwert'};
+    if (g.id === 'books' || g.id === 'biz') return {kind:'count',label:'Erledigte Meilensteine'};
+    return {kind:'count',label:'Stand'};
+}
+function getGoalMetric(g,currentOverride) {
+    const gs = state.goals[g.id] || {done:false,current:g.current ?? 0};
+    const current = Number(currentOverride !== undefined ? currentOverride : gs.current) || 0;
+    const meta = getGoalMetricMeta(g);
+    if (gs.done) return {kind:meta.kind,current,percent:100,label:'Ziel erreicht',detail:'Ziel erreicht'};
+    if (g.type === 'once') return {kind:'once',current,percent:null,label:'',detail:'Einmaliges Ziel'};
+    if (meta.kind === 'trajectory') {
+        const start=meta.baseline,target=Number(g.target),span=target-start;
+        const raw=span===0?0:((current-start)/span)*100;
+        const percent=Math.max(0,Math.min(100,raw));
+        return {kind:meta.kind,current,percent,label:'Fortschritt vom Ausgangswert',detail:'Stand '+current+' '+g.unit+' · Ausgang '+start+' '+g.unit+' · Ziel '+target+' '+g.unit};
     }
-    return g.target > 0 ? Math.min(100, (gs.current / g.target) * 100) : 0;
+    if (meta.kind === 'rating') {
+        const percent=current>0?Math.max(0,Math.min(100,current/Number(g.target||10)*100)):null;
+        return {kind:meta.kind,current,percent,label:current>0?'Selbsteinschätzung: '+current+'/'+g.target:'Selbsteinschätzung noch offen',detail:current>0?'Deine aktuelle Einschätzung: '+current+' von '+g.target:'Trage zuerst eine ehrliche Einschätzung ein – nicht schätzen lassen.'};
+    }
+    const target=Number(g.target)||0,percent=target>0?Math.max(0,Math.min(100,current/target*100)):null;
+    const unitLabel=g.id==='training'?'Einheiten/Woche':g.unit;
+    const label=meta.kind==='weekly'?'Aktueller Wochenwert: '+current+'/'+target+' '+unitLabel:'Stand: '+current+'/'+target+' '+unitLabel;
+    return {kind:meta.kind,current,percent,label,detail:label};
 }
-
-// Umsetzungs-Score (40%): abgehakte Execution-Schritte
-function getExecScore(goalId) {
-    const plan = EXECUTION_PLANS[goalId];
-    if (!plan) return 0;
-    let total = 0, done = 0;
-    plan.phases.forEach(ph => ph.steps.forEach(s => {
-        total++;
-        if (state.execSteps[s.id]) done++;
-    }));
-    return total > 0 ? Math.round((done / total) * 100) : 0;
-}
-
 function getExecProgress(goalId) {
-    const plan = EXECUTION_PLANS[goalId];
-    if (!plan) return { done:0, total:0 };
-    let total = 0, done = 0;
-    plan.phases.forEach(ph => ph.steps.forEach(s => {
-        total++;
-        if (state.execSteps[s.id]) done++;
-    }));
-    return { done, total };
+    const plan=EXECUTION_PLANS[goalId]; if(!plan)return {done:0,total:0};
+    let total=0,done=0; plan.phases.forEach(ph=>ph.steps.forEach(s=>{total++;if(state.execSteps[s.id])done++;}));
+    return {done,total};
 }
-
-// Gesamt-Score: 60% Ergebnis + 40% Umsetzung
-function getTotalScore(g) {
-    if (state.goals[g.id]?.done) return 100;
-    const resultScore = getResultScore(g);
-    const execScore   = getExecScore(g.id);
-    return Math.round(resultScore * 0.6 + execScore * 0.4);
-}
-
-// Area Score = Durchschnitt aller Ziele
-function calcAreaScore(area) {
-    if (!area.goals.length) return 0;
-    return Math.round(area.goals.reduce((s, g) => s + getTotalScore(g), 0) / area.goals.length);
-}
-
-function calcOverallBalance() {
-    const scores = LIFE_AREAS.map(a => calcAreaScore(a));
-    return Math.round(scores.reduce((s, v) => s + v, 0) / scores.length);
-}
-
-// Insight: welcher Zustand ist das Ziel gerade?
+function getExecScore(goalId) { const p=getExecProgress(goalId); return p.total?Math.round(p.done/p.total*100):0; }
+function getResultScore(g) { const m=getGoalMetric(g); return m.percent===null?0:m.percent; }
 function getInsight(g) {
-    if (state.goals[g.id]?.done) return { cls:'insight-great', icon:'🏆', text:'Ziel erreicht!' };
-    const rs = Math.round(getResultScore(g));
-    const es = getExecScore(g.id);
-
-    if (rs >= 60 && es >= 60) return { cls:'insight-great',   icon:'🏆', text:'Perfekt — du lieferst Ergebnisse mit Plan!' };
-    if (es >= 50 && rs < 40)  return { cls:'insight-working', icon:'💪', text:'Du arbeitest dran — Ergebnis kommt! Bleib dran.' };
-    if (es < 30  && rs >= 50) return { cls:'insight-plan',    icon:'⚡', text:'Gutes Ergebnis — aber kein strukturierter Plan. Execution starten!' };
-    if (es < 20  && rs < 20)  return { cls:'insight-start',   icon:'🚨', text:'Noch kein Fortschritt — jetzt ersten Schritt machen!' };
-    return { cls:'insight-working', icon:'📈', text:'In Arbeit — weiter so!' };
+    const gs=state.goals[g.id]||{done:false,current:g.current??0};
+    if(gs.done)return {cls:'insight-great',icon:'🏆',text:'Ziel erreicht!'};
+    const p=getExecProgress(g.id),m=getGoalMetric(g);
+    if(g.type==='once')return p.done>0?{cls:'insight-working',icon:'🔧',text:'In Arbeit · '+p.done+'/'+p.total+' Planschritte'}:{cls:'insight-start',icon:'🎯',text:'Offen · erster konkreter Schritt steht im Plan'};
+    if(m.kind==='rating'&&m.current===0)return {cls:'insight-start',icon:'🧭',text:'Stand noch nicht bewertet'};
+    if(m.kind==='trajectory'&&m.percent>=100)return {cls:'insight-great',icon:'🏆',text:'Zielwert erreicht – bestätige den Abschluss'};
+    if(p.done>0)return {cls:'insight-working',icon:'📈',text:'In Arbeit · '+p.done+'/'+p.total+' Planschritte erledigt'};
+    return {cls:'insight-start',icon:'🎯',text:'Noch offen · starte mit dem nächsten Planschritt'};
 }
-
 // ═══════════════════════════════════════════
 //  RENDER DNN
 // ═══════════════════════════════════════════
