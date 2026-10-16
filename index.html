@@ -1475,29 +1475,11 @@ function lifeFocusAreaMap(scoreAreaId) {
     })[scoreAreaId] || [];
 }
 function lifeFocusGetCandidate() {
-    const steps = generateDynamicSteps();
-    if (!steps.length) return null;
-    const {week} = lifeScoreCurrentWeek();
-    const scored = LIFE_SCORE_AREAS
-        .filter(a => Number(week.scores[a.id]?.score) >= 1 && Number(week.scores[a.id]?.score) <= 5)
-        .sort((a,b) => Number(week.scores[a.id].score)-Number(week.scores[b.id].score));
-    if (scored.length) {
-        const orderedAreas = [];
-        scored.forEach(a => lifeFocusAreaMap(a.id).forEach(id => { if(!orderedAreas.includes(id)) orderedAreas.push(id); }));
-        for (const areaId of orderedAreas) {
-            const matches = steps.filter(s => s.areaId === areaId).sort((a,b) => a.ts-b.ts);
-            if (matches.length) {
-                const scoreArea = scored.find(a=>lifeFocusAreaMap(a.id).includes(areaId));
-                return { ...matches[0], reason:'Dein Wochen-Score zeigt hier aktuell den größten Handlungsbedarf.', scoreArea };
-            }
-        }
-    }
-    return [...steps].sort((a,b) => {
-        const areaA = LIFE_AREAS.find(x=>x.id===a.areaId);
-        const areaB = LIFE_AREAS.find(x=>x.id===b.areaId);
-        const diff = (areaA ? calcAreaScore(areaA) : 50) - (areaB ? calcAreaScore(areaB) : 50);
-        return diff || a.ts-b.ts;
-    })[0] || null;
+    const steps=generateDynamicSteps();if(!steps.length)return null;
+    const {week}=lifeScoreCurrentWeek();
+    const scored=LIFE_SCORE_AREAS.filter(a=>Number(week.scores[a.id]?.score)>=1&&Number(week.scores[a.id]?.score)<=5).sort((a,b)=>Number(week.scores[a.id].score)-Number(week.scores[b.id].score));
+    if(scored.length){const ordered=[];scored.forEach(a=>lifeFocusAreaMap(a.id).forEach(id=>{if(!ordered.includes(id))ordered.push(id);}));for(const areaId of ordered){const matches=steps.filter(s=>s.areaId===areaId).sort((a,b)=>a.execDone-b.execDone);if(matches.length){const scoreArea=scored.find(a=>lifeFocusAreaMap(a.id).includes(areaId));return {...matches[0],reason:'Dein Wochen-Score zeigt hier aktuell den größten Handlungsbedarf.',scoreArea};}}}
+    const order={career:0,health:1,business:2,family:3,personal:4};return [...steps].sort((a,b)=>(order[a.areaId]??5)-(order[b.areaId]??5)||a.execDone-b.execDone)[0]||null;
 }
 function lifeFocusOpenPlan() {
     const candidate = lifeFocusGetCandidate();
@@ -1723,186 +1705,41 @@ function checkAlerts() {
 //  MODALS
 // ═══════════════════════════════════════════
 function openProgressModal(goalId) {
-    modalMode = 'progress'; modalGoalId = goalId;
-    const goal = findGoal(goalId);
-    const gs   = state.goals[goalId];
-    const rs   = Math.round(getResultScore(goal));
-    const es   = getExecScore(goalId);
-    const ts   = getTotalScore(goal);
-
-    document.getElementById('modalTitle').textContent = '✏️ Ergebnis eintragen';
-    document.getElementById('modalSub').textContent   = goal.text;
-
-    document.getElementById('modalBody').innerHTML = `
-        <div class="modal-score-summary">
-            <div class="modal-score-item">
-                <div class="modal-score-val" style="color:#00d4ff">${rs}%</div>
-                <div class="modal-score-lbl">Ergebnis (60%)</div>
-            </div>
-            <div class="modal-score-item">
-                <div class="modal-score-val" style="color:#b44fff">${es}%</div>
-                <div class="modal-score-lbl">Umsetzung (40%)</div>
-            </div>
-            <div class="modal-score-item">
-                <div class="modal-score-val" style="color:#00ff88">${ts}%</div>
-                <div class="modal-score-lbl">Gesamt</div>
-            </div>
-        </div>
-        <div class="modal-field">
-            <label>Aktueller Wert (${goal.unit})</label>
-            <input type="number" id="progressInput" value="${gs.current}"
-                   step="0.1" oninput="updatePreview('${goalId}')">
-            <div class="unit">Ziel: ${goal.target} ${goal.unit}
-                ${goal.reverseProgress ? ' (niedriger = besser)' : ''}</div>
-        </div>
-        <div class="modal-preview-bars">
-            <div class="preview-row">
-                <div class="preview-label">Ergebnis (60%)</div>
-                <div class="preview-bar"><div class="preview-fill fill-result" id="prev-result" style="width:${rs}%"></div></div>
-                <div class="preview-val" id="prev-result-val" style="color:#00d4ff">${rs}%</div>
-            </div>
-            <div class="preview-row">
-                <div class="preview-label">Umsetzung (40%)</div>
-                <div class="preview-bar"><div class="preview-fill fill-exec" style="width:${es}%"></div></div>
-                <div class="preview-val" style="color:#b44fff">${es}%</div>
-            </div>
-            <div class="preview-row">
-                <div class="preview-label" style="font-weight:600">Gesamt</div>
-                <div class="preview-bar"><div class="preview-fill fill-total" id="prev-total" style="width:${ts}%"></div></div>
-                <div class="preview-val" id="prev-total-val" style="color:#00ff88;font-weight:700">${ts}%</div>
-            </div>
-        </div>
-    `;
-
-    document.getElementById('modalButtons').innerHTML = `
-        <button class="btn btn-primary" onclick="saveProgress()">Speichern</button>
-        <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
-    `;
-
+    modalMode='progress';modalGoalId=goalId;const goal=findGoal(goalId);if(!goal)return;
+    const gs=state.goals[goalId]||{done:false,current:goal.current??0},meta=getGoalMetricMeta(goal),metric=getGoalMetric(goal),isRating=meta.kind==='rating';
+    document.getElementById('modalTitle').textContent=isRating?'🧭 Selbsteinschätzung':'✏️ Aktuellen Stand eintragen';
+    document.getElementById('modalSub').textContent=goal.text;
+    const min=isRating?'1':((meta.kind==='weekly'||meta.kind==='count')?'0':''),max=isRating?'10':'',step=isRating?'1':'0.1';
+    document.getElementById('modalBody').innerHTML='<div class="exec-impact-note">'+metric.detail+'</div><div class="modal-field"><label>'+(isRating?'Wie bewertest du den aktuellen Stand von 1 bis 10?':'Aktueller Wert ('+goal.unit+')')+'</label><input type="number" id="progressInput" value="'+gs.current+'" min="'+min+'" max="'+max+'" step="'+step+'" oninput="updatePreview(\''+goalId+'\')"><div class="unit">'+(isRating?'1 = sehr schwach · 10 = ausgezeichnet. Standortbestimmung, kein automatischer Zielabschluss.':'Ziel: '+goal.target+' '+goal.unit+(meta.kind==='trajectory'?' · Ausgangswert: '+meta.baseline+' '+goal.unit:''))+'</div></div><div class="goal-progress-detail" id="goalMetricPreview">'+metric.detail+'</div>';
+    document.getElementById('modalButtons').innerHTML='<button class="btn btn-primary" onclick="saveProgress()">Speichern</button><button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>';
     document.getElementById('modalOverlay').classList.add('active');
 }
-
 function updatePreview(goalId) {
-    const goal    = findGoal(goalId);
-    const val     = parseFloat(document.getElementById('progressInput').value) || 0;
-    const origGs  = state.goals[goalId];
-    state.goals[goalId] = { ...origGs, current: val };
-    const newRs   = Math.round(getResultScore(goal));
-    const es      = getExecScore(goalId);
-    const newTs   = Math.round(newRs * 0.6 + es * 0.4);
-    state.goals[goalId] = origGs;
-
-    document.getElementById('prev-result').style.width     = newRs + '%';
-    document.getElementById('prev-result-val').textContent = newRs + '%';
-    document.getElementById('prev-total').style.width      = newTs + '%';
-    document.getElementById('prev-total-val').textContent  = newTs + '%';
+    const goal=findGoal(goalId),input=document.getElementById('progressInput'),preview=document.getElementById('goalMetricPreview');if(!goal||!input||!preview)return;
+    const val=input.value.trim()===''?0:Number(input.value);preview.textContent=getGoalMetric(goal,Number.isFinite(val)?val:0).detail;
 }
-
 function saveProgress() {
-    const input = document.getElementById('progressInput');
-    const goalId = modalGoalId;
-    const goal = findGoal(goalId);
-    if (!input || !goal || !goalId) return;
-
-    const raw = input.value.trim();
-    const val = raw === '' ? NaN : Number(raw);
-    if (!Number.isFinite(val)) {
-        input.setCustomValidity('Bitte einen gültigen Zahlenwert eingeben.');
-        input.reportValidity();
-        input.focus();
-        return;
-    }
-    input.setCustomValidity('');
-    if (!state.goals || typeof state.goals !== 'object') state.goals = {};
-    const previous = state.goals[goalId] || { done:false, current:goal.current ?? 0 };
-    state.goals[goalId] = { ...previous, current: val };
-
-    if (goal.reverseProgress) {
-        state.goals[goalId].done = val <= goal.target;
-    } else if (goal.type === 'progress') {
-        state.goals[goalId].done = val >= goal.target;
-    }
-
-    saveState();
-    renderAll();
-    closeModal();
+    const input=document.getElementById('progressInput'),goalId=modalGoalId,goal=findGoal(goalId);if(!input||!goal||!goalId)return;
+    const raw=input.value.trim();let val=raw===''?NaN:Number(raw);const meta=getGoalMetricMeta(goal);
+    if(!Number.isFinite(val)){input.setCustomValidity('Bitte einen gültigen Zahlenwert eingeben.');input.reportValidity();input.focus();return;}
+    if(meta.kind==='rating'&&(!Number.isInteger(val)||val<1||val>10)){input.setCustomValidity('Bitte eine ganze Zahl von 1 bis 10 eingeben.');input.reportValidity();input.focus();return;}
+    if((meta.kind==='weekly'||meta.kind==='count')&&val<0){input.setCustomValidity('Der Wert darf nicht negativ sein.');input.reportValidity();input.focus();return;}
+    input.setCustomValidity('');const previous=state.goals[goalId]||{done:false,current:goal.current??0};state.goals[goalId]={...previous,current:val};
+    if(meta.kind==='trajectory')state.goals[goalId].done=goal.reverseProgress?val<=goal.target:val>=goal.target;
+    else if(meta.kind==='rating'||meta.kind==='weekly')state.goals[goalId].done=false;
+    else if(goal.type==='progress')state.goals[goalId].done=val>=Number(goal.target);
+    saveState();renderAll();closeModal();
 }
-
 function openExecModal(goalId) {
-    modalMode = 'exec'; modalGoalId = goalId;
-    const plan  = EXECUTION_PLANS[goalId];
-    const goal  = findGoal(goalId);
-    if (!plan || !goal) return;
-
-    const ep  = getExecProgress(goalId);
-    const rs  = Math.round(getResultScore(goal));
-    const es  = getExecScore(goalId);
-    const ts  = getTotalScore(goal);
-
-    document.getElementById('modalTitle').textContent = '📋 Execution Plan';
-    document.getElementById('modalSub').textContent   = goal.text;
-
-    document.getElementById('modalBody').innerHTML = `
-        <div class="modal-score-summary">
-            <div class="modal-score-item">
-                <div class="modal-score-val" style="color:#00d4ff">${rs}%</div>
-                <div class="modal-score-lbl">Ergebnis (60%)</div>
-            </div>
-            <div class="modal-score-item">
-                <div class="modal-score-val" style="color:#b44fff">${es}%</div>
-                <div class="modal-score-lbl">Umsetzung ${ep.done}/${ep.total}</div>
-            </div>
-            <div class="modal-score-item">
-                <div class="modal-score-val" style="color:#00ff88">${ts}%</div>
-                <div class="modal-score-lbl">Gesamt-Score</div>
-            </div>
-        </div>
-        <div class="exec-impact-note">
-            💡 <strong>So wirkt der Plan auf deinen Score:</strong>
-            Jeder abgehakte Schritt erhöht deinen Umsetzungs-Score (40% Gewichtung).
-            Den Ergebnis-Score (60%) trägst du über "✏️ Ergebnis eintragen" ein.
-            Zusammen ergibt das deinen ehrlichen Gesamt-Fortschritt.
-        </div>
-        ${plan.phases.map(phase => {
-            const phaseDone  = phase.steps.filter(s => state.execSteps[s.id]).length;
-            const phaseTotal = phase.steps.length;
-            return `
-                <div class="exec-phase">
-                    <div class="exec-phase-header">
-                        <div class="exec-phase-title">${phase.title}</div>
-                        <div class="exec-phase-prog">${phaseDone}/${phaseTotal} erledigt</div>
-                    </div>
-                    ${phase.steps.map((step, i) => `
-                        <div class="exec-step">
-                            <button type="button"
-                                    class="exec-step-cb ${state.execSteps[step.id] ? 'done' : ''}"
-                                    aria-label="${state.execSteps[step.id] ? 'Schritt als offen markieren' : 'Schritt abhaken'}"
-                                    aria-pressed="${!!state.execSteps[step.id]}"
-                                    onclick="toggleExecStep('${step.id}','${goalId}')">
-                                ${state.execSteps[step.id] ? '✓' : ''}
-                            </button>
-                            <div class="exec-step-body">
-                                <div class="exec-step-title ${state.execSteps[step.id] ? 'done-text' : ''}">${step.title}</div>
-                                <div class="exec-step-desc">${step.desc}</div>
-                                <div class="exec-step-tags">
-                                    ${step.time ? `<span class="exec-tag">⏱ ${step.time}</span>` : ''}
-                                    ${step.dnn  ? `<span class="exec-tag">${DNN_LABELS[step.dnn]||step.dnn}</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }).join('')}
-    `;
-
-    document.getElementById('modalButtons').innerHTML = `
-        <button class="btn btn-secondary" onclick="closeModal()">Schließen</button>
-    `;
-
-    document.getElementById('modalOverlay').classList.add('active');
+    modalMode='exec';modalGoalId=goalId;const plan=EXECUTION_PLANS[goalId],goal=findGoal(goalId);if(!plan||!goal)return;
+    const ep=getExecProgress(goalId),metric=getGoalMetric(goal);
+    document.getElementById('modalTitle').textContent='📋 Execution Plan';document.getElementById('modalSub').textContent=goal.text;
+    document.getElementById('modalBody').innerHTML='<div class="exec-impact-note"><strong>Planfortschritt: '+ep.done+'/'+ep.total+' Schritte.</strong><br>'+metric.detail+'<br>Hake nur Schritte ab, die du tatsächlich erledigt hast. Das aktualisiert den Planfortschritt, nicht automatisch dein Ergebnis.</div>'+plan.phases.map(phase=>{
+        const phaseDone=phase.steps.filter(s=>state.execSteps[s.id]).length,phaseTotal=phase.steps.length;
+        return '<div class="exec-phase"><div class="exec-phase-header"><div class="exec-phase-title">'+phase.title+'</div><div class="exec-phase-prog">'+phaseDone+'/'+phaseTotal+' erledigt</div></div>'+phase.steps.map(step=>'<div class="exec-step"><button type="button" class="exec-step-cb '+(state.execSteps[step.id]?'done':'')+'" aria-label="'+(state.execSteps[step.id]?'Schritt als offen markieren':'Schritt abhaken')+'" aria-pressed="'+!!state.execSteps[step.id]+'" onclick="toggleExecStep(\''+step.id+'\',\''+goalId+'\')">'+(state.execSteps[step.id]?'✓':'')+'</button><div class="exec-step-body"><div class="exec-step-title '+(state.execSteps[step.id]?'done-text':'')+'">'+step.title+'</div><div class="exec-step-desc">'+step.desc+'</div><div class="exec-step-tags">'+(step.time?'<span class="exec-tag">⏱ '+step.time+'</span>':'')+(step.dnn?'<span class="exec-tag">'+(DNN_LABELS[step.dnn]||step.dnn)+'</span>':'')+'</div></div></div>').join('')+'</div>';
+    }).join('');
+    document.getElementById('modalButtons').innerHTML='<button class="btn btn-secondary" onclick="closeModal()">Schließen</button>';document.getElementById('modalOverlay').classList.add('active');
 }
-
 function toggleExecStep(stepId, goalId) {
     if (!state.execSteps || typeof state.execSteps !== 'object') state.execSteps = {};
     state.execSteps[stepId] = !Boolean(state.execSteps[stepId]);
