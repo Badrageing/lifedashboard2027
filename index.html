@@ -1593,166 +1593,43 @@ function renderWeekly() {
 //  RENDER GOALS
 // ═══════════════════════════════════════════
 const DNN_LABELS = { read:'📚 Lesen', goals:'🎯 Review', move:'💪 Bewegen', connect:'🤝 Verbinden', share:'🚀 Teilen' };
-
 function renderGoals() {
     document.getElementById('goalsGrid').innerHTML = LIFE_AREAS.map(area => {
-        const score = calcAreaScore(area);
-        const col   = score >= 70 ? '#00ff88' : score >= 40 ? '#00d4ff' : score >= 20 ? '#ffc800' : '#ff6b6b';
-        const cls   = score < 20 ? 'danger' : score < 35 ? 'warning' : '';
-
-        const goalsHTML = area.goals.map(g => {
-            const gs        = state.goals[g.id] || { done:false, current: g.current ?? 0 };
-            const rs        = Math.round(getResultScore(g));
-            const es        = getExecScore(g.id);
-            const ts        = getTotalScore(g);
-            const execProg  = getExecProgress(g.id);
-            const insight   = getInsight(g);
-            const badges    = g.dnn.map(k => `<span class="dnn-badge">${DNN_LABELS[k]}</span>`).join('');
-            const typeTag   = g.type === 'once'
-                ? `<span class="goal-type-tag tag-once">einmalig</span>`
-                : `<span class="goal-type-tag tag-ongoing">laufend</span>`;
-
-            const totalCol  = ts >= 70 ? '#00ff88' : ts >= 40 ? '#00d4ff' : ts >= 20 ? '#ffc800' : '#ff6b6b';
-
-            const dualBars = !gs.done ? `
-                <div class="dual-score">
-                    <div class="score-row">
-                        <div class="score-row-label">Ergebnis (60%)</div>
-                        <div class="mini-bar"><div class="mini-fill fill-result" style="width:${rs}%"></div></div>
-                        <div class="score-row-val" style="color:#00d4ff">${rs}%</div>
-                    </div>
-                    <div class="score-row">
-                        <div class="score-row-label">Umsetzung (40%)</div>
-                        <div class="mini-bar"><div class="mini-fill fill-exec" style="width:${es}%"></div></div>
-                        <div class="score-row-val" style="color:#b44fff">${es}%</div>
-                    </div>
-                    <div class="score-row">
-                        <div class="score-row-label" style="font-weight:600;color:rgba(255,255,255,0.6)">Gesamt</div>
-                        <div class="mini-bar"><div class="mini-fill fill-total" style="width:${ts}%"></div></div>
-                        <div class="score-row-val" style="color:${totalCol};font-weight:700">${ts}%</div>
-                    </div>
-                </div>
-            ` : '';
-
-            const resultInput = (g.type === 'progress' && !gs.done) ? `
-                <div class="goal-actions">
-                    <button class="goal-edit-btn" onclick="openProgressModal('${g.id}')">✏️ Ergebnis eintragen (${gs.current} ${g.unit})</button>
-                    <button class="goal-edit-btn" onclick="openExecModal('${g.id}')">📋 Plan (${execProg.done}/${execProg.total})</button>
-                </div>
-            ` : g.type === 'once' && !gs.done ? `
-                <div class="goal-actions">
-                    <button class="goal-edit-btn" onclick="openExecModal('${g.id}')">📋 Plan (${execProg.done}/${execProg.total})</button>
-                </div>
-            ` : '';
-
-            return `
-                <div class="goal-item">
-                    <div class="goal-cb ${gs.done ? 'done' : ''}" onclick="toggleGoal('${g.id}')">${gs.done ? '✓' : ''}</div>
-                    <div class="goal-body">
-                        <div class="goal-text ${gs.done ? 'done-text' : ''}">${g.text}${typeTag}</div>
-                        ${dualBars}
-                        <div class="goal-insight ${insight.cls}">${insight.icon} ${insight.text}</div>
-                        ${resultInput}
-                        <div class="dnn-badges">${badges}</div>
-                    </div>
-                </div>
-            `;
+        const doneCount=area.goals.filter(g=>state.goals[g.id]?.done).length,totalCount=area.goals.length;
+        const areaPct=totalCount?Math.round(doneCount/totalCount*100):0,col=areaPct>=70?'#00ff88':areaPct>=35?'#00d4ff':'#ffc800';
+        const goalsHTML=area.goals.map(g=>{
+            const gs=state.goals[g.id]||{done:false,current:g.current??0},metric=getGoalMetric(g),plan=getExecProgress(g.id),insight=getInsight(g);
+            const badges=(g.dnn||[]).map(k=>'<span class="dnn-badge">'+DNN_LABELS[k]+'</span>').join('');
+            const typeTag=g.type==='once'?'<span class="goal-type-tag tag-once">einmalig</span>':'<span class="goal-type-tag tag-ongoing">laufend</span>';
+            const metricHTML=metric.percent!==null&&g.type!=='once'?
+                '<div class="goal-progress-block"><div class="goal-progress-copy"><span>'+metric.label+'</span><strong>'+Math.round(metric.percent)+'%</strong></div><div class="mini-bar"><div class="mini-fill fill-result" style="width:'+metric.percent+'%"></div></div><div class="goal-progress-detail">'+metric.detail+'</div></div>'
+                :(g.type==='once'?'':'<div class="goal-progress-detail">'+metric.detail+'</div>');
+            const meta=getGoalMetricMeta(g),currentLabel=meta.kind==='rating'?(metric.current>0?metric.current+'/10 bewertet':'noch nicht bewertet'):(metric.current+' '+g.unit);
+            const actions=g.type==='once'?
+                '<div class="goal-actions"><button class="goal-edit-btn" onclick="openExecModal(\''+g.id+'\')">📋 Plan ('+plan.done+'/'+plan.total+')</button></div>'
+                :'<div class="goal-actions"><button class="goal-edit-btn" onclick="openProgressModal(\''+g.id+'\')">✏️ '+(meta.kind==='rating'?'Selbsteinschätzung':'Aktuellen Stand')+' ('+currentLabel+')</button><button class="goal-edit-btn" onclick="openExecModal(\''+g.id+'\')">📋 Plan ('+plan.done+'/'+plan.total+')</button></div>';
+            return '<div class="goal-item"><div class="goal-cb '+(gs.done?'done':'')+'" onclick="toggleGoal(\''+g.id+'\')">'+(gs.done?'✓':'')+'</div><div class="goal-body"><div class="goal-text '+(gs.done?'done-text':'')+'">'+g.text+typeTag+'</div>'+metricHTML+'<div class="goal-insight '+insight.cls+'">'+insight.icon+' '+insight.text+'</div>'+actions+'<div class="goal-progress-detail">Plan: '+plan.done+'/'+plan.total+' Schritte erledigt</div><div class="dnn-badges">'+badges+'</div></div></div>';
         }).join('');
-
-        return `
-            <div class="life-area ${cls}">
-                <div class="area-header">
-                    <div class="area-left">
-                        <span class="area-icon">${area.icon}</span>
-                        <span class="area-name">${area.name}</span>
-                    </div>
-                    <div class="area-score-wrap">
-                        <div class="area-score-num" style="color:${col}">${score}%</div>
-                        <div class="area-score-lbl">Gesamt-Score</div>
-                    </div>
-                </div>
-                <div class="score-bar">
-                    <div class="score-fill" style="width:${score}%; background:linear-gradient(90deg,${col},rgba(0,212,255,0.4))"></div>
-                </div>
-                ${goalsHTML}
-            </div>
-        `;
+        return '<div class="life-area"><div class="area-header"><div class="area-left"><span class="area-icon">'+area.icon+'</span><span class="area-name">'+area.name+'</span></div><div class="area-score-wrap"><div class="area-score-num">'+doneCount+'/'+totalCount+'</div><div class="area-score-lbl">Ziele erreicht</div></div></div><div class="score-bar"><div class="score-fill" style="width:'+areaPct+'%;background:'+col+'"></div></div>'+goalsHTML+'</div>';
     }).join('');
 }
-
 // ═══════════════════════════════════════════
 //  DYNAMIC NEXT STEPS
 // ═══════════════════════════════════════════
 function generateDynamicSteps() {
-    const steps = [];
-
-    LIFE_AREAS.forEach(area => {
-        area.goals.forEach(goal => {
-            const gs = state.goals[goal.id] || { done:false, current: goal.current ?? 0 };
-            if (gs.done) return;
-
-            const plan = EXECUTION_PLANS[goal.id];
-            if (!plan) return;
-
-            const ts        = getTotalScore(goal);
-            const rs        = Math.round(getResultScore(goal));
-            const es        = getExecScore(goal.id);
-            const areaScore = calcAreaScore(area);
-            const insight   = getInsight(goal);
-            const execProg  = getExecProgress(goal.id);
-
-            // Next uncompleted step
-            let nextStep = null;
-            for (const phase of plan.phases) {
-                for (const step of phase.steps) {
-                    if (!state.execSteps[step.id]) {
-                        nextStep = { ...step, phaseName: phase.title };
-                        break;
-                    }
-                }
-                if (nextStep) break;
-            }
-
-            if (!nextStep) return;
-
-            // Priority
-            let priority = 'l';
-            if (areaScore < 15 || ts < 10)  priority = 'critical';
-            else if (areaScore < 30 || ts < 25) priority = 'h';
-            else if (areaScore < 50 || ts < 50) priority = 'm';
-            else priority = 'l';
-
-            // DNN not done boost
-            const dnnNotDone = goal.dnn?.some(d => !state.dnn[d]);
-            if (dnnNotDone && priority === 'l') priority = 'm';
-
-            steps.push({
-                goalId: goal.id, stepId: nextStep.id,
-                areaId: area.id, areaName: area.name, areaIcon: area.icon,
-                priority,
-                title: `${area.icon} ${goal.text}`,
-                nextAction: nextStep.title,
-                desc: nextStep.desc,
-                time: nextStep.time,
-                insight,
-                rs, es, ts,
-                execDone: execProg.done, execTotal: execProg.total,
-            });
-        });
-    });
-
-    const order = { critical:0, h:1, m:2, l:3 };
-    const areaPriority = { career:0, health:1, business:2, family:3, personal:4 };
-    steps.sort((a, b) => {
-        const areaDiff = (areaPriority[a.areaId] ?? 5) - (areaPriority[b.areaId] ?? 5);
-        if (areaDiff !== 0) return areaDiff;
-        const pd = order[a.priority] - order[b.priority];
-        return pd !== 0 ? pd : a.ts - b.ts;
-    });
-
+    const steps=[],areaPriority={career:0,health:1,business:2,family:3,personal:4};
+    LIFE_AREAS.forEach(area=>area.goals.forEach(goal=>{
+        const gs=state.goals[goal.id]||{done:false,current:goal.current??0};if(gs.done)return;
+        const plan=EXECUTION_PLANS[goal.id];if(!plan)return;let nextStep=null;
+        for(const phase of plan.phases){for(const step of phase.steps){if(!state.execSteps[step.id]){nextStep={...step,phaseName:phase.title};break;}}if(nextStep)break;}
+        if(!nextStep)return;const p=getExecProgress(goal.id),dnnNotDone=goal.dnn?.some(d=>!state.dnn[d]);
+        const priority=area.id==='career'?(dnnNotDone?'h':'m'):(p.done===0?'h':'m');
+        steps.push({goalId:goal.id,stepId:nextStep.id,areaId:area.id,areaName:area.name,areaIcon:area.icon,priority,title:area.icon+' '+goal.text,nextAction:nextStep.title,desc:nextStep.desc,time:nextStep.time,insight:getInsight(goal),execDone:p.done,execTotal:p.total});
+    }));
+    const order={critical:0,h:1,m:2,l:3};
+    steps.sort((a,b)=>{const d=(areaPriority[a.areaId]??5)-(areaPriority[b.areaId]??5);if(d)return d;const p=order[a.priority]-order[b.priority];return p||a.execDone-b.execDone;});
     return steps;
 }
-
 function renderDynamicSteps() {
     const steps   = generateDynamicSteps();
     const areaMap = {};
@@ -1785,7 +1662,7 @@ function renderDynamicSteps() {
                     <div class="step-meta">
                         <span class="step-tag tag-area">${s.areaIcon} ${s.areaName}</span>
                         ${s.time ? `<span class="step-tag tag-time">⏱ ${s.time}</span>` : ''}
-                        <span class="step-tag tag-score">📊 Ergebnis ${s.rs}% · Umsetzung ${s.es}% · Gesamt ${s.ts}%</span>
+                        <span class="step-tag tag-score">📋 Plan ${s.execDone}/${s.execTotal} Schritte</span>
                         <span class="step-tag tag-score">📋 ${s.execDone}/${s.execTotal} Schritte</span>
                         <span class="step-tag ${insightTagClass[s.insight.cls]}">${s.insight.icon} ${s.insight.text}</span>
                     </div>
@@ -1814,56 +1691,26 @@ function markStepDone(stepId, goalId) {
 //  RENDER TIPS
 // ═══════════════════════════════════════════
 function renderTips() {
-    const areaScores = {};
-    LIFE_AREAS.forEach(a => areaScores[a.id] = calcAreaScore(a));
-
-    const sorted = [...ALL_TIPS].sort((a, b) =>
-        (areaScores[a.areaId] ?? 50) - (areaScores[b.areaId] ?? 50)
-    );
-
-    document.getElementById('tipsGrid').innerHTML = sorted.map(tip => {
-        const score    = areaScores[tip.areaId] ?? 50;
-        const relClass = score < 25 ? 'rel-high' : score < 50 ? 'rel-med' : 'rel-low';
-        const relLabel = score < 25 ? '🔥 Dringend' : score < 50 ? '📌 Relevant' : '💡 Nützlich';
-
-        return `
-            <div class="tip-card">
-                <div class="tip-relevance ${relClass}">${relLabel}</div>
-                <div class="tip-header">
-                    <span class="tip-icon">${tip.icon}</span>
-                    <span class="tip-title">${tip.title}</span>
-                </div>
-                <div class="tip-content">${tip.content}</div>
-                <div class="tip-tools">${tip.tools.map(t => `<span class="tool-tag">${t}</span>`).join('')}</div>
-            </div>
-        `;
-    }).join('');
+    const areaPriority={career:0,health:1,business:2,family:3,personal:4};
+    const sorted=[...ALL_TIPS].sort((a,b)=>(areaPriority[a.areaId]??5)-(areaPriority[b.areaId]??5));
+    document.getElementById('tipsGrid').innerHTML=sorted.map(tip=>'<div class="tip-card"><div class="tip-relevance rel-med">💡 Impuls</div><div class="tip-header"><span class="tip-icon">'+tip.icon+'</span><span class="tip-title">'+tip.title+'</span></div><div class="tip-content">'+tip.content+'</div><div class="tip-tools">'+tip.tools.map(t=>'<span class="tool-tag">'+t+'</span>').join('')+'</div></div>').join('');
 }
-
 // ═══════════════════════════════════════════
 //  RENDER STATS
 // ═══════════════════════════════════════════
 function renderStats() {
-    const dnnDone = Object.values(state.dnn).filter(Boolean).length;
-    let totalGoals = 0, doneGoals = 0, totalExec = 0, totalResult = 0;
-
-    LIFE_AREAS.forEach(area => area.goals.forEach(g => {
-        totalGoals++;
-        if (state.goals[g.id]?.done) doneGoals++;
-        totalExec   += getExecScore(g.id);
-        totalResult += Math.round(getResultScore(g));
-    }));
-
-    const avgExec   = totalGoals > 0 ? Math.round(totalExec / totalGoals) : 0;
-    const avgResult = totalGoals > 0 ? Math.round(totalResult / totalGoals) : 0;
-
-    document.getElementById('statToday').textContent  = `${dnnDone}/5`;
-    document.getElementById('statDone').textContent   = `${doneGoals}/${totalGoals}`;
-    document.getElementById('statExec').textContent   = `${avgExec}%`;
-    document.getElementById('statResult').textContent = `${avgResult}%`;
-    document.getElementById('statBalance').textContent= calcOverallBalance() + '%';
+    const dnnDone=Object.values(state.dnn).filter(Boolean).length;
+    let totalGoals=0,doneGoals=0,totalExec=0,doneExec=0;
+    LIFE_AREAS.forEach(area=>area.goals.forEach(g=>{totalGoals++;if(state.goals[g.id]?.done)doneGoals++;const p=getExecProgress(g.id);totalExec+=p.total;doneExec+=p.done;}));
+    const {week}=lifeScoreCurrentWeek();
+    const rated=LIFE_SCORE_AREAS.filter(a=>Number(week.scores[a.id]?.score)>=1&&Number(week.scores[a.id]?.score)<=5);
+    const avg=rated.length?(rated.reduce((sum,a)=>sum+Number(week.scores[a.id].score),0)/rated.length).toFixed(1):'–';
+    document.getElementById('statToday').textContent=dnnDone+'/5';
+    document.getElementById('statDone').textContent=doneGoals+'/'+totalGoals;
+    document.getElementById('statExec').textContent=doneExec+'/'+totalExec;
+    document.getElementById('statResult').textContent=avg+'/5';
+    document.getElementById('statBalance').textContent=rated.length+'/7';
 }
-
 // ═══════════════════════════════════════════
 //  ALERTS
 // ═══════════════════════════════════════════
