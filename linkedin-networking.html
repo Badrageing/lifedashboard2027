@@ -230,7 +230,7 @@ const templates={
 };
 function loadState(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));return saved?{...structuredClone(defaults),...saved,metrics:{...defaults.metrics,...saved.metrics},completedTasks:saved.completedTasks||{},contacts:saved.contacts||[],scoutLeads:saved.scoutLeads||[],templateEdits:saved.templateEdits||{}}:structuredClone(defaults)}catch(e){return structuredClone(defaults)}}
 function save(){
- localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderStats();
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderStats();if(typeof renderPriorityQueue==='function')renderPriorityQueue();
  if(remoteReady&&currentUser){
   const snapshot=structuredClone(state),userId=currentUser.id;
   saveQueue=saveQueue.then(async()=>{
@@ -362,7 +362,7 @@ async function handleSession(session){
   if(writeError){console.error(writeError);setAuthMessage('Erstanlage der Datensicherung fehlgeschlagen: '+writeError.message,true);return}
  }
  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
- loadedUserId=session.user.id;remoteReady=true;document.body.classList.add('authed');setAuthMessage('Synchronisierung aktiv.');renderApp();
+ loadedUserId=session.user.id;remoteReady=true;document.body.classList.add('authed');setAuthMessage('Synchronisierung aktiv.');renderApp();const requestedTab=new URLSearchParams(location.search).get('tab');if(requestedTab&&['overview','scout','contacts','opportunities','templates','followup','progress'].includes(requestedTab))switchTab(requestedTab);
 }
 document.getElementById('authForm').addEventListener('submit',async e=>{
  e.preventDefault();const email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value;
