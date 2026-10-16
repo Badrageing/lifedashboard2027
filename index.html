@@ -1,19 +1,4 @@
-
-                        <!DOCTYPE html>
-                        <html lang="en">
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-							<style>
-								body {
-									background-color: white; /* Ensure the iframe has a white background */
-								}
-
-								
-							</style>
-                        </head>
-                        <body>
-                            <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -629,7 +614,25 @@
         }
     </style>
 </head>
-<body>
+<body><style>
+.auth-screen{max-width:460px;margin:8vh auto;padding:22px;font-family:'Segoe UI',sans-serif;color:#172033}
+.auth-card{background:#fff;border:1px solid #dce2ed;border-radius:18px;padding:26px;box-shadow:0 12px 35px rgba(0,0,0,.12)}
+.auth-card h1{margin:5px 0 8px;font-size:25px;color:#172033}.auth-card p{color:#667085;font-size:14px;line-height:1.5}
+.auth-form{display:grid;gap:12px;margin-top:18px}.auth-form label{font-size:12px;font-weight:750;color:#475467;display:block;margin-bottom:5px}
+.auth-form input{width:100%;border:1px solid #d8deea;border-radius:9px;padding:11px}.auth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.auth-actions button{border:1px solid #d8deea;border-radius:9px;padding:10px 13px;cursor:pointer;font-weight:700}.auth-actions .primary{background:#2146a5;color:#fff;border-color:#2146a5}
+.auth-message{margin-top:12px;font-size:13px;color:#667085;overflow-wrap:anywhere}
+body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{display:none}
+</style>
+<section id="lifeosAuth" class="auth-screen"><div class="auth-card">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#2146a5;font-weight:800">Persönlicher Zugriff</div>
+<h1>LifeOS</h1><p>Deine Lebensziele, fünf Daily Non-Negotiables und dein Fortschritt werden mit deinem persönlichen Konto synchronisiert.</p>
+<form id="lifeosAuthForm" class="auth-form">
+<div><label for="lifeosEmail">E-Mail</label><input id="lifeosEmail" type="email" autocomplete="email" required></div>
+<div><label for="lifeosPassword">Passwort</label><input id="lifeosPassword" type="password" autocomplete="current-password" minlength="8" required></div>
+<div class="auth-actions"><button class="primary" type="submit">Einloggen</button><button type="button" id="lifeosSignUp">Konto erstellen</button></div>
+</form><div id="lifeosAuthMessage" class="auth-message" role="status">Sichere Verbindung wird hergestellt …</div>
+</div></section><div id="lifeosApp">
 
 <div class="header">
     <h1>🎯 Life Dashboard</h1>
@@ -1748,14 +1751,59 @@ function init() {
     renderAll();
 }
 
-init();
+
+</script>
+
+</div><!-- /#lifeosApp -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const LIFEOS_SUPABASE_URL='https://srgxrkjkexzfjztspibf.supabase.co';
+const LIFEOS_SUPABASE_KEY='sb_publishable_CQBqODnDyv7dWEkwqsxBUA_bzf5LqWF';
+const lifeosSb=window.supabase.createClient(LIFEOS_SUPABASE_URL,LIFEOS_SUPABASE_KEY);
+const LIFEOS_STORAGE_KEY='lifeDashV4';
+let lifeosUser=null,lifeosRemoteReady=false,lifeosSaveQueue=Promise.resolve(),lifeosLoadedUserId=null;
+function lifeosMessage(msg,isError=false){const el=document.getElementById('lifeosAuthMessage');el.textContent=msg;el.style.color=isError?'#b42318':'#667085'}
+function lifeosLocalState(){try{const raw=localStorage.getItem(LIFEOS_STORAGE_KEY);return raw?JSON.parse(raw):null}catch(e){return null}}
+function lifeosSaveRemote(snapshot,userId){
+ if(!lifeosRemoteReady||!lifeosUser||lifeosUser.id!==userId)return;
+ lifeosSaveQueue=lifeosSaveQueue.then(async()=>{
+  if(!lifeosRemoteReady||!lifeosUser||lifeosUser.id!==userId)return;
+  const {error}=await lifeosSb.from('lifeos_state').upsert({user_id:userId,state:snapshot,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error){console.error('LifeOS cloud save failed',error);lifeosMessage('Cloud-Speicherung fehlgeschlagen: '+error.message,true)}
+ }).catch(err=>{console.error(err);lifeosMessage('Synchronisierung fehlgeschlagen.',true)});
+}
+const lifeosOriginalSaveState=saveState;
+saveState=function(){lifeosOriginalSaveState();if(lifeosRemoteReady&&lifeosUser)lifeosSaveRemote(JSON.parse(JSON.stringify(state)),lifeosUser.id)};
+async function lifeosHandleSession(session){
+ if(!session){lifeosRemoteReady=false;lifeosUser=null;lifeosLoadedUserId=null;document.body.classList.remove('lifeos-authed');lifeosMessage('Bitte anmelden oder ein Konto erstellen.');return}
+ if(lifeosLoadedUserId===session.user.id&&lifeosRemoteReady){document.body.classList.add('lifeos-authed');return}
+ lifeosUser=session.user;lifeosRemoteReady=false;lifeosMessage('Lade deine gespeicherten Daten …');
+ const {data,error}=await lifeosSb.from('lifeos_state').select('state').eq('user_id',session.user.id).maybeSingle();
+ if(error){console.error(error);lifeosMessage('Datenbankzugriff fehlgeschlagen. '+error.message,true);return}
+ if(data&&data.state){state={...state,...data.state,dnn:{...state.dnn,...(data.state.dnn||{})},goals:data.state.goals||{},execSteps:data.state.execSteps||{},week:data.state.week||{},lastDay:data.state.lastDay||null}}
+ else{
+  const local=lifeosLocalState();
+  if(local)state={...state,...local,dnn:{...state.dnn,...(local.dnn||{})},goals:local.goals||{},execSteps:local.execSteps||{},week:local.week||{},lastDay:local.lastDay||null};
+  const {error:writeError}=await lifeosSb.from('lifeos_state').upsert({user_id:session.user.id,state,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(writeError){console.error(writeError);lifeosMessage('Erstsicherung fehlgeschlagen: '+writeError.message,true);return}
+ }
+ localStorage.setItem(LIFEOS_STORAGE_KEY,JSON.stringify(state));lifeosLoadedUserId=session.user.id;lifeosRemoteReady=true;
+ document.body.classList.add('lifeos-authed');lifeosMessage('Synchronisierung aktiv.');renderAll();
+}
+document.getElementById('lifeosAuthForm').addEventListener('submit',async e=>{
+ e.preventDefault();const email=document.getElementById('lifeosEmail').value.trim(),password=document.getElementById('lifeosPassword').value;
+ lifeosMessage('Anmeldung läuft …');const {error}=await lifeosSb.auth.signInWithPassword({email,password});
+ if(error){lifeosMessage('Anmeldung fehlgeschlagen: '+error.message,true);return}lifeosMessage('Angemeldet – Daten werden geladen …');
+});
+document.getElementById('lifeosSignUp').addEventListener('click',async()=>{
+ const email=document.getElementById('lifeosEmail').value.trim(),password=document.getElementById('lifeosPassword').value;
+ if(!email||password.length<8){lifeosMessage('Bitte E-Mail und ein Passwort mit mindestens 8 Zeichen eingeben.',true);return}
+ lifeosMessage('Konto wird erstellt …');const {data,error}=await lifeosSb.auth.signUp({email,password,options:{emailRedirectTo:window.location.href}});
+ if(error){lifeosMessage('Konto konnte nicht erstellt werden: '+error.message,true);return}
+ if(data.session)lifeosMessage('Konto erstellt – Daten werden geladen …');else lifeosMessage('Konto angelegt. Bitte den Bestätigungslink per E-Mail öffnen und danach anmelden.');
+});
+lifeosSb.auth.onAuthStateChange((event,session)=>{setTimeout(()=>lifeosHandleSession(session),0)});
+(async()=>{const {data}=await lifeosSb.auth.getSession();await lifeosHandleSession(data.session)})();
 </script>
 </body>
 </html>
-
-							<script>
-                            	
-							</script>
-                        </body>
-                        </html>
-                    
