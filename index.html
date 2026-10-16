@@ -1429,7 +1429,7 @@ function loadState() {
     if (state.goals.bodyfat && state.goals.bodyfat.current === 30 && !state.goals.bodyfat.done) state.goals.bodyfat.current = 25;
 
     // Mark only work clearly supported by prior conversations. Never overwrite an explicit status.
-    ['sal_1','sal_3'].forEach(id => {
+    ['sal_1','sal_3','lead_1','idea_1'].forEach(id => {
         if (state.execSteps[id] === undefined) state.execSteps[id] = true;
     });
 
