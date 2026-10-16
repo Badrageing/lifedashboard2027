@@ -706,7 +706,26 @@
           .life-score-head { flex-direction:column; }
         }
 
-    </style>
+    
+/* Networking integration */
+.networking-hub{margin:0 0 28px;padding:22px;border:1px solid #c9d7f5;border-radius:18px;background:linear-gradient(135deg,#fff 0%,#f2f6ff 100%);box-shadow:0 8px 24px rgba(23,59,130,.06);color:#182230}
+.networking-hub-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.networking-hub h2{font-size:1.12rem;margin:0 0 4px;color:#173b82}
+.networking-hub p{margin:0;color:#475467;font-size:.88rem}
+.networking-hub-actions{display:flex;gap:8px;flex-wrap:wrap}
+.networking-hub-btn{border:1px solid #b7c7e8;background:#fff;color:#173b82;border-radius:9px;padding:9px 12px;font-weight:700;font-size:.82rem;text-decoration:none;cursor:pointer}
+.networking-hub-btn.primary{background:#2447a8;color:#fff;border-color:#2447a8}
+.networking-hub-stats{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.networking-hub-stat{background:#fff;border:1px solid #e0e7f3;border-radius:10px;padding:10px 13px;min-width:100px}
+.networking-hub-stat strong{display:block;font-size:1.2rem;color:#173b82}.networking-hub-stat span{font-size:.74rem;color:#475467}
+.networking-hub-list{display:grid;gap:8px;margin-top:10px}
+.networking-hub-item{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:1px solid #e0e7f3;border-radius:11px;padding:11px 13px}
+.networking-hub-item strong{display:block;font-size:.88rem;color:#182230}.networking-hub-item small{display:block;color:#475467;font-size:.78rem;margin-top:2px}
+.networking-hub-due{font-size:.75rem;font-weight:750;color:#8a4b08;background:#fff4dc;border-radius:8px;padding:5px 8px;white-space:nowrap}
+.networking-hub-empty{padding:13px;background:#fff;border:1px dashed #c8d0dc;border-radius:10px;color:#475467;font-size:.86rem}
+.networking-hub-status{font-size:.76rem;color:#475467;margin-top:8px}
+@media(max-width:650px){.networking-hub{padding:16px}.networking-hub-item{align-items:flex-start;flex-direction:column}.networking-hub-due{white-space:normal}}
+</style>
 </head>
 <body><style>
 .auth-screen{max-width:460px;margin:8vh auto;padding:22px;font-family:'Segoe UI',sans-serif;color:#172033}
@@ -848,6 +867,24 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
             <div class="stat-label">Life Balance Score</div>
         </div>
     </div>
+
+    <!-- Networking hub: reads existing networking_state without copying it into LifeOS state -->
+    <section class="networking-hub" id="networkingHub" aria-labelledby="networkingHubTitle">
+      <div class="networking-hub-head">
+        <div><h2 id="networkingHubTitle">🤝 Networking & Karrierechancen</h2><p>Deine nächsten sinnvollen Kontaktaktionen – direkt aus deinem bestehenden LinkedIn OS.</p></div>
+        <div class="networking-hub-actions">
+          <button type="button" class="networking-hub-btn" id="networkingRefresh">↻ Aktualisieren</button>
+          <a class="networking-hub-btn" href="./linkedin-networking.html?tab=scout">Neue Kontakte finden →</a><a class="networking-hub-btn primary" href="./linkedin-networking.html">Networking öffnen →</a>
+        </div>
+      </div>
+      <div class="networking-hub-stats">
+        <div class="networking-hub-stat"><strong id="networkingContactCount">—</strong><span>Kontakte</span></div>
+        <div class="networking-hub-stat"><strong id="networkingDueCount">—</strong><span>Fällig / überfällig</span></div>
+        <div class="networking-hub-stat"><strong id="networkingOpportunityCount">—</strong><span>Offene Chancen</span></div>
+      </div>
+      <div id="networkingPriorityList" class="networking-hub-list"><div class="networking-hub-empty">Networking-Daten werden geladen …</div></div>
+      <div id="networkingHubStatus" class="networking-hub-status" role="status" aria-live="polite">Lädt aus deiner bestehenden Networking-Datenbasis.</div>
+    </section>
 
     <!-- Score Legend -->
     <div class="section-title">ℹ️ So funktioniert der Score</div>
@@ -2182,6 +2219,31 @@ saveState=function(){
  lifeosOriginalSaveState();
  if(lifeosRemoteReady&&lifeosUser)lifeosSaveRemote(JSON.parse(JSON.stringify(state)),lifeosUser.id);
 };
+
+function networkingEsc(value=''){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+function networkingLocalDateISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function networkingDateLabel(value){if(!value)return 'ohne Termin';const d=new Date(value+'T12:00:00');return Number.isNaN(d.getTime())?value:d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})}
+async function lifeosRefreshNetworking(userId=lifeosUser?.id){
+ const list=document.getElementById('networkingPriorityList'),status=document.getElementById('networkingHubStatus');
+ if(!list||!userId){if(list)list.innerHTML='<div class="networking-hub-empty">Bitte im LifeOS anmelden, um deine Networking-Daten zu laden.</div>';return}
+ status.textContent='Lade aktuelle Kontakte und Wiedervorlagen …';
+ const {data,error}=await lifeosSb.from('networking_state').select('state,updated_at').eq('user_id',userId).maybeSingle();
+ if(error){status.textContent='Networking konnte nicht geladen werden: '+error.message;list.innerHTML='<div class="networking-hub-empty">Die Daten sind weiterhin im LinkedIn OS vorhanden. Bitte dort öffnen oder erneut versuchen.</div>';return}
+ if(!data||!data.state){document.getElementById('networkingContactCount').textContent='0';document.getElementById('networkingDueCount').textContent='0';document.getElementById('networkingOpportunityCount').textContent='0';list.innerHTML='<div class="networking-hub-empty">Noch keine Networking-Daten gespeichert. Öffne das Networking OS und melde dich mit demselben Konto an.</div>';status.textContent='Keine Networking-Daten gefunden.';return}
+ const ns=data.state,contacts=Array.isArray(ns.contacts)?ns.contacts:[],opps=Array.isArray(ns.opportunities)?ns.opportunities:[];
+ const today=networkingLocalDateISO(),end=new Date();end.setDate(end.getDate()+7);const endISO=end.getFullYear()+'-'+String(end.getMonth()+1).padStart(2,'0')+'-'+String(end.getDate()).padStart(2,'0');
+ const eligible=contacts.filter(c=>c&&c.status!=='Kein Fit'&&c.status!=='Gespräch geführt');
+ const due=eligible.filter(c=>c.nextDate&&c.nextDate<=today).sort((a,b)=>(a.nextDate||'9999').localeCompare(b.nextDate||'9999'));
+ const soon=eligible.filter(c=>c.nextDate&&c.nextDate>today&&c.nextDate<=endISO).sort((a,b)=>(a.nextDate||'9999').localeCompare(b.nextDate||'9999'));
+ const noDate=eligible.filter(c=>!c.nextDate&&c.next);
+ document.getElementById('networkingContactCount').textContent=contacts.length;
+ document.getElementById('networkingDueCount').textContent=due.length;
+ document.getElementById('networkingOpportunityCount').textContent=opps.filter(o=>o&&o.stage!=='Abgeschlossen'&&o.stage!=='Verworfen').length;
+ const picks=[...due.map(c=>({...c,_kind:'Fällig'})),...soon.map(c=>({...c,_kind:'Demnächst'})),...noDate.map(c=>({...c,_kind:'Ohne Termin'}))].slice(0,4);
+ list.innerHTML=picks.length?picks.map(c=>'<div class="networking-hub-item"><div><strong>'+networkingEsc(c.name||'Kontakt')+' · '+networkingEsc(c.company||c.role||'Networking')+'</strong><small>'+networkingEsc(c.next||'Nächsten sinnvollen Schritt festlegen')+'</small></div><span class="networking-hub-due">'+networkingEsc(c._kind)+(c.nextDate?' · '+networkingEsc(networkingDateLabel(c.nextDate)):'')+'</span></div>').join(''):'<div class="networking-hub-empty">Keine fälligen oder zeitnahen Follow-ups. Nutze „Networking öffnen“, um neue Kontakte und Chancen zu recherchieren.</div>';
+ status.textContent='Live aus networking_state · zuletzt aktualisiert '+new Date(data.updated_at||Date.now()).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})+'. Kontakte und Historien bleiben in ihrer bestehenden Tabelle.';
+}
+document.getElementById('networkingRefresh')?.addEventListener('click',()=>lifeosRefreshNetworking());
 async function lifeosHandleSession(session){
  const run=++lifeosSessionRun;
  if(!session){
@@ -2231,6 +2293,7 @@ async function lifeosHandleSession(session){
  localStorage.setItem(LIFEOS_STORAGE_KEY,JSON.stringify(state));
  lifeosLoadedUserId=session.user.id;
  lifeosRemoteReady=true;
+ await lifeosRefreshNetworking(session.user.id);
  document.getElementById('dateDisplay').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
  document.body.classList.add('lifeos-authed');
  renderAll();
