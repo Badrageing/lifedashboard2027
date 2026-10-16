@@ -815,6 +815,47 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
           *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
         }
 
+
+/* LifeOS goal system: calm focus, editable goals, accessible controls */
+.life-focus{background:#fff;border:1px solid #d7deea;border-radius:20px;padding:clamp(18px,3vw,30px);margin:0 0 26px;color:#182230;box-shadow:0 8px 24px rgba(16,24,40,.06)}
+.life-focus-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.life-focus-eyebrow{font-size:.72rem;letter-spacing:.12em;font-weight:800;color:#475467;margin:0 0 5px}
+.life-focus h2{margin:0;color:#101828;font-size:clamp(1.45rem,2vw,1.9rem)}
+.life-focus-intro{margin:6px 0 0;color:#475467;line-height:1.55}
+.life-focus-pill{display:inline-flex;align-items:center;background:#edf4ff;color:#1849a9;border:1px solid #c7d7fe;border-radius:999px;padding:8px 12px;font-size:.78rem;font-weight:750}
+.life-vision-label,.life-focus label,.life-plan-goal label{display:block;font-size:.83rem;font-weight:700;color:#344054;margin:10px 0 5px}
+.life-vision-input,.life-focus input,.life-plan-goal input,.life-plan-goal select{width:100%;min-height:44px;padding:10px 12px;border:1px solid #98a2b3;border-radius:10px;background:#fff;color:#182230;font:inherit;line-height:1.45}
+.life-vision-input{resize:vertical;min-height:62px}
+.life-focus-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,1fr);gap:14px;margin-top:16px}
+.life-focus-main,.life-focus-side{border:1px solid #d0d5dd;border-radius:14px;padding:18px;background:#f9fafb}
+.life-focus-label{font-size:.7rem;letter-spacing:.08em;font-weight:800;color:#475467;margin-bottom:8px}
+.life-focus-main h3{font-size:1.12rem;color:#101828;margin:0 0 7px}
+.life-focus-main p{color:#475467;line-height:1.5;margin:0 0 12px}
+.life-focus-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+.life-focus-primary{min-height:44px;padding:10px 15px;border:1px solid #174ea6;border-radius:10px;background:#174ea6;color:#fff;font-weight:750;cursor:pointer}
+.life-focus-primary:hover{background:#123d83}
+.life-focus-primary.is-complete{background:#e8f5ee;color:#14532d;border-color:#86c9a0}
+.life-focus-muted,.life-focus-hint{font-size:.8rem;color:#475467}
+.life-focus-hint{margin:12px 0 0!important}
+.life-focus-guardrail{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-top:1px solid #e4e7ec}
+.life-focus-guardrail:first-of-type{border-top:0}
+.life-focus-guardrail>span{font-size:1.2rem}
+.life-focus-guardrail strong{display:block;color:#182230;font-size:.9rem}
+.life-focus-guardrail small{display:block;color:#475467;line-height:1.45;margin-top:3px}
+.life-goal-editor-head{margin-top:22px}
+.life-goal-editor-head h3{margin:0;color:#101828;font-size:1.1rem}
+.life-goal-editor-head p{margin:5px 0 12px;color:#475467;font-size:.87rem;line-height:1.5}
+.life-plan-goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:12px}
+.life-plan-goal{border:1px solid #d0d5dd;border-radius:13px;padding:14px;background:#fff;min-width:0}
+.life-plan-goal-head{display:grid;grid-template-columns:auto 1fr minmax(110px,auto);align-items:center;gap:8px;margin-bottom:8px}
+.life-plan-icon{font-size:1.25rem}
+.life-plan-status-label{margin:0!important}
+.life-plan-goal-head select{width:auto;min-width:110px;min-height:40px;padding:7px 8px}
+.life-plan-goal input,.life-plan-goal select{font-size:.9rem}
+.life-focus-footnote{margin-top:14px;padding-top:12px;border-top:1px solid #e4e7ec;font-size:.8rem;line-height:1.5;color:#475467}
+@media(max-width:760px){.life-focus-grid{grid-template-columns:1fr}.life-focus-top{display:block}.life-focus-pill{margin-top:12px}.life-plan-goal-head{grid-template-columns:auto 1fr}.life-plan-goal-head select{grid-column:1/-1;width:100%}}
+@media(prefers-reduced-motion:reduce){.life-focus *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
 </style>
 <section id="lifeosAuth" class="auth-screen"><div class="auth-card">
 <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#2146a5;font-weight:800">Persönlicher Zugriff</div>
@@ -837,11 +878,44 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
 
 <div class="container">
 
-    <!-- Alert -->
-    <div class="alert-banner" id="alertBanner">
-        <h4>⚠️ Diese Bereiche brauchen sofort Aufmerksamkeit</h4>
-        <div id="alertList"></div>
-    </div>
+    <!-- Personal focus and goal system -->
+    <section class="life-focus" aria-labelledby="lifeFocusTitle">
+      <div class="life-focus-top">
+        <div>
+          <p class="life-focus-eyebrow">DEIN LEBENSKOMPASS</p>
+          <h2 id="lifeFocusTitle">Dein Fokus</h2>
+          <p class="life-focus-intro">Mehr Einkommen aufbauen – und dabei Gesundheit und Familie bewusst schützen.</p>
+        </div>
+        <span class="life-focus-pill" id="lifeFocusStatus">Karriere zuerst · Gesundheit & Familie geschützt</span>
+      </div>
+      <label class="life-vision-label" for="lifeVisionInput">Meine Lebensvision</label>
+      <textarea id="lifeVisionInput" class="life-vision-input" rows="2" onchange="lifePlanSetVision(this.value)">Finanziell unabhängiger werden, gesund und fit bleiben und ein präsenter Ehemann und Vater sein.</textarea>
+      <div class="life-focus-grid">
+        <article class="life-focus-main">
+          <div class="life-focus-label">HEUTE · WICHTIGSTER NÄCHSTER SCHRITT</div>
+          <h3 id="lifeFocusActionTitle">Deinen Fokus bestimmen</h3>
+          <p id="lifeFocusActionDesc">Wähle eine realistische Handlung, die deine wichtigste aktive Priorität voranbringt.</p>
+          <label for="lifeTodayAction">Meine konkrete Aktion heute</label>
+          <input id="lifeTodayAction" type="text" maxlength="180" placeholder="z. B. einen passenden Kontakt gezielt anschreiben" onchange="lifePlanSetTodayAction(this.value)">
+          <div class="life-focus-actions">
+            <button type="button" class="life-focus-primary" id="lifeReviewComplete" onclick="lifePlanCompleteReview()">Tagesreview abschließen</button>
+            <span id="lifeReviewStatus" class="life-focus-muted" aria-live="polite">3-Minuten-Review offen</span>
+          </div>
+          <p class="life-focus-hint">Review: Fokus wählen · konkrete Aktion festlegen · Gesundheit und Familie im Tagesplan berücksichtigen.</p>
+        </article>
+        <aside class="life-focus-side">
+          <div class="life-focus-label">DEINE LEITPLANKEN</div>
+          <div class="life-focus-guardrail"><span>💪</span><div><strong>Gesundheit</strong><small>80 kg · ca. 20 % Körperfett · 3 Trainings/Woche</small></div></div>
+          <div class="life-focus-guardrail"><span>❤️</span><div><strong>Familie</strong><small>Präsenz und gemeinsame Zeit statt künstlicher Pflichten</small></div></div>
+          <div class="life-focus-guardrail"><span>🚀</span><div><strong>Business</strong><small>2–3 Stunden pro Woche für Validierung und Umsetzung</small></div></div>
+        </aside>
+      </div>
+      <div class="life-goal-editor-head">
+        <div><h3>Jahresziele & aktive Vorhaben</h3><p>Bearbeite deine Zielbeschreibung und entscheide, woran du gerade aktiv arbeitest.</p></div>
+      </div>
+      <div id="lifePlanGoals" class="life-plan-goals"></div>
+      <div class="life-focus-footnote">Regel: maximal zwei große Entwicklungsziele gleichzeitig. Karriere ist aktuell der primäre Einkommenshebel; Business bleibt bewusst begrenzt. Deine übrigen Lebensbereiche bleiben erhalten.</div>
+    </section>
 
     <!-- Stats -->
     <div class="section-title">📊 Dein heutiger Stand</div>
@@ -1265,11 +1339,11 @@ const EXECUTION_PLANS = {
 //  CORE DATA
 // ═══════════════════════════════════════════
 const DNN_LIST = [
-    { id:'read',    icon:'📚', title:'10 Seiten lesen',      sub:'Leadership · 12 Bücher' },
-    { id:'goals',   icon:'🎯', title:'Ziele reviewen',       sub:'Alle Bereiche' },
-    { id:'move',    icon:'💪', title:'Body bewegen',          sub:'80kg · Training · KF' },
-    { id:'connect', icon:'🤝', title:'5 Menschen verbinden', sub:'Familie · Business' },
-    { id:'share',   icon:'🚀', title:'Arbeit teilen',         sub:'Business · 100k · Ideen' }
+    { id:'read',    icon:'📚', title:'Lesen',                 sub:'10 Seiten als Ziel · klein anfangen zählt' },
+    { id:'goals',   icon:'🎯', title:'Ziele reviewen',        sub:'Fokus wählen · konkrete Aktion festlegen' },
+    { id:'move',    icon:'💪', title:'Körper bewegen',       sub:'Bewegung täglich · Training nach Plan' },
+    { id:'connect', icon:'🤝', title:'Beziehungen pflegen',  sub:'Relevante Kontakte aufbauen und nachfassen' },
+    { id:'share',   icon:'🚀', title:'Arbeit sichtbar machen',sub:'Nützliche Erkenntnisse und Ergebnisse teilen' }
 ];
 
 const LIFE_AREAS = [
@@ -1317,12 +1391,26 @@ const ALL_TIPS = [
 // ═══════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════
+const LIFE_PLAN_DEFAULTS = {
+    vision: 'Finanziell unabhängiger werden, gesund und fit bleiben und ein präsenter Ehemann und Vater sein.',
+    businessHours: 3,
+    goals: {
+        career: { title: 'Einkommen steigern und nächsten Karriereschritt erreichen', target: 'Mindestens 100.000 € Jahresgehalt', status: 'active' },
+        health: { title: 'Gesund, fit und leistungsfähig bleiben', target: '80 kg · ca. 20 % Körperfett · 3 Trainings pro Woche', status: 'active' },
+        family: { title: 'Ein präsenter Ehemann und Vater sein', target: 'Bewusste gemeinsame Zeit und verlässliche Beteiligung', status: 'foundation' },
+        business: { title: 'Ein eigenes Angebot praktisch validieren', target: '2–3 Std./Woche; langfristig ca. 1.000 € netto/Monat ab Mai 2027', status: 'active' },
+        personal: { title: 'Persönliche Entwicklung', target: 'Lesen und Lernen ohne zusätzlichen Perfektionsdruck', status: 'paused' }
+    },
+    dailyReviews: {}
+};
+
 let state = {
     dnn: { read:false, goals:false, move:false, connect:false, share:false },
     goals: {},
     execSteps: {},
     week: {},
     lifeScorecard: { weeks: {} },
+    lifePlan: JSON.parse(JSON.stringify(LIFE_PLAN_DEFAULTS)),
     lastDay: null
 };
 
@@ -1356,6 +1444,14 @@ function loadState() {
     if (!state.execSteps) state.execSteps = {};
     if (!state.lifeScorecard || typeof state.lifeScorecard !== 'object') state.lifeScorecard = { weeks: {} };
     if (!state.lifeScorecard.weeks || typeof state.lifeScorecard.weeks !== 'object') state.lifeScorecard.weeks = {};
+    const savedPlan = state.lifePlan && typeof state.lifePlan === 'object' ? state.lifePlan : {};
+    state.lifePlan = {
+        ...JSON.parse(JSON.stringify(LIFE_PLAN_DEFAULTS)),
+        ...savedPlan,
+        goals: { ...JSON.parse(JSON.stringify(LIFE_PLAN_DEFAULTS.goals)), ...(savedPlan.goals || {}) },
+        dailyReviews: savedPlan.dailyReviews && typeof savedPlan.dailyReviews === 'object' ? savedPlan.dailyReviews : {}
+    };
+    if (!Number.isFinite(Number(state.lifePlan.businessHours))) state.lifePlan.businessHours = 3;
 }
 
 function saveState() { localStorage.setItem('lifeDashV4', JSON.stringify(state)); }
@@ -1435,6 +1531,81 @@ function getInsight(g) {
 // ═══════════════════════════════════════════
 //  RENDER DNN
 // ═══════════════════════════════════════════
+function lifePlanEscape(value='') {
+    return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function lifePlanTodayKey() { return todayISO(); }
+function lifePlanCurrentReview() {
+    const key = lifePlanTodayKey();
+    if (!state.lifePlan.dailyReviews[key]) state.lifePlan.dailyReviews[key] = { action:'', reviewed:false };
+    return state.lifePlan.dailyReviews[key];
+}
+function lifePlanSetVision(value) {
+    state.lifePlan.vision = value.trim();
+    saveState();
+}
+function lifePlanSetTodayAction(value) {
+    lifePlanCurrentReview().action = value.trim();
+    saveState();
+}
+function lifePlanCompleteReview() {
+    const review = lifePlanCurrentReview();
+    review.reviewed = !review.reviewed;
+    state.dnn.goals = review.reviewed;
+    saveState();
+    renderAll();
+}
+function lifePlanUpdateGoal(goalId, field, value) {
+    const goal = state.lifePlan.goals[goalId];
+    if (!goal) return;
+    if (field === 'status' && !['active','foundation','paused','completed'].includes(value)) return;
+    goal[field] = value;
+    saveState();
+    renderLifePlan();
+    renderDynamicSteps();
+    renderFocusCard();
+}
+function lifePlanSetBusinessHours(value) {
+    const n = Math.max(1, Math.min(5, Number(value) || 3));
+    state.lifePlan.businessHours = n;
+    saveState();
+    renderLifePlan();
+}
+function renderLifePlan() {
+    const container = document.getElementById('lifePlanGoals');
+    if (!container) return;
+    const labels = {active:'Aktiv',foundation:'Leitplanke',paused:'Pausiert',completed:'Abgeschlossen'};
+    const order = ['career','health','family','business','personal'];
+    container.innerHTML = order.map(id => {
+        const goal = state.lifePlan.goals[id];
+        return '<article class="life-plan-goal life-plan-'+id+'"><div class="life-plan-goal-head"><span class="life-plan-icon">'+({career:'💼',health:'💪',family:'❤️',business:'🚀',personal:'🌱'}[id])+'</span><label class="life-plan-status-label" for="lifePlanStatus-'+id+'">Status</label><select id="lifePlanStatus-'+id+'" aria-label="Status: '+lifePlanEscape(goal.title)+'" onchange="lifePlanUpdateGoal(\''+id+'\',\'status\',this.value)">'+Object.entries(labels).map(([value,label])=>'<option value="'+value+'" '+(goal.status===value?'selected':'')+'>'+label+'</option>').join('')+'</select></div><label for="lifePlanTitle-'+id+'">Ziel / Vorhaben</label><input id="lifePlanTitle-'+id+'" maxlength="120" value="'+lifePlanEscape(goal.title)+'" onchange="lifePlanUpdateGoal(\''+id+'\',\'title\',this.value)"><label for="lifePlanTarget-'+id+'">Ergebnis / Leitplanke</label><input id="lifePlanTarget-'+id+'" maxlength="160" value="'+lifePlanEscape(goal.target)+'" onchange="lifePlanUpdateGoal(\''+id+'\',\'target\',this.value)">'+(id==='business'?'<label for="lifeBusinessHours">Zeitbudget pro Woche (Stunden)</label><select id="lifeBusinessHours" onchange="lifePlanSetBusinessHours(this.value)">'+[1,2,3,4,5].map(n=>'<option value="'+n+'" '+(Number(state.lifePlan.businessHours)===n?'selected':'')+'>'+n+' Std.</option>').join('')+'</select>':'')+'</article>';
+    }).join('');
+}
+function renderFocusCard() {
+    const review = lifePlanCurrentReview();
+    const title = document.getElementById('lifeFocusActionTitle');
+    const desc = document.getElementById('lifeFocusActionDesc');
+    const input = document.getElementById('lifeTodayAction');
+    const status = document.getElementById('lifeReviewStatus');
+    const button = document.getElementById('lifeReviewComplete');
+    if (!title || !desc || !input || !status || !button) return;
+    const career = state.lifePlan.goals.career;
+    const salaryGoal = LIFE_AREAS.flatMap(a=>a.goals).find(g=>g.id==='salary');
+    const careerSteps = EXECUTION_PLANS.salary?.phases?.flatMap(p=>p.steps)||[];
+    const nextCareerStep = careerSteps.find(s=>!state.execSteps[s.id]);
+    const activeCareer = career.status === 'active';
+    title.textContent = review.action ? 'Deine gewählte Aktion' : (activeCareer ? (nextCareerStep?.title || 'Karrierefokus bewusst festlegen') : 'Wähle eine aktive Priorität');
+    desc.textContent = review.action ? 'Diese Aktion ist für heute gespeichert. Passe sie an, wenn sich dein Tag ändert.' : (activeCareer ? (nextCareerStep?.desc || 'Wähle den nächsten sinnvollen Schritt für deinen Karriereschritt.') : 'Deine Karriere ist aktuell pausiert. Wähle unten ein aktives Vorhaben oder passe den Status an.');
+    input.value = review.action || '';
+    status.textContent = review.reviewed ? 'Tagesreview abgeschlossen' : '3-Minuten-Review offen';
+    button.textContent = review.reviewed ? 'Review erneut markieren' : 'Tagesreview abschließen';
+    button.setAttribute('aria-pressed',String(!!review.reviewed));
+    button.classList.toggle('is-complete',!!review.reviewed);
+    const pill = document.getElementById('lifeFocusStatus');
+    if (pill) pill.textContent = activeCareer ? 'Karriere zuerst · Gesundheit & Familie geschützt' : 'Prioritäten selbst festlegen';
+    const vision = document.getElementById('lifeVisionInput');
+    if (vision && document.activeElement !== vision) vision.value = state.lifePlan.vision || '';
+}
 function renderDNN() {
     document.getElementById('dnnGrid').innerHTML = DNN_LIST.map(d => `
         <div class="dnn-card ${state.dnn[d.id] ? 'completed' : ''}" onclick="toggleDNN('${d.id}')">
@@ -1588,6 +1759,8 @@ function generateDynamicSteps() {
     const steps = [];
 
     LIFE_AREAS.forEach(area => {
+        const projectStatus = state.lifePlan?.goals?.[area.id]?.status;
+        if (projectStatus === 'paused' || projectStatus === 'completed') return;
         area.goals.forEach(goal => {
             const gs = state.goals[goal.id] || { done:false, current: goal.current ?? 0 };
             if (gs.done) return;
@@ -1643,7 +1816,10 @@ function generateDynamicSteps() {
     });
 
     const order = { critical:0, h:1, m:2, l:3 };
+    const areaPriority = { career:0, health:1, business:2, family:3, personal:4 };
     steps.sort((a, b) => {
+        const areaDiff = (areaPriority[a.areaId] ?? 5) - (areaPriority[b.areaId] ?? 5);
+        if (areaDiff !== 0) return areaDiff;
         const pd = order[a.priority] - order[b.priority];
         return pd !== 0 ? pd : a.ts - b.ts;
     });
@@ -1765,19 +1941,8 @@ function renderStats() {
 //  ALERTS
 // ═══════════════════════════════════════════
 function checkAlerts() {
-    const danger = LIFE_AREAS.filter(a => calcAreaScore(a) < 20);
-    const banner = document.getElementById('alertBanner');
-    if (danger.length) {
-        document.getElementById('alertList').innerHTML = danger.map(a => {
-            const score     = calcAreaScore(a);
-            const notDone   = a.goals.flatMap(g => g.dnn || []).filter(d => !state.dnn[d]);
-            const hint      = notDone.length ? ` · Starte mit: ${[...new Set(notDone)].map(d => DNN_LABELS[d]).join(', ')}` : '';
-            return `<div class="alert-item">▸ ${a.icon} <strong>${a.name}</strong> — ${score}% Gesamt-Score${hint}</div>`;
-        }).join('');
-        banner.classList.add('visible');
-    } else {
-        banner.classList.remove('visible');
-    }
+    // Der frühere Alarmbanner wurde bewusst entfernt. Relevante Hinweise
+    // erscheinen kontextbezogen in der Fokuskarte und im Wochenreview.
 }
 
 // ═══════════════════════════════════════════
@@ -2150,11 +2315,12 @@ function renderAll() {
     renderDNN();
     renderWeekly();
     renderLifeScorecard();
+    renderLifePlan();
+    renderFocusCard();
     renderGoals();
     renderDynamicSteps();
     renderTips();
     renderStats();
-    checkAlerts();
 }
 
 function init() {
