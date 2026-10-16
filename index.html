@@ -171,6 +171,11 @@
             display: flex; align-items: flex-start; gap: 12px;
             padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
+        .goal-progress-block { margin: 9px 0 7px; }
+        .goal-progress-copy { display:flex; justify-content:space-between; gap:10px; font-size:.75em; color:#667085; margin-bottom:5px; }
+        .goal-progress-copy strong { color:#344054; white-space:nowrap; }
+        .goal-progress-detail { font-size:.73em; line-height:1.45; color:#667085; margin-top:5px; }
+        .goal-cb-static { cursor:default; border-color:#d0d5dd; color:#667085; background:#f2f4f7; }
 
         .goal-item:last-child { border-bottom: none; }
 
@@ -1587,10 +1592,11 @@ function renderGoals() {
                 '<div class="goal-progress-block"><div class="goal-progress-copy"><span>'+metric.label+'</span><strong>'+Math.round(metric.percent)+'%</strong></div><div class="mini-bar"><div class="mini-fill fill-result" style="width:'+metric.percent+'%"></div></div><div class="goal-progress-detail">'+metric.detail+'</div></div>'
                 :(g.type==='once'?'':'<div class="goal-progress-detail">'+metric.detail+'</div>');
             const meta=getGoalMetricMeta(g),currentLabel=meta.kind==='rating'?(metric.current>0?metric.current+'/10 bewertet':'noch nicht bewertet'):(metric.current+' '+g.unit);
+            const toggleControl=(meta.kind==='rating'||meta.kind==='weekly') ? '<div class="goal-cb goal-cb-static" aria-hidden="true">↻</div>' : '<div class="goal-cb '+(gs.done?'done':'')+'" onclick="toggleGoal(&quot;'+g.id+'&quot;)">'+(gs.done?'✓':'')+'</div>';
             const actions=g.type==='once'?
                 '<div class="goal-actions"><button class="goal-edit-btn" onclick="openExecModal(\''+g.id+'\')">📋 Plan ('+plan.done+'/'+plan.total+')</button></div>'
                 :'<div class="goal-actions"><button class="goal-edit-btn" onclick="openProgressModal(\''+g.id+'\')">✏️ '+(meta.kind==='rating'?'Selbsteinschätzung':'Aktuellen Stand')+' ('+currentLabel+')</button><button class="goal-edit-btn" onclick="openExecModal(\''+g.id+'\')">📋 Plan ('+plan.done+'/'+plan.total+')</button></div>';
-            return '<div class="goal-item"><div class="goal-cb '+(gs.done?'done':'')+'" onclick="toggleGoal(\''+g.id+'\')">'+(gs.done?'✓':'')+'</div><div class="goal-body"><div class="goal-text '+(gs.done?'done-text':'')+'">'+g.text+typeTag+'</div>'+metricHTML+'<div class="goal-insight '+insight.cls+'">'+insight.icon+' '+insight.text+'</div>'+actions+'<div class="goal-progress-detail">Plan: '+plan.done+'/'+plan.total+' Schritte erledigt</div><div class="dnn-badges">'+badges+'</div></div></div>';
+            return '<div class="goal-item">'+toggleControl+'<div class="goal-body"><div class="goal-text '+(gs.done?'done-text':'')+'">'+g.text+typeTag+'</div>'+metricHTML+'<div class="goal-insight '+insight.cls+'">'+insight.icon+' '+insight.text+'</div>'+actions+'<div class="goal-progress-detail">Plan: '+plan.done+'/'+plan.total+' Schritte erledigt</div><div class="dnn-badges">'+badges+'</div></div></div>';
         }).join('');
         return '<div class="life-area"><div class="area-header"><div class="area-left"><span class="area-icon">'+area.icon+'</span><span class="area-name">'+area.name+'</span></div><div class="area-score-wrap"><div class="area-score-num">'+doneCount+'/'+totalCount+'</div><div class="area-score-lbl">Ziele erreicht</div></div></div><div class="score-bar"><div class="score-fill" style="width:'+areaPct+'%;background:'+col+'"></div></div>'+goalsHTML+'</div>';
     }).join('');
