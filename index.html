@@ -1991,8 +1991,9 @@ function renderLifeScorecard(forceSuggestions=false) {
   const avg=scored.length ? (scored.reduce((sum,a)=>sum+Number(week.scores[a.id].score),0)/scored.length).toFixed(1) : '–';
   const prevScored=previous?LIFE_SCORE_AREAS.filter(a=>Number(previous.scores?.[a.id]?.score)>=1&&Number(previous.scores[a.id].score)<=5):[];
   const prevAvg=prevScored.length?(prevScored.reduce((sum,a)=>sum+Number(previous.scores[a.id].score),0)/prevScored.length).toFixed(1):null;
+  const deltaLabel=(avg!=='–'&&prevAvg)?' <span class="life-score-muted">('+(Number(avg)-Number(prevAvg)>0?'+':'')+(Number(avg)-Number(prevAvg)).toFixed(1)+' zur Vorwoche)</span>':'';
   document.getElementById('lifeScoreSummary').innerHTML =
-    '<span>Woche ab <strong>'+lifeScoreDateLabel(key)+'</strong></span><span>Bewertet <strong>'+scored.length+'/7</strong></span><span>Ø <strong>'+avg+'</strong>'+(prevAvg?' <span class="life-score-muted">('+ (Number(avg)-Number(prevAvg)>0?'+':'')+(Number(avg)-Number(prevAvg)).toFixed(1)+' zur Vorwoche)</span>':'')+'</span>';
+    '<span>Woche ab <strong>'+lifeScoreDateLabel(key)+'</strong></span><span>Bewertet <strong>'+scored.length+'/7</strong></span><span>Ø <strong>'+avg+'</strong>'+deltaLabel+'</span>';
   document.getElementById('lifeScoreGrid').innerHTML=LIFE_SCORE_AREAS.map(area=>{
     const item=week.scores[area.id]||{};
     const score=Number(item.score)||0;
@@ -2027,7 +2028,7 @@ function renderLifeScorecard(forceSuggestions=false) {
     const area=LIFE_SCORE_AREAS.find(x=>x.id===a.areaId);
     return '<div class="life-score-action"><input type="checkbox" aria-label="Maßnahme erledigt" '+(a.done?'checked':'')+' onchange="lifeScoreToggleAction(\''+a.id+'\',this.checked)"><div class="life-score-action-main"><div class="life-score-action-title '+(a.done?'done':'')+'">'+lifeScoreEscape(a.title)+'</div><div class="life-score-action-meta">'+lifeScoreEscape(area?.name||'Fokus')+' · Termin '+lifeScoreEscape(a.date||'offen')+'</div></div><button type="button" class="life-score-btn" aria-label="Maßnahme entfernen" onclick="lifeScoreRemoveAction(\''+a.id+'\')">Entfernen</button></div>';
   }).join('')+'</div>':'';
-  const historyKeys=Object.keys(state.lifeScorecard.weeks).filter(k=>k<=key).sort((a,b)=>b.localeCompare(a)).slice(0,26);
+  const historyKeys=Object.keys(state.lifeScorecard.weeks).filter(k=>k<=key).filter(k=>{const w=state.lifeScorecard.weeks[k];return Object.keys(w.scores||{}).length>0||(w.actions||[]).length>0;}).sort((a,b)=>b.localeCompare(a)).slice(0,26);
   document.getElementById('lifeScoreHistory').innerHTML=historyKeys.length?historyKeys.map(k=>{
     const w=state.lifeScorecard.weeks[k], arr=LIFE_SCORE_AREAS.filter(a=>Number(w.scores?.[a.id]?.score)>=1&&Number(w.scores[a.id].score)<=5);
     const a=arr.length?(arr.reduce((s,x)=>s+Number(w.scores[x.id].score),0)/arr.length).toFixed(1):'–';
