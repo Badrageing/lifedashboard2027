@@ -1077,23 +1077,23 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
 const EXECUTION_PLANS = {
     salary: {
         phases: [
-            { title: '📋 Phase 1 — Analyse & Vorbereitung', steps: [
-                { id:'sal_1', title:'Aktuelles Gehalt + Benefits dokumentieren', desc:'Brutto, Boni, Benefits, Urlaubstage — vollständige Bestandsaufnahme als Verhandlungsbasis.', time:'30 Min', dnn:'goals' },
-                { id:'sal_2', title:'Marktgehalt recherchieren', desc:'Gehalt.de, StepStone, LinkedIn Salary, Glassdoor — für deine exakte Rolle + Erfahrungsjahre.', time:'1 Std', dnn:'goals' },
-                { id:'sal_3', title:'Eigene Erfolge der letzten 12 Monate auflisten', desc:'Konkrete Zahlen: Projekte, Einsparungen, Umsatz, Teamgröße. Je messbarer, desto stärker.', time:'1 Std', dnn:'share' },
-                { id:'sal_4', title:'Verhandlungsziel definieren + Anker setzen', desc:'Ziel: 100k+. Anker: 10-15% über Ziel nennen. Nie als Erster eine Zahl nennen.', time:'20 Min', dnn:'goals' },
+            { title: '🎯 Phase 1 — Zielprofil & laufende Chancen', steps: [
+                { id:'sal_1', title:'Zielprofil und Wechselkriterien schärfen', desc:'Fokus: Head of PMO, Transformation Lead oder passende Programm-/Portfolio-Rollen; mindestens 100.000 € Zielgehalt, Radius 40–50 km bzw. überwiegend remote, stabile Arbeitgeber und keine häufigen Reisen.', time:'30 Min', dnn:'goals' },
+                { id:'sal_2', title:'Aktive Bewerbungen und Prozesse priorisieren', desc:'Offene Bewerbungen, Rückmeldungen und nächste Schritte prüfen. Bestehende Prozesse zuerst voranbringen, keine bereits laufenden Bewerbungen doppelt starten.', time:'20 Min', dnn:'goals' },
+                { id:'sal_3', title:'Erfolge und Führungsbelege schärfen', desc:'PMO von Grund auf aufgebaut, Stage-Gate-Modell, Transformation und Automatisierung: Ergebnisse, Umfang und Wirkung prägnant für CV und Gespräche dokumentieren.', time:'45 Min', dnn:'share' },
+                { id:'sal_4', title:'Nächsten Schritt für die beste Chance festlegen', desc:'Für den aussichtsreichsten aktiven Prozess genau eine nächste Aktion definieren: Kontakt, Rückfrage, Interviewvorbereitung oder gezielte Bewerbung.', time:'15 Min', dnn:'goals' },
             ]},
-            { title: '🎯 Phase 2 — Skills & Positionierung', steps: [
-                { id:'sal_5', title:'Skill-Gap zu 100k-Profilen identifizieren', desc:'LinkedIn: Profile mit 100k+ in deiner Branche. Was haben die, was du noch nicht hast?', time:'2 Std', dnn:'connect' },
-                { id:'sal_6', title:'High-Impact-Zertifizierung starten', desc:'PMP, Scrum Master, AWS, ITIL — je nach Branche. Zeigt Eigeninitiative und steigert Marktwert.', time:'Laufend', dnn:'read' },
-                { id:'sal_7', title:'Sichtbarkeit im Unternehmen erhöhen', desc:'Präsentationen übernehmen, Projekte leiten, Ideen vorstellen. Wer nicht gesehen wird, wird nicht befördert.', time:'Laufend', dnn:'share' },
-                { id:'sal_8', title:'Mentor finden', desc:'Jemanden der schon dort ist wo du hinwillst. 1x/Monat Kaffee kann Karriere um Jahre beschleunigen.', time:'30 Min', dnn:'connect' },
+            { title: '🧭 Phase 2 — Positionierung & Entwicklung', steps: [
+                { id:'sal_5', title:'Anforderungen passender Führungsrollen abgleichen', desc:'Wiederkehrende Anforderungen aus geeigneten Stellen mit deinen belegbaren Stärken abgleichen. Nur echte Lücken priorisieren; keine Zertifizierung ohne klaren Nutzen beginnen.', time:'45 Min', dnn:'connect' },
+                { id:'sal_6', title:'Arbeitgeber-Coaching gezielt nutzen', desc:'Ab dem 26.10. konkrete Entwicklungsziele, Feedback zu Wirkung und Sichtbarkeit sowie einen umsetzbaren Transfer in den Arbeitsalltag vereinbaren.', time:'30 Min', dnn:'read' },
+                { id:'sal_7', title:'Sichtbarkeit durch Wirkung erhöhen', desc:'Ein relevantes Ergebnis, eine Entscheidung oder eine Verbesserung so aufbereiten, dass Stakeholder den geschäftlichen Nutzen und deinen Beitrag erkennen.', time:'30 Min', dnn:'share' },
+                { id:'sal_8', title:'Einen strategisch relevanten Kontakt pflegen', desc:'Gezielt mit einer Führungskraft, einem Recruiter oder einer erfahrenen PMO-/Transformation-Person in Kontakt treten und einen echten Austausch anstoßen.', time:'15–30 Min', dnn:'connect' },
             ]},
-            { title: '💬 Phase 3 — Das Gespräch', steps: [
-                { id:'sal_9',  title:'Gespräch mit Vorgesetztem anfragen', desc:'Nicht "über Gehalt reden" — "über meine Entwicklung und nächste Schritte sprechen."', time:'5 Min', dnn:'connect' },
-                { id:'sal_10', title:'Verhandlungsgespräch vorbereiten + üben', desc:'Argumente: Marktwert + Leistungen + Zukunftspläne. Mit Partner üben bis es flüssig klingt.', time:'2 Std', dnn:'goals' },
-                { id:'sal_11', title:'Gespräch führen + Ergebnis dokumentieren', desc:'Falls Ablehnung: konkrete Bedingungen für nächste Erhöhung klären. Schriftlich bestätigen lassen.', time:'1 Std', dnn:'share' },
-                { id:'sal_12', title:'Externe Angebote als Hebel einholen', desc:'Externes Angebot ist der stärkste Verhandlungshebel. Mindestens 2 Benchmarks einholen.', time:'Laufend', dnn:'connect' },
+            { title: '💬 Phase 3 — Gespräche & Entscheidung', steps: [
+                { id:'sal_9', title:'Entwicklungsgespräch strategisch vorbereiten', desc:'Wenn ein interner Weg realistisch ist: gewünschte Verantwortung, messbarer Beitrag und konkrete nächste Schritte besprechen – nicht nur Gehalt.', time:'30 Min', dnn:'connect' },
+                { id:'sal_10', title:'Interviewbeispiele für Führungsrollen vorbereiten', desc:'Drei prägnante Beispiele zu Ambiguität, Stakeholdersteuerung und messbarem Geschäftsnutzen vorbereiten und laut üben.', time:'45 Min', dnn:'goals' },
+                { id:'sal_11', title:'Optionen anhand klarer Kriterien vergleichen', desc:'Gesamtvergütung, Verantwortungsumfang, Führungsperspektive, Kultur, Stabilität, Arbeitsweg und Reiseanteil gemeinsam bewerten.', time:'30 Min', dnn:'share' },
+                { id:'sal_12', title:'Nachfassen und nächste Schritte verbindlich machen', desc:'Nach Gesprächen oder Bewerbungen zeitnah nachfassen, offene Fragen klären und den nächsten Termin bzw. Entscheidungszeitpunkt dokumentieren.', time:'15 Min', dnn:'connect' },
             ]}
         ]
     },
@@ -1566,7 +1566,7 @@ function lifePlanUpdateGoal(goalId, field, value) {
     renderFocusCard();
 }
 function lifePlanSetBusinessHours(value) {
-    const n = Math.max(1, Math.min(5, Number(value) || 3));
+    const n = Number(value) === 2 ? 2 : 3;
     state.lifePlan.businessHours = n;
     saveState();
     renderLifePlan();
