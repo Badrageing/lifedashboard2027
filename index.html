@@ -1113,7 +1113,7 @@ const EXECUTION_PLANS = {
     },
     pm: {
         phases: [
-            { title: '📋 Phase 1 — Methodik & Zertifizierung', steps: [
+            { title: '📋 Phase 1 — Portfolio-Kompetenz schärfen', steps: [
                 { id:'pm_1', title:'PM-Kompetenzen mit Zielrollen abgleichen', desc:'Stärken sind vorhanden: PMO-Aufbau, Stage-Gate, Transformation und Automatisierung. Lücken bei Portfolio-Governance, Priorisierung, Business Case und Executive Reporting anhand echter Stellen prüfen.', time:'45 Min', dnn:'read' },
                 { id:'pm_2', title:'Ein Portfolio-Steuerungsartefakt verbessern', desc:'Ein schlankes Beispiel für Priorisierung, Abhängigkeiten, Nutzen, Status und notwendige Entscheidungen erstellen oder verbessern.', time:'60 Min', dnn:'read' },
                 { id:'pm_3', title:'Weiterbildung nur bei belegter Lücke wählen', desc:'Keine Zertifizierung auf Verdacht. Stellenanforderungen und Coaching-Feedback prüfen und erst dann eine gezielte Lernmaßnahme auswählen.', time:'30 Min', dnn:'goals' },
@@ -1423,6 +1423,10 @@ function loadState() {
     LIFE_AREAS.forEach(area => area.goals.forEach(g => {
         if (!state.goals[g.id]) state.goals[g.id] = { done:false, current: g.current ?? 0 };
     }));
+
+    // Migrate stale default values to the last known baseline, but preserve later user entries.
+    if (state.goals.weight && state.goals.weight.current === 0 && !state.goals.weight.done) state.goals.weight.current = 84;
+    if (state.goals.bodyfat && state.goals.bodyfat.current === 30 && !state.goals.bodyfat.done) state.goals.bodyfat.current = 25;
 
     // Mark only work clearly supported by prior conversations. Never overwrite an explicit status.
     ['sal_1','sal_3'].forEach(id => {
