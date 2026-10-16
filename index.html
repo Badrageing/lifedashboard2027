@@ -1910,5 +1910,6 @@ lifeosSb.auth.onAuthStateChange((event,session)=>{setTimeout(()=>lifeosHandleSes
  if(error){lifeosSetSyncStatus('error','⚠️ Sitzung nicht verfügbar');lifeosMessage('Sitzung konnte nicht geladen werden: '+error.message,true);return}
  await lifeosHandleSession(data.session);
 })();
+</script>
 </body>
 </html>
