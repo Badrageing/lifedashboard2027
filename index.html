@@ -725,6 +725,77 @@
 .lifeos-logout:disabled{opacity:.55;cursor:wait}
 @media(max-width:700px){.lifeos-toolbar{justify-content:flex-start}.lifeos-sync{font-size:11px}}
 body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{display:none}
+
+        /* Accessibility pass: readable contrast, visible focus, keyboard/touch support */
+        :root { color-scheme: light; }
+        body { background:#f4f6fa; color:#182230; font-size:16px; line-height:1.55; }
+        .header h1 { color:#182230; background:none; -webkit-text-fill-color:initial; }
+        .header .date,.section-sub,.stat-label,.dnn-sub,.day-name,.legend-desc,.area-score-lbl,
+        .modal .modal-sub,.modal-score-lbl,.step-content p,.exec-step-desc,.tip-content,
+        .life-score-head p,.life-score-muted,.life-score-question,.life-score-action-meta,
+        .life-score-history-item,.life-score-empty { color:#475467; }
+        .section-title { color:#182230; }
+        .stat-card,.dnn-card,.life-area,.tip-card,.score-legend,.next-steps-panel,
+        .life-scorecard,.life-score-row,.life-score-suggestion,.day-col { background:#fff; }
+        .stat-value { color:#173b82; background:none; -webkit-text-fill-color:initial; }
+        .dnn-card { color:#182230; }
+        .dnn-card.completed { background:#eaf7ee; border-color:#237a45; }
+        .dnn-card.completed .check-circle { background:#176b3a; border-color:#176b3a; color:#fff; }
+        .life-area.warning,.life-area.danger { background:#fff; }
+        .goal-text,.step-next-action,.exec-step-title,.life-score-name,.life-score-head h3,
+        .life-score-actions-head h4,.life-score-suggestion strong,.life-score-action-title,
+        .life-score-summary strong,.life-score-history-item strong { color:#182230; }
+        .goal-text.done-text,.exec-step-title.done-text,.life-score-action-title.done { color:#596579; }
+        .tag-once,.tag-ongoing,.tag-area,.tag-time,.tag-score,.tool-tag,.dnn-badge {
+          border-color:#c8d0dc; background:#eef1f5; color:#344054;
+        }
+        .tag-once,.prio-m,.insight-plan,.tag-insight-plan { color:#754900; }
+        .tag-ongoing,.tag-time,.insight-working,.tag-insight-working { color:#124e78; }
+        .tag-area,.tag-insight-great { color:#493080; }
+        .prio-critical,.prio-h,.rel-high { background:#fff0ee; border-color:#b42318; color:#8f1d14; }
+        .prio-l,.insight-great { background:#eaf7ee; border-color:#237a45; color:#175c34; }
+        .rel-med { background:#fff7e6; border-color:#946200; color:#754900; }
+        .rel-low { background:#f2f4f7; border-color:#c8d0dc; color:#475467; }
+        .insight-working { background:#eef6ff; border-color:#175cd3; color:#1849a9; }
+        .insight-plan { background:#fff7e6; border-color:#946200; }
+        .insight-start { background:#fff0ee; border-color:#b42318; color:#8f1d14; }
+        .tag-insight-great { background:#f0ebff; border-color:#b7a6e8; }
+        .tag-insight-working { background:#eef6ff; border-color:#84adff; }
+        .tag-insight-plan { background:#fff7e6; border-color:#e6b85c; }
+        .tag-insight-start { background:#fff0ee; border-color:#fda29b; color:#8f1d14; }
+        .fill-result { background:#2459a9; } .fill-exec { background:#6950a1; } .fill-total { background:#237a45; }
+        .goal-edit-btn { background:#eef4ff; color:#1849a9; border-color:#84adff; }
+        .filter-btn.active { background:#eaf2ff; border-color:#2459a9; color:#1849a9; }
+        .btn-primary { background:#2447a8; color:#fff; }
+        .btn-primary:hover { background:#173b82; }
+        .btn-secondary { background:#eef1f5; color:#182230; border:1px solid #c8d0dc; }
+        .modal { background:#fff; color:#182230; }
+        .modal-field label,.modal-field .unit,.preview-label { color:#475467; }
+        .modal-field input { background:#fff; color:#182230; border-color:#98a2b3; }
+        .modal-field input:focus { border-color:#2459a9; }
+        .modal-score-summary,.life-score-suggestion { background:#f8fafc; }
+        .life-score-row.is-low { background:#fff8e8; border-color:#946200; }
+        .life-score-pill { min-width:44px; min-height:44px; font-size:.95em; color:#182230; border-color:#98a2b3; }
+        .life-score-pill.active { background:#173b82; color:#fff; border-color:#173b82; }
+        .life-score-btn { min-height:44px; padding:10px 13px; color:#182230; border-color:#98a2b3; font-size:.875em; }
+        .life-score-btn.primary { background:#173b82; border-color:#173b82; color:#fff; }
+        .life-score-suggestion small { color:#475467; font-size:.8em; }
+        .life-score-note { min-height:44px; font-size:.875em; color:#182230; }
+        .life-score-note::placeholder { color:#596579; opacity:1; }
+        .life-score-history summary { color:#344054; min-height:44px; display:flex; align-items:center; }
+        .day-col.today { border-color:#2459a9; background:#eef4ff; }
+        .day-name { color:#475467; }
+        button,a,input,select,textarea,summary,[tabindex]:not([tabindex="-1"]) { scroll-margin-top:1rem; }
+        button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,
+        summary:focus-visible,[tabindex]:not([tabindex="-1"]):focus-visible {
+          outline:3px solid #155eef !important; outline-offset:3px;
+        }
+        input,select,textarea { font-size:16px; }
+        button { line-height:1.35; }
+        @media (prefers-reduced-motion:reduce) {
+          *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
+        }
+
 </style>
 <section id="lifeosAuth" class="auth-screen"><div class="auth-card">
 <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#2146a5;font-weight:800">Persönlicher Zugriff</div>
