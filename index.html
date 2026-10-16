@@ -527,13 +527,17 @@
         .modal-field label { display: block; font-size: 0.83em; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
 
         .modal-field input[type="number"] {
-            width: 100%;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.12);
+            display: block; box-sizing: border-box; width: 100%; min-height: 46px;
+            background: #202a3a; border: 1px solid rgba(255,255,255,0.28);
             border-radius: 10px; padding: 10px 14px;
-            color: #fff; font-size: 0.9em;
-            outline: none; transition: border-color 0.2s;
+            color: #ffffff !important; -webkit-text-fill-color: #ffffff;
+            caret-color: #00d4ff; color-scheme: dark; font: inherit; font-size: 1rem;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
         }
+        .modal-field input[type="number"]:focus {
+            border-color: #00d4ff; box-shadow: 0 0 0 3px rgba(0,212,255,0.16);
+        }
+        .modal-field input[type="number"]::selection { background: #006b80; color: #fff; }
 
         .modal-field input:focus { border-color: rgba(0,212,255,0.5); }
         .modal-field .unit { font-size: 0.78em; color: rgba(255,255,255,0.35); margin-top: 4px; }
@@ -1998,14 +2002,33 @@ function updatePreview(goalId) {
 }
 
 function saveProgress() {
-    const val  = parseFloat(document.getElementById('progressInput').value) || 0;
-    const goal = findGoal(modalGoalId);
-    state.goals[modalGoalId].current = val;
+    const input = document.getElementById('progressInput');
+    const goalId = modalGoalId;
+    const goal = findGoal(goalId);
+    if (!input || !goal || !goalId) return;
 
-    if (goal.reverseProgress && val <= goal.target) state.goals[modalGoalId].done = true;
-    else if (goal.type === 'progress' && val >= goal.target) state.goals[modalGoalId].done = true;
+    const raw = input.value.trim();
+    const val = raw === '' ? NaN : Number(raw);
+    if (!Number.isFinite(val)) {
+        input.setCustomValidity('Bitte einen gültigen Zahlenwert eingeben.');
+        input.reportValidity();
+        input.focus();
+        return;
+    }
+    input.setCustomValidity('');
+    if (!state.goals || typeof state.goals !== 'object') state.goals = {};
+    const previous = state.goals[goalId] || { done:false, current:goal.current ?? 0 };
+    state.goals[goalId] = { ...previous, current: val };
 
-    saveState(); renderAll(); closeModal();
+    if (goal.reverseProgress) {
+        state.goals[goalId].done = val <= goal.target;
+    } else if (goal.type === 'progress') {
+        state.goals[goalId].done = val >= goal.target;
+    }
+
+    saveState();
+    renderAll();
+    closeModal();
 }
 
 function openExecModal(goalId) {
@@ -2055,10 +2078,13 @@ function openExecModal(goalId) {
                     ${phase.steps.map((step, i) => `
                         <div class="exec-step">
                             <div class="exec-step-num">${i+1}</div>
-                            <div class="exec-step-cb ${state.execSteps[step.id] ? 'done' : ''}"
-                                 onclick="toggleExecStep('${step.id}','${goalId}')">
+                            <button type="button"
+                                    class="exec-step-cb ${state.execSteps[step.id] ? 'done' : ''}"
+                                    aria-label="${state.execSteps[step.id] ? 'Schritt als offen markieren' : 'Schritt abhaken'}"
+                                    aria-pressed="${!!state.execSteps[step.id]}"
+                                    onclick="toggleExecStep('${step.id}','${goalId}')">
                                 ${state.execSteps[step.id] ? '✓' : ''}
-                            </div>
+                            </button>
                             <div class="exec-step-body">
                                 <div class="exec-step-title ${state.execSteps[step.id] ? 'done-text' : ''}">${step.title}</div>
                                 <div class="exec-step-desc">${step.desc}</div>
@@ -2082,7 +2108,8 @@ function openExecModal(goalId) {
 }
 
 function toggleExecStep(stepId, goalId) {
-    state.execSteps[stepId] = !state.execSteps[stepId];
+    if (!state.execSteps || typeof state.execSteps !== 'object') state.execSteps = {};
+    state.execSteps[stepId] = !Boolean(state.execSteps[stepId]);
     saveState();
     renderAll();
     openExecModal(goalId);
