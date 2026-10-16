@@ -479,13 +479,6 @@
 
         .exec-step:last-child { border-bottom: none; }
 
-        .exec-step-num {
-            width: 22px; height: 22px; border-radius: 50%;
-            background: rgba(123,47,247,0.3); border: 1px solid rgba(123,47,247,0.4);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.7em; font-weight: 700; flex-shrink: 0;
-            color: rgba(200,150,255,0.9);
-        }
 
         .exec-step-cb {
             width: 20px; height: 20px; border-radius: 5px;
@@ -1078,10 +1071,10 @@ const EXECUTION_PLANS = {
     salary: {
         phases: [
             { title: '🎯 Phase 1 — Zielprofil & laufende Chancen', steps: [
-                { id:'sal_1', title:'Zielprofil und Wechselkriterien schärfen', desc:'Fokus: Head of PMO, Transformation Lead oder passende Programm-/Portfolio-Rollen; mindestens 100.000 € Zielgehalt, Radius 40–50 km bzw. überwiegend remote, stabile Arbeitgeber und keine häufigen Reisen.', time:'30 Min', dnn:'goals' },
-                { id:'sal_2', title:'Aktive Bewerbungen und Prozesse priorisieren', desc:'Offene Bewerbungen, Rückmeldungen und nächste Schritte prüfen. Bestehende Prozesse zuerst voranbringen, keine bereits laufenden Bewerbungen doppelt starten.', time:'20 Min', dnn:'goals' },
-                { id:'sal_3', title:'Erfolge und Führungsbelege schärfen', desc:'PMO von Grund auf aufgebaut, Stage-Gate-Modell, Transformation und Automatisierung: Ergebnisse, Umfang und Wirkung prägnant für CV und Gespräche dokumentieren.', time:'45 Min', dnn:'share' },
-                { id:'sal_4', title:'Nächsten Schritt für die beste Chance festlegen', desc:'Für den aussichtsreichsten aktiven Prozess genau eine nächste Aktion definieren: Kontakt, Rückfrage, Interviewvorbereitung oder gezielte Bewerbung.', time:'15 Min', dnn:'goals' },
+                { id:'sal_1', title:'Zielprofil und Wechselkriterien festlegen', desc:'Ziel: mindestens 100.000 € Gesamtvergütung, PMO-/Transformation-/Portfolio-Führung, stabiler Arbeitgeber, Radius 40–50 km oder überwiegend remote, keine häufigen Reisen.', time:'30 Min', dnn:'goals' },
+                { id:'sal_2', title:'Aktive Bewerbungen und nächste Schritte prüfen', desc:'Offene Prozesse zuerst bearbeiten. BVK, MONTANA und ATOSS nur weiterführen, solange sie aktiv sind. Harman und Munich Re sind Absagen; DAV, OMMAX und Denk Pharma abgeschlossen. Keine Doppelbewerbungen.', time:'20 Min/Woche', dnn:'goals' },
+                { id:'sal_3', title:'Wirkungsnachweise für Führungsrollen bündeln', desc:'PMO-Aufbau, Stage-Gate-Modell, M365-Transformation und Automatisierung mit Umfang, eigenem Beitrag und Geschäftswirkung für CV und Gespräche darstellen.', time:'45 Min', dnn:'share' },
+                { id:'sal_4', title:'Für die beste Chance genau eine Aktion festlegen', desc:'Eine nächste Aktion wählen und terminieren: Recruiter nachfassen, Interview vorbereiten, Kontakt aktivieren oder eine passende Stelle bearbeiten.', time:'15 Min/Woche', dnn:'goals' },
             ]},
             { title: '🧭 Phase 2 — Positionierung & Entwicklung', steps: [
                 { id:'sal_5', title:'Anforderungen passender Führungsrollen abgleichen', desc:'Wiederkehrende Anforderungen aus geeigneten Stellen mit deinen belegbaren Stärken abgleichen. Nur echte Lücken priorisieren; keine Zertifizierung ohne klaren Nutzen beginnen.', time:'45 Min', dnn:'connect' },
@@ -1100,10 +1093,10 @@ const EXECUTION_PLANS = {
     leadership: {
         phases: [
             { title: '📚 Phase 1 — Fundament aufbauen', steps: [
-                { id:'lead_1', title:'"Extreme Ownership" lesen (Jocko Willink)', desc:'Das Standardwerk für Führung. Kernbotschaft: Alles ist deine Verantwortung. Sofort umsetzbar.', time:'1 Woche', dnn:'read' },
-                { id:'lead_2', title:'"The 21 Irrefutable Laws of Leadership" lesen', desc:'John Maxwell — systematisches Führungsverständnis. Jede Law direkt nach dem Kapitel anwenden.', time:'2 Wochen', dnn:'read' },
-                { id:'lead_3', title:'Eigene Führungsschwächen identifizieren', desc:'Feedback von 3 Personen: Was kann ich als Leader besser? Journaling: Wo verliere ich die Kontrolle?', time:'1 Std', dnn:'goals' },
-                { id:'lead_4', title:'Leadership-Stil definieren', desc:'Servant Leader? Transformational? Situativ? Bewusste Entscheidung treffen und konsistent leben.', time:'30 Min', dnn:'goals' },
+                { id:'lead_1', title:'Bisherige Führungserfolge sammeln', desc:'Vorhandene Belege nutzen: PMO von Grund auf aufgebaut, Stage-Gate eingeführt und komplexe Vorhaben strukturiert. Daraus konkrete Verhaltensbeispiele ableiten.', time:'30 Min', dnn:'read' },
+                { id:'lead_2', title:'Zwei Entwicklungsziele mit dem Coach vereinbaren', desc:'Coaching ab 26.10.: sichtbarer/authentischer auftreten und Prioritäten konsequenter abschließen. Fortschritt an beobachtbarem Verhalten festmachen.', time:'30 Min', dnn:'read' },
+                { id:'lead_3', title:'Gezielt Feedback von zwei Personen einholen', desc:'Eine Führungskraft und eine Projektpartnerin/einen Projektpartner fragen: Was beibehalten, mehr zeigen und reduzieren? Um ein konkretes Beispiel bitten.', time:'30 Min', dnn:'goals' },
+                { id:'lead_4', title:'Eigenes Führungsverständnis formulieren', desc:'Wie schaffst du Klarheit, triffst Entscheidungen, befähigst andere und sprichst Probleme an? An echten Situationen prüfen statt ein Führungslabel wählen.', time:'20 Min', dnn:'goals' },
             ]},
             { title: '🔧 Phase 2 — Praxis täglich', steps: [
                 { id:'lead_5', title:'Täglich eine Führungsentscheidung bewusst treffen', desc:'Keine passiven Entscheidungen. Aktiv führen: klare Ansage, klare Erwartung, klares Feedback.', time:'Täglich', dnn:'goals' },
@@ -1121,10 +1114,10 @@ const EXECUTION_PLANS = {
     pm: {
         phases: [
             { title: '📋 Phase 1 — Methodik & Zertifizierung', steps: [
-                { id:'pm_1', title:'PM-Methode wählen: Agil oder Klassisch', desc:'Scrum/Kanban für iterative, Wasserfall/PRINCE2 für lineare Projekte. Beides kennen ist ideal.', time:'1 Tag', dnn:'read' },
-                { id:'pm_2', title:'Scrum Master Zertifizierung (PSM I) machen', desc:'Online-Kurs + Exam: ~200€. Scrumguide.org kostenlos lesen. Sehr arbeitsmarktrelevant.', time:'4 Wochen', dnn:'read' },
-                { id:'pm_3', title:'PMP oder IPMA langfristig einplanen', desc:'PMP = globaler Standard. Voraussetzung: 36 Monate Projekterfahrung. In 12 Monaten angehen.', time:'6-12 Mo', dnn:'goals' },
-                { id:'pm_4', title:'"The Art of Project Management" lesen', desc:'Scott Berkun — praxisnahes PM-Wissen ohne Theorie-Ballast. Direkt auf echte Projekte anwendbar.', time:'2 Wochen', dnn:'read' },
+                { id:'pm_1', title:'PM-Kompetenzen mit Zielrollen abgleichen', desc:'Stärken sind vorhanden: PMO-Aufbau, Stage-Gate, Transformation und Automatisierung. Lücken bei Portfolio-Governance, Priorisierung, Business Case und Executive Reporting anhand echter Stellen prüfen.', time:'45 Min', dnn:'read' },
+                { id:'pm_2', title:'Ein Portfolio-Steuerungsartefakt verbessern', desc:'Ein schlankes Beispiel für Priorisierung, Abhängigkeiten, Nutzen, Status und notwendige Entscheidungen erstellen oder verbessern.', time:'60 Min', dnn:'read' },
+                { id:'pm_3', title:'Weiterbildung nur bei belegter Lücke wählen', desc:'Keine Zertifizierung auf Verdacht. Stellenanforderungen und Coaching-Feedback prüfen und erst dann eine gezielte Lernmaßnahme auswählen.', time:'30 Min', dnn:'goals' },
+                { id:'pm_4', title:'Ein Playbook für unklare Projekte erstellen', desc:'Eine Seite mit Startfragen: Problem/Nutzen, Sponsor, Entscheidungsspielraum, Stakeholder, Risiken, Erfolgskriterien und nächster Entscheidungspunkt.', time:'45 Min', dnn:'read' },
             ]},
             { title: '🔧 Phase 2 — Tools & Prozesse', steps: [
                 { id:'pm_5', title:'PM-Tool professionell einrichten', desc:'Jira, Asana, Monday oder Notion — eines vollständig beherrschen. Templates für Standardprojekte bauen.', time:'2 Std', dnn:'goals' },
@@ -1163,16 +1156,16 @@ const EXECUTION_PLANS = {
     biz: {
         phases: [
             { title: '💡 Phase 1 — Idee validieren (Woche 1-2)', steps: [
-                { id:'biz_1', title:'Problem klar definieren (nicht die Lösung)', desc:'Für wen? Welches Problem? Wie schmerzhaft (1-10)? Wer zahlt? Ohne klares Problem kein Business.', time:'2 Std', dnn:'goals' },
-                { id:'biz_2', title:'10 Zielkunden-Gespräche führen', desc:'Nicht verkaufen — verstehen. "The Mom Test" lesen. Wie gehen sie aktuell damit um? Was kostet es?', time:'1 Woche', dnn:'connect' },
-                { id:'biz_3', title:'Wettbewerb analysieren', desc:'5 direkte Konkurrenten: Was machen die? Was fehlt? Wo ist die Lücke? Preise notieren.', time:'2 Std', dnn:'goals' },
-                { id:'biz_4', title:'Erste Zahlungsbereitschaft testen', desc:'"Ich baue das — würdest du X€ zahlen?" Erst wenn jemand zahlt ist Validierung real.', time:'1 Woche', dnn:'connect' },
+                { id:'biz_1', title:'Ein abgegrenztes Problem und Angebot formulieren', desc:'Arbeitsannahme: 1:1-Sparring für Einzelpersonen, die berufliche Komplexität ordnen, Entscheidungen treffen und einen konkreten nächsten Schritt umsetzen wollen. Arbeitgeberkonflikte vor einem Verkauf klären.', time:'45 Min', dnn:'goals' },
+                { id:'biz_2', title:'Drei bis fünf Gespräche mit passenden Personen führen', desc:'In kleinen Etappen nach konkreten Situationen, bisherigen Lösungen, Folgen und Unterstützungsbedarf fragen. Erst verstehen, noch nicht pitchen.', time:'20–30 Min/Gespräch', dnn:'connect' },
+                { id:'biz_3', title:'Alternativen und Abgrenzung prüfen', desc:'Drei bis fünf Alternativen prüfen: wofür zahlen Menschen, was fehlt und wie grenzt sich dein Angebot klar von Arbeitgeberleistungen und deiner Haupttätigkeit ab?', time:'45 Min', dnn:'goals' },
+                { id:'biz_4', title:'Zahlungsbereitschaft mit einem kleinen Pilot testen', desc:'Nach den Gesprächen ein enges Pilotangebot mit Umfang, Ergebnis, Zeitbedarf und transparentem Preis vorschlagen. Lob allein ist keine Validierung.', time:'30 Min', dnn:'connect' },
             ]},
             { title: '🔨 Phase 2 — MVP bauen (Woche 3-6)', steps: [
-                { id:'biz_5', title:'Kleinsten möglichen MVP definieren', desc:'Was ist das MINIMUM das einen Kunden glücklich macht? Alles andere streichen. Liste halbieren.', time:'1 Std', dnn:'goals' },
-                { id:'biz_6', title:'Landing Page erstellen', desc:'Carrd.co oder Notion: Problem → Lösung → Preis → Kontakt. Live in 2 Stunden. Kein Perfektionismus.', time:'2 Std', dnn:'share' },
-                { id:'biz_7', title:'Zahlungsinfrastruktur einrichten', desc:'Stripe oder PayPal Business. Rechtsform prüfen (Gewerbe anmelden). Geschäftskonto trennen.', time:'1 Tag', dnn:'goals' },
-                { id:'biz_8', title:'Ersten zahlenden Kunden gewinnen', desc:'Direkt ansprechen: "Ich biete X an — willst du der erste Kunde sein?" 50% Early-Adopter-Rabatt.', time:'1-2 Wochen', dnn:'connect' },
+                { id:'biz_5', title:'Einen 60-Minuten-Pilot mit klarem Ergebnis definieren', desc:'Beispiel: Situation sortieren, Optionen bewerten und einen umsetzbaren 14-Tage-Plan erstellen. Keine Therapie oder Erfolgsgarantie versprechen.', time:'45 Min', dnn:'goals' },
+                { id:'biz_6', title:'Eine einfache Angebotsseite oder PDF erstellen', desc:'Problem, Zielgruppe, Ablauf, Ergebnis, Preisrahmen und Kontakt. Mit vorhandenen Mitteln starten; kein Websiteprojekt und keine bezahlten Tools nötig.', time:'60 Min', dnn:'share' },
+                { id:'biz_7', title:'Rahmenbedingungen vor dem ersten bezahlten Auftrag klären', desc:'Nebentätigkeit nach Arbeitgebervorgaben anzeigen/genehmigen lassen, Vertraulichkeit und Datenschutz beachten sowie steuerliche/gewerbliche Anforderungen prüfen.', time:'45 Min', dnn:'goals' },
+                { id:'biz_8', title:'Einen passenden Pilotkunden gewinnen', desc:'Eine passende Person persönlich einladen, ohne Druck und ohne vertrauliche Arbeitgeberkontakte zu nutzen. Erst liefern und lernen, dann skalieren.', time:'30 Min', dnn:'connect' },
             ]},
             { title: '📈 Phase 3 — Wachstum', steps: [
                 { id:'biz_9',  title:'5 Referenzkunden aufbauen', desc:'Erste Kunden = Testimonials = Vertrauen für alle weiteren. Ergebnisse dokumentieren lassen.', time:'1-3 Monate', dnn:'connect' },
@@ -1215,14 +1208,14 @@ const EXECUTION_PLANS = {
     weight: {
         phases: [
             { title: '🍽️ Phase 1 — Ernährung einrichten', steps: [
-                { id:'wt_1', title:'Täglichen Kalorienbedarf berechnen (TDEE)', desc:'TDEE-Rechner online. Für Gewichtszunahme: TDEE + 300-500 kcal. Protein: 1.6-2g/kg Körpergewicht.', time:'30 Min', dnn:'goals' },
-                { id:'wt_2', title:'MyFitnessPal 4 Wochen täglich tracken', desc:'Nicht für immer — für das Gefühl für Portionen und Makros. Wissen ist der erste Schritt.', time:'5 Min täglich', dnn:'goals' },
+                { id:'wt_1', title:'Kalorienziel anhand des Trends überprüfen', desc:'Die bisherige Orientierung von ca. 2.400 kcal nur als Startwert nutzen. Zwei bis drei Wochen Gewichtstrend, Hunger und Energie beobachten und dann klein anpassen.', time:'15 Min', dnn:'goals' },
+                { id:'wt_2', title:'Ernährung zeitlich begrenzt protokollieren', desc:'Falls aktuell nicht bereits getan: sieben repräsentative Tage tracken, um Portionsgrößen und Protein zu prüfen. Kein dauerhaftes minutiöses Tracking nötig.', time:'5 Min/Tag', dnn:'goals' },
                 { id:'wt_3', title:'Meal Prep Sonntag einführen', desc:'Proteinquellen vorkochen: Hühnchen, Eier, Quark, Linsen. Vorbereitung verhindert schlechte Entscheidungen.', time:'2 Std/Woche', dnn:'move' },
-                { id:'wt_4', title:'Wöchentlich wiegen (gleiche Bedingung)', desc:'Morgens nüchtern nach dem Toilettengang. Trend über 4 Wochen zählt — nicht tägliche Schwankung.', time:'1 Min/Woche', dnn:'goals' },
+                { id:'wt_4', title:'Gewicht unter gleichen Bedingungen erfassen', desc:'Morgens nach dem Toilettengang messen und Wochenmittel statt Tagesausschläge vergleichen. Aktuellen Stand erst nach neuer Messung eintragen.', time:'1 Min/Tag', dnn:'goals' },
             ]},
             { title: '💪 Phase 2 — Training optimieren', steps: [
-                { id:'wt_5', title:'Trainingsplan wählen (PPL oder GZCLP)', desc:'Für Körperzusammensetzung: Hypertrophie-Plan mit Fokus auf Grundübungen. Kraft vor Ausdauer.', time:'1 Std', dnn:'move' },
-                { id:'wt_6', title:'Progressive Overload konsequent einhalten', desc:'Jede Woche mehr Gewicht oder eine Wiederholung mehr. Ohne Progression kein Wachstum.', time:'Laufend', dnn:'move' },
+                { id:'wt_5', title:'Nachhaltigen Trainingsplan beibehalten', desc:'Dein bestehendes ShredFast-Training zwei- bis dreimal pro Woche ist eine Basis. Nicht gleichzeitig Training, Ernährung und Alltag komplett umbauen.', time:'2–3x/Woche', dnn:'move' },
+                { id:'wt_6', title:'Alltagsbewegung schrittweise steigern', desc:'Von etwa 5.000 Schritten aus zunächst 7.000 im Durchschnitt anpeilen, später bei guter Verträglichkeit 8.000–10.000. Spaziergänge statt Perfektionsdruck.', time:'Täglich', dnn:'move' },
                 { id:'wt_7', title:'Schlaf auf 7-8 Stunden optimieren', desc:'Muskel wächst beim Schlafen nicht im Gym. Vor 23 Uhr ins Bett. Handy aus dem Schlafzimmer.', time:'Laufend', dnn:'move' },
             ]}
         ]
@@ -1230,9 +1223,9 @@ const EXECUTION_PLANS = {
     bodyfat: {
         phases: [
             { title: '🔥 Phase 1 — Defizit etablieren', steps: [
-                { id:'bf_1', title:'Kaloriendefizit berechnen (300-500 unter TDEE)', desc:'Zu aggressiv = Muskelverlust. 0.5kg/Woche ist das Optimum für nachhaltigen Erfolg.', time:'30 Min', dnn:'goals' },
-                { id:'bf_2', title:'Proteinzufuhr erhöhen (2-2.4g/kg)', desc:'Beim Abnehmen besonders wichtig: Muskelmasse schützen, Sättigung erhöhen, Thermogenese steigern.', time:'Laufend', dnn:'move' },
-                { id:'bf_3', title:'Flüssigkalorien eliminieren', desc:'Alkohol, Säfte, Milchkaffee-Spezialitäten = unsichtbare Kalorienbomben. Wasser + schwarzer Kaffee.', time:'Ab sofort', dnn:'goals' },
+                { id:'bf_1', title:'Moderates Defizit über den Gewichtstrend steuern', desc:'Kein aggressives Defizit. Ca. 2.400 kcal als bisherige Orientierung nutzen und nach mehreren Wochen anhand des Trends justieren.', time:'15 Min', dnn:'goals' },
+                { id:'bf_2', title:'Protein und Krafttraining absichern', desc:'Grob 1,6–2,0 g Protein pro kg Körper-/Zielgewicht anpeilen, sofern medizinisch nichts dagegenspricht, und Krafttraining fortsetzen.', time:'Täglich', dnn:'move' },
+                { id:'bf_3', title:'Getränke und Snacks bewusst prüfen', desc:'Alkohol trinkst du bereits nicht. Prüfe nur zusätzliche Kalorienquellen, die tatsächlich relevant sind; nichts streichen, das kein Problem ist.', time:'15 Min', dnn:'goals' },
                 { id:'bf_4', title:'NEAT erhöhen (Alltagsbewegung)', desc:'Treppe, 10.000 Schritte/Tag, Stehpult. Verbrennt oft mehr als explizites Sport-Training.', time:'Laufend', dnn:'move' },
             ]},
             { title: '📊 Phase 2 — Messen & Anpassen', steps: [
@@ -1244,13 +1237,13 @@ const EXECUTION_PLANS = {
     training: {
         phases: [
             { title: '📅 Phase 1 — System aufbauen', steps: [
-                { id:'tr_1', title:'3 Trainingstage in Kalender blockieren', desc:'Mo/Mi/Fr oder Di/Do/Sa — wie Business-Meeting behandeln. Nicht verschieben.', time:'10 Min', dnn:'move' },
+                { id:'tr_1', title:'Zwei feste Trainingsfenster plus Option planen', desc:'Mit Familienalltag zwei feste Termine und einen optionalen dritten planen. Drei Einheiten sind das Ziel; eine realistische Woche schlägt einen perfekten Plan.', time:'10 Min/Woche', dnn:'move' },
                 { id:'tr_2', title:'Gym-Bag immer gepackt lassen', desc:'Friction reduzieren. Wenn die Tasche steht gibt es keine Ausrede. Abends vorbereiten.', time:'10 Min', dnn:'move' },
                 { id:'tr_3', title:'Trainingsplan in Strong App eintragen', desc:'Kein Denken im Gym — einfach ausführen. Fortschritt automatisch getrackt.', time:'1 Std', dnn:'goals' },
                 { id:'tr_4', title:'Trainings-Buddy finden', desc:'Accountability verdoppelt Erfolgsrate. Kollege, Freund oder Partner als Sparringspartner.', time:'1 Gespräch', dnn:'connect' },
             ]},
             { title: '🔥 Phase 2 — Gewohnheit verankern', steps: [
-                { id:'tr_5', title:'66-Tage-Streak anstreben', desc:'Nicht 21 — Forschung: 66 Tage für echte Habitformierung. Nie zweimal hintereinander auslassen.', time:'66 Tage', dnn:'move' },
+                { id:'tr_5', title:'Vier Wochen Konstanz statt Streak-Druck verfolgen', desc:'Geplante Einheiten möglichst regelmäßig absolvieren. Verpasste Termine nicht durch übermäßiges Nachholen kompensieren.', time:'4 Wochen', dnn:'move' },
                 { id:'tr_6', title:'Kleine Belohnung nach jedem Training', desc:'Proteinshake, Lieblingspodcast, heißes Bad. Positiver Reiz verankert die Gewohnheit.', time:'Nach Training', dnn:'move' },
             ]}
         ]
@@ -1258,9 +1251,9 @@ const EXECUTION_PLANS = {
     ice: {
         phases: [
             { title: '❄️ Schrittweise zum Eisbaden', steps: [
-                { id:'ice_1', title:'Wim Hof Methode lernen', desc:'Atemübung vor dem Bad ist entscheidend. YouTube: Wim Hof Breathing kostenlos. Ohne Vorbereitung unnötig unangenehm.', time:'30 Min', dnn:'move' },
+                { id:'ice_1', title:'Risiken und Sicherheitsregeln prüfen', desc:'Kälteexposition ist optional. Bei Herz-Kreislauf-Erkrankungen, relevanten Vorerkrankungen oder Unsicherheit vorher medizinisch abklären. Keine Atem-/Hyperventilationsübungen im oder nahe am Wasser.', time:'15 Min', dnn:'move' },
                 { id:'ice_2', title:'7 Tage: kalt duschen (30 Sek am Ende)', desc:'Tag 1-3: 10 Sek. Tag 4-7: 30 Sek. Körper akklimatisieren. Kein Schock — kein Aufgeben.', time:'7 Tage', dnn:'move' },
-                { id:'ice_3', title:'Termin für echtes Eisbaden buchen', desc:'Eisbaden München, See im Winter oder Eiswanne. Mit einer Person zusammen — sicherer und motivierender.', time:'10 Min', dnn:'goals' },
+                { id:'ice_3', title:'Sichere Möglichkeit und Begleitung organisieren', desc:'Nie allein ins kalte offene Wasser, nicht nach Alkohol und keine Atemanhalte-Challenges. Geeigneten Ort und nüchterne Begleitung wählen.', time:'20 Min', dnn:'goals' },
                 { id:'ice_4', title:'Eisbaden durchführen + dokumentieren', desc:'2-5 Minuten. Danach aktiv aufwärmen (Bewegung, nicht sofort Sauna). Foto oder Video für Motivation.', time:'1 Nachmittag', dnn:'share' },
             ]}
         ]
@@ -1268,12 +1261,12 @@ const EXECUTION_PLANS = {
     wife: {
         phases: [
             { title: '❤️ Phase 1 — Verbindung verstehen', steps: [
-                { id:'wife_1', title:'"Die 5 Sprachen der Liebe" lesen', desc:'Herausfinden was IHRE Liebessprache ist — nicht deine. Viele Konflikte = falsche Liebessprache.', time:'1 Woche', dnn:'read' },
-                { id:'wife_2', title:'Offenes Gespräch: Was braucht sie wirklich?', desc:'Nicht raten — fragen. "Was kann ich tun damit du dich mehr geliebt und gesehen fühlst?"', time:'1 Abend', dnn:'connect' },
+                { id:'wife_1', title:'Eigene Vorstellung von guter Partnerschaft klären', desc:'Drei Verhaltensweisen notieren, mit denen du deiner Frau im Alltag Verlässlichkeit, Zuneigung und Unterstützung zeigen möchtest.', time:'15 Min', dnn:'read' },
+                { id:'wife_2', title:'Ein offenes, neugieriges Gespräch führen', desc:'Ohne vorauszusetzen, dass etwas fehlt, fragen: Was tut uns gerade gut? Was würde den Alltag leichter oder schöner machen?', time:'15–20 Min', dnn:'connect' },
                 { id:'wife_3', title:'Eigene Stärken/Schwächen als Partner kennen', desc:'Was bringe ich in die Beziehung? Wo bin ich unzuverlässig? Ehrlichkeit schafft echte Intimität.', time:'1 Std', dnn:'goals' },
             ]},
             { title: '🌹 Phase 2 — Rituale aufbauen', steps: [
-                { id:'wife_4', title:'Wöchentliches Date Night (fixer Termin)', desc:'Geplant, nicht spontan. Abwechselnd planen. Kein Restaurant-Thema — wirklich präsent sein.', time:'1x/Woche', dnn:'connect' },
+                { id:'wife_4', title:'Gemeinsame Zeit nur bei beiderseitigem Wunsch planen', desc:'Wenn ihr euch danach fühlt, eine unkomplizierte gemeinsame Aktivität vereinbaren. Spaziergang oder ruhige Zeit zu Hause zählt genauso.', time:'Nach Bedarf', dnn:'connect' },
                 { id:'wife_5', title:'Tägliches 10-Min-Gespräch ohne Ablenkung', desc:'Handy weg, TV aus. "Wie war dein Tag wirklich?" Zuhören ohne direkt zu lösen.', time:'10 Min täglich', dnn:'connect' },
                 { id:'wife_6', title:'Regelmäßige kleine Überraschungen planen', desc:'Lieblingsessen kochen, Brief schreiben, spontaner Spaziergang. Kleine Gesten > große Events.', time:'1x/Woche', dnn:'connect' },
                 { id:'wife_7', title:'Gemeinsames Ziel oder Projekt finden', desc:'Urlaub planen, Wohnung einrichten, gemeinsames Hobby. Gemeinsame Richtung verbindet tief.', time:'1 Abend', dnn:'goals' },
@@ -1287,8 +1280,8 @@ const EXECUTION_PLANS = {
     family: {
         phases: [
             { title: '👨‍👩‍👧‍👦 Phase 1 — Präsenz & Rituale', steps: [
-                { id:'fam_1', title:'Wöchentlicher Familientag einführen', desc:'Sonntag = Familientag. Kein Handy, keine Arbeit. Ausflug, kochen, spielen. Sacred Time.', time:'1x/Woche', dnn:'connect' },
-                { id:'fam_2', title:'Tägliches Abendessen gemeinsam', desc:'Ohne Bildschirm. Wie war der Tag? Was war schön? Was war schwer? Einfachstes Ritual mit größter Wirkung.', time:'Täglich', dnn:'connect' },
+                { id:'fam_1', title:'Ein kleines Familienritual auswählen', desc:'Einen realistischen Moment wählen, der ohnehin stattfindet: Abendroutine, gemeinsames Essen oder kurzer Spaziergang. Keine starre Wochenpflicht.', time:'10–20 Min', dnn:'connect' },
+                { id:'fam_2', title:'Bei einem täglichen Moment wirklich präsent sein', desc:'Wenn es der Alltag zulässt, beim Essen oder Spielen das Handy weglegen und aufmerksam mit Frau und Tochter sein. Gut genug ist besser als perfekt.', time:'10 Min', dnn:'connect' },
                 { id:'fam_3', title:'Monatlich etwas Besonderes planen', desc:'Wildtierpark, Kino, Wanderung. Im Kalender planen = es passiert auch wirklich.', time:'1x/Monat', dnn:'goals' },
             ]},
             { title: '💪 Phase 2 — Als Vater führen', steps: [
@@ -1311,8 +1304,8 @@ const EXECUTION_PLANS = {
     books: {
         phases: [
             { title: '📚 Phase 1 — System aufbauen', steps: [
-                { id:'book_1', title:'Buchliste für alle 12 Bücher erstellen', desc:'Vorschlag: 4 Leadership/PM, 3 Business, 2 Gesundheit, 2 Persönlichkeit, 1 Beziehung.', time:'30 Min', dnn:'goals' },
-                { id:'book_2', title:'Lesesession täglich blocken', desc:'30 Min = mind. 10 Seiten. Morgen nach Aufwachen oder vor dem Schlafen. Gleiche Zeit = Habit.', time:'Täglich', dnn:'read' },
+                { id:'book_1', title:'Leseliste auf die aktuelle Lebensphase zuschneiden', desc:'Wenige relevante Bücher zu Führung, Business oder persönlicher Entwicklung auswählen. Zwölf Bücher sind ein Wunschziel, keine Pflicht neben Arbeit und Familie.', time:'15 Min', dnn:'goals' },
+                { id:'book_2', title:'Zehn Seiten an einen bestehenden Anker hängen', desc:'Die tägliche DNN ist bereits auf zehn Seiten ausgelegt. Eine passende Zeit wählen; wenn Abende knapp sind, nicht auf eine lange Abendroutine setzen.', time:'10–15 Min/Tag', dnn:'read' },
                 { id:'book_3', title:'Notion-Template für Buchnotizen anlegen', desc:'Pro Buch: Kernaussagen, Zitate, 3 Umsetzungen. Wissen ohne Notizen geht zu 80% verloren.', time:'1 Std', dnn:'goals' },
             ]},
             { title: '🎯 Phase 2 — Mit Intention lesen', steps: [
@@ -1359,8 +1352,8 @@ const LIFE_AREAS = [
         { id:'beyond', text:'Discover the man beyond the surface',type:'progress', current:0, target:10, unit:'von 10',       dnn:['read','goals'] },
     ]},
     { id:'health', name:'Gesundheit & Fitness', icon:'🏋️', goals:[
-        { id:'weight',   text:'80kg Körpergewicht',     type:'progress', current:0,  target:80, unit:'kg',      dnn:['move','goals'] },
-        { id:'bodyfat',  text:'20% Körperfett',         type:'progress', current:30, target:20, unit:'% KF',    dnn:['move','goals'], reverseProgress:true },
+        { id:'weight',   text:'80kg Körpergewicht',     type:'progress', current:84, target:80, unit:'kg',      dnn:['move','goals'] },
+        { id:'bodyfat',  text:'20% Körperfett',         type:'progress', current:25, target:20, unit:'% KF',    dnn:['move','goals'], reverseProgress:true },
         { id:'training', text:'3x/Woche trainieren',    type:'progress', current:0,  target:3,  unit:'x/Woche', dnn:['move'] },
         { id:'ice',      text:'Eis Baden ausprobieren', type:'once',                                             dnn:['move','goals'] },
     ]},
@@ -1430,6 +1423,11 @@ function loadState() {
     LIFE_AREAS.forEach(area => area.goals.forEach(g => {
         if (!state.goals[g.id]) state.goals[g.id] = { done:false, current: g.current ?? 0 };
     }));
+
+    // Mark only work clearly supported by prior conversations. Never overwrite an explicit status.
+    ['sal_1','sal_3'].forEach(id => {
+        if (state.execSteps[id] === undefined) state.execSteps[id] = true;
+    });
 
     if (!state.execSteps) state.execSteps = {};
     if (!state.lifeScorecard || typeof state.lifeScorecard !== 'object') state.lifeScorecard = { weeks: {} };
@@ -2077,7 +2075,6 @@ function openExecModal(goalId) {
                     </div>
                     ${phase.steps.map((step, i) => `
                         <div class="exec-step">
-                            <div class="exec-step-num">${i+1}</div>
                             <button type="button"
                                     class="exec-step-cb ${state.execSteps[step.id] ? 'done' : ''}"
                                     aria-label="${state.execSteps[step.id] ? 'Schritt als offen markieren' : 'Schritt abhaken'}"
