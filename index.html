@@ -728,6 +728,18 @@
 .networking-hub-status{font-size:.76rem;color:#475467;margin-top:8px}
 @media(max-width:650px){.networking-hub{padding:16px}.networking-hub-item{align-items:flex-start;flex-direction:column}.networking-hub-due{white-space:normal}}
 </style>
+<style>
+/* LifeOS top-level navigation: keep the dashboard calm and networking in its own workspace */
+.lifeos-tabs{max-width:1400px;margin:0 auto;padding:0 20px 18px;display:flex;gap:8px;align-items:center}
+.lifeos-tab{appearance:none;border:1px solid #d0d5dd;background:#fff;color:#344054;border-radius:10px;padding:10px 15px;font-weight:750;cursor:pointer}
+.lifeos-tab[aria-selected="true"]{background:#173b82;border-color:#173b82;color:#fff;box-shadow:0 2px 7px rgba(23,59,130,.16)}
+.lifeos-tab-hint{margin-left:auto;color:#667085;font-size:12px}
+.lifeos-network-workspace{display:none;margin:0 auto;padding:0 20px 24px;max-width:1500px}
+.lifeos-network-frame{display:block;width:100%;height:calc(100vh - 150px);min-height:680px;border:1px solid #e5e9f2;border-radius:14px;background:#f5f7fb}
+body.lifeos-network-mode #lifeosApp > .header,body.lifeos-network-mode #lifeosApp > .container{display:none!important}
+body.lifeos-network-mode .lifeos-network-workspace{display:block}
+@media(max-width:700px){.lifeos-tabs{padding:0 12px 14px}.lifeos-tab{padding:9px 12px;font-size:14px}.lifeos-tab-hint{display:none}.lifeos-network-workspace{padding:0 8px 12px}.lifeos-network-frame{height:calc(100vh - 125px);min-height:600px;border-radius:10px}}
+</style>
 </head>
 <body><style>
 .auth-screen{max-width:460px;margin:8vh auto;padding:22px;font-family:'Segoe UI',sans-serif;color:#172033}
@@ -874,6 +886,15 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
 </form><div id="lifeosAuthMessage" class="auth-message" role="status">Sichere Verbindung wird hergestellt …</div>
 </div></section><div id="lifeosApp">
 
+<nav class="lifeos-tabs" aria-label="LifeOS Bereiche">
+  <button type="button" class="lifeos-tab" id="lifeosTabDashboard" aria-selected="true" onclick="lifeosSetActiveTab('dashboard')">🎯 LifeOS</button>
+  <button type="button" class="lifeos-tab" id="lifeosTabNetworking" aria-selected="false" onclick="lifeosOpenNetworking()">🤝 Netzwerk</button>
+  <span class="lifeos-tab-hint">Ein System für Ziele, Alltag und Karriere</span>
+</nav>
+<section class="lifeos-network-workspace" id="lifeosNetworkingWorkspace" aria-label="Networking und Karrierechancen">
+  <iframe class="lifeos-network-frame" id="lifeosNetworkingFrame" title="Networking und Karrierechancen" src="./linkedin-networking.html" loading="lazy" referrerpolicy="same-origin"></iframe>
+</section>
+
 <div class="header">
     <h1>🎯 Life Dashboard</h1>
     <div class="lifeos-toolbar">
@@ -946,7 +967,7 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
         <div><h2 id="networkingHubTitle">🤝 Networking & Karrierechancen</h2><p>Deine nächsten sinnvollen Kontaktaktionen – direkt aus deinem bestehenden LinkedIn OS.</p></div>
         <div class="networking-hub-actions">
           <button type="button" class="networking-hub-btn" id="networkingRefresh">↻ Aktualisieren</button>
-          <a class="networking-hub-btn" href="./linkedin-networking.html?tab=scout">Neue Kontakte finden →</a><a class="networking-hub-btn primary" href="./linkedin-networking.html">Networking öffnen →</a>
+          <button type="button" class="networking-hub-btn" onclick="lifeosOpenNetworking('scout')">Neue Kontakte finden →</button><button type="button" class="networking-hub-btn primary" onclick="lifeosOpenNetworking()">Networking öffnen →</button>
         </div>
       </div>
       <div class="networking-hub-stats">
@@ -1977,6 +1998,24 @@ function init() {
 </div><!-- /#lifeosApp -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+function lifeosSetActiveTab(tab){
+ const network=tab==='networking';
+ document.body.classList.toggle('lifeos-network-mode',network);
+ const dashboardButton=document.getElementById('lifeosTabDashboard');
+ const networkButton=document.getElementById('lifeosTabNetworking');
+ if(dashboardButton)dashboardButton.setAttribute('aria-selected',String(!network));
+ if(networkButton)networkButton.setAttribute('aria-selected',String(network));
+ if(network){
+   const frame=document.getElementById('lifeosNetworkingFrame');
+   if(frame && frame.contentWindow) { try { frame.contentWindow.dispatchEvent(new Event('lifeos-tab-activated')); } catch(_){} }
+ }
+}
+function lifeosOpenNetworking(tab){
+ const frame=document.getElementById('lifeosNetworkingFrame');
+ if(frame && tab==='scout' && !frame.src.includes('tab=scout')) frame.src='./linkedin-networking.html?tab=scout';
+ else if(frame && !tab && frame.src.includes('tab=scout')) frame.src='./linkedin-networking.html';
+ lifeosSetActiveTab('networking');
+}
 const LIFEOS_SUPABASE_URL='https://srgxrkjkexzfjztspibf.supabase.co';
 const LIFEOS_SUPABASE_KEY='sb_publishable_CQBqODnDyv7dWEkwqsxBUA_bzf5LqWF';
 const lifeosSb=window.supabase.createClient(LIFEOS_SUPABASE_URL,LIFEOS_SUPABASE_KEY);
