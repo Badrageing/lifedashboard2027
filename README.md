@@ -1,39 +1,35 @@
-# Life Dashboard 2027
+# LifeOS 2027
 
-Personal operating system for goals, routines and career execution.
+Personal operating system for goals, routines, weekly reviews and career execution.
 
-## LinkedIn Networking OS
+## Networking lives inside LifeOS
 
-The dedicated LinkedIn CRM lives in [`linkedin-networking.html`](./linkedin-networking.html).
+Open the **„🤝 Netzwerk“ tab** in `index.html` to use the complete networking workspace without leaving LifeOS. The dashboard tab stays focused on goals and everyday execution; the networking tab contains the detailed CRM.
 
-It supports:
-- Contact scouting and a structured contact CRM
-- Relationship status tracking, next actions and dated follow-ups
+The networking workspace supports:
+- Contact scouting and contact management
+- Relationship status, next actions and dated follow-ups
 - Interaction history per contact
-- Message templates, weekly reviews and progress metrics
+- Message templates and draft preparation
+- Career opportunity pipeline
+- Weekly reviews and progress metrics
 - JSON backup and import
 
-### Data and privacy
+`linkedin-networking.html` remains the underlying networking application loaded inside the LifeOS tab. You normally do not need to open it separately.
 
-- The app uses Supabase Auth and stores the signed-in user's state in `public.networking_state`.
+## Data and privacy
+
+- LifeOS goals and routines remain in `public.lifeos_state`.
+- Networking records remain in the signed-in user's existing `public.networking_state` row.
+- LifeOS and the embedded networking workspace use the same Supabase project and signed-in session.
+- The networking data is **not copied or migrated** into `lifeos_state`; the existing networking row remains the source of truth. This avoids duplicate records and protects existing contacts and interaction history.
 - Row Level Security restricts each user to their own row.
-- The app also keeps a local browser cache to make the interface responsive.
-- Export a JSON backup periodically, especially before importing a full backup.
+- The networking app keeps a local browser cache for responsiveness. Export a JSON backup periodically, especially before importing a full backup.
 - Keep notes professional and avoid sensitive or confidential information.
 
-### Maintenance notes
+## Maintenance notes
 
-- Contact records are stored as JSON in the user's `state` field. New optional fields (such as interaction history) are backward-compatible.
-- Status labels used by existing records should remain available in both the edit form and the filter.
+- Contact records are stored as JSON in the user's networking `state` field. Optional fields are backward-compatible.
+- Existing status labels should remain available in both the edit form and filter.
 - Follow-up dates should be compared using the user's local calendar date, not UTC.
-
-## LifeOS + Networking integration
-
-LifeOS is the central dashboard; the LinkedIn Networking OS remains the detailed CRM and source of truth for networking records.
-
-- LifeOS reads the signed-in user's existing row from `public.networking_state` and displays contact count, due follow-ups, near-term actions, and open opportunity count.
-- Networking data is **not copied or migrated** into `lifeos_state`; contact history remains in the existing networking row.
-- The Networking OS includes a prioritized "Diese Woche zuerst" queue and a career-opportunity pipeline. Opportunities are stored as an optional `opportunities` array in the existing `networking_state.state` JSON. Existing records remain compatible.
-- Both apps must use the same Supabase account to show the same user data.
-- Contact discovery remains a reviewed workflow: research results and message drafts should be checked by the user before contacting anyone. No automatic messages are sent.
-- The LifeOS integration uses the existing Supabase Auth session and Row Level Security. Do not put a service-role key in client code.
+- Message drafts require user review; nothing is sent automatically.
