@@ -167,6 +167,20 @@
         .score-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
 
         /* GOAL ITEM */
+        .master-plan-card { margin: 18px 0 28px; padding: 20px; border: 1px solid #d9e2f2; border-radius: 16px; background: #f8faff; color: #1d2939; }
+        .master-plan-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; }
+        .master-plan-eyebrow { font-size:.68rem; letter-spacing:.08em; color:#475467; font-weight:700; }
+        .master-plan-heading h3 { margin:7px 0 5px; font-size:1.15rem; color:#101828; }
+        .master-plan-heading p { margin:0; color:#475467; font-size:.85rem; line-height:1.5; }
+        .master-plan-count { white-space:nowrap; border-radius:10px; background:#e4ecfb; color:#2149a6; padding:8px 10px; font-weight:700; font-size:.9rem; }
+        .master-plan-details { margin-top:16px; border-top:1px solid #e4e7ec; padding-top:12px; }
+        .master-plan-details summary { cursor:pointer; font-weight:650; color:#344054; font-size:.88rem; }
+        .master-phase { margin-top:15px; }
+        .master-phase h4 { margin:0 0 8px; color:#344054; font-size:.85rem; }
+        .master-task { display:flex; align-items:flex-start; gap:9px; padding:9px 0; border-bottom:1px solid #eaecf0; color:#344054; font-size:.83rem; line-height:1.45; }
+        .master-task input { margin-top:3px; accent-color:#315fc4; flex-shrink:0; }
+        .master-task.done span { color:#667085; text-decoration:line-through; }
+        .master-phase-note { margin:7px 0 0; color:#667085; font-size:.76rem; line-height:1.4; }
         .goal-item {
             display: flex; align-items: flex-start; gap: 12px;
             padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -1026,6 +1040,18 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
       </details>
     </section>
 
+    <!-- 90-day master plan -->
+    <section class="master-plan-card" id="masterPlanCard">
+      <div class="master-plan-heading">
+        <div><div class="master-plan-eyebrow">DEIN UMSETZUNGSRAHMEN · 19.10.2026–16.01.2027</div><h3>90-Tage-Masterplan</h3><p>Karriere und Gesundheit aktiv voranbringen. Familie schützen. Business schlank validieren.</p></div>
+        <div class="master-plan-count" id="masterPlanCount">0/18</div>
+      </div>
+      <details class="master-plan-details">
+        <summary>Konkrete Aufgaben anzeigen und abhaken</summary>
+        <div id="masterPlanTasks"></div>
+      </details>
+    </section>
+
     <!-- Goals -->
     <div class="section-title">🌟 Lebensbereiche & Ziele</div>
     <div class="goals-grid" id="goalsGrid"></div>
@@ -1386,7 +1412,8 @@ let state = {
     execSteps: {},
     week: {},
     lifeScorecard: { weeks: {} },
-    lastDay: null
+    lastDay: null,
+    masterPlanDone: {}
 };
 
 let activeFilter = 'all';
@@ -1402,6 +1429,7 @@ function loadState() {
     if (!state.dnn || typeof state.dnn !== 'object') state.dnn = { read:false, goals:false, move:false, connect:false, share:false };
     if (!state.goals || typeof state.goals !== 'object') state.goals = {};
     if (!state.execSteps || typeof state.execSteps !== 'object') state.execSteps = {};
+    if (!state.masterPlanDone || typeof state.masterPlanDone !== 'object') state.masterPlanDone = {};
     if (!state.week || typeof state.week !== 'object') state.week = {};
 
     const todayKey = todayISO();
@@ -1974,6 +2002,45 @@ function renderLifeScorecard(forceSuggestions=false) {
 }
 
 
+const MASTER_PLAN = [
+  {phase:'PHASE 1 · KLARHEIT & KONTROLLE · 19.10.–01.11.',note:'Zuerst Ordnung und Ausgangswerte schaffen.',tasks:[
+    ['mp_01','Aktive Bewerbungen und Rückmeldungen aktualisieren; pro offenem Prozess nächsten Schritt und Wiedervorlage festhalten.'],
+    ['mp_02','Drei belastbare Führungsnachweise formulieren: PMO-Aufbau, Stage-Gate/Governance, Transformation oder Automatisierung.'],
+    ['mp_03','Das Arbeitgeber-Coaching ab 26.10. mit einem konkreten Entwicklungsauftrag und messbarem Erfolgskriterium starten.'],
+    ['mp_04','Drei Trainingstermine pro Woche für die nächsten zwei Wochen fest in den Kalender setzen.'],
+    ['mp_05','Aktuelles Gewicht und Körperfett erfassen; Messwerte und Trends statt alter Schätzwerte verwenden.'],
+    ['mp_06','B2C-Pilotangebot auf eine Zielgruppe, ein konkretes Problem und einen klaren Nutzen begrenzen.']
+  ]},
+  {phase:'PHASE 2 · MARKTWERT & ROUTINE · 02.11.–29.11.',note:'Qualität vor Masse; kleine Schritte, die sich wiederholen lassen.',tasks:[
+    ['mp_07','Pro Woche zwei passende Stellen auf mindestens 100.000 € fixes Jahresbrutto prüfen; nur bei echtem Fit bewerben.'],
+    ['mp_08','Pro Woche drei gezielte berufliche Kontakte neu ansprechen oder sinnvoll nachfassen.'],
+    ['mp_09','Jede Woche eine Führungsfähigkeit mit dem Coach bearbeiten und im Arbeitsalltag konkret anwenden.'],
+    ['mp_10','Dreimal pro Woche trainieren und die Alltagsbewegung schrittweise Richtung 8.000 Schritte erhöhen.'],
+    ['mp_11','Mindestens fünf Zielpersonen über das Business-Problem befragen; keine Website und keine teuren Tools bauen.'],
+    ['mp_12','Freitag einen 15-minütigen Wochenreview machen: Ergebnisse, Blocker und nächste konkrete Aktion.']
+  ]},
+  {phase:'PHASE 3 · ERGEBNISSE · 30.11.–27.12.',note:'Aktivitäten nur fortsetzen, wenn sie Ergebnisse wahrscheinlicher machen.',tasks:[
+    ['mp_13','Karriereansatz anhand echter Rückmeldungen gezielt nachschärfen: Positionierung, CV oder Interviewbelege – nicht alles zugleich.'],
+    ['mp_14','Eine konkrete Governance- oder Führungsverbesserung im aktuellen Job sichtbar machen und dokumentieren.'],
+    ['mp_15','Das Business-Pilotangebot mit klarem Preis anbieten und aktiv auf eine bezahlte Testphase hinarbeiten.'],
+    ['mp_16','Ernährung anhand des mehrwöchigen Gewichtstrends überprüfen; kleine Anpassung statt Crash-Diät.'],
+    ['mp_17','Familienzeit und Erholung auch in anspruchsvollen Wochen bewusst schützen.']
+  ]},
+  {phase:'PHASE 4 · BILANZ & ENTSCHEIDUNG · 28.12.–16.01.',note:'Auf Basis von Belegen entscheiden, nicht aus Bauchgefühl oder Frust.',tasks:[
+    ['mp_18','90-Tage-Bilanz ziehen: Karrierefortschritt, Gesundheit, Business-Zahlungsbereitschaft und Lebensbereiche; danach maximal zwei aktive Entwicklungsziele wählen.']
+  ]}
+];
+function toggleMasterPlanTask(id,checked) {
+  if(!state.masterPlanDone||typeof state.masterPlanDone!=='object')state.masterPlanDone={};
+  state.masterPlanDone[id]=Boolean(checked);saveState();renderMasterPlan();
+}
+function renderMasterPlan() {
+  const host=document.getElementById('masterPlanTasks'),count=document.getElementById('masterPlanCount');if(!host||!count)return;
+  const all=MASTER_PLAN.flatMap(p=>p.tasks),done=all.filter(t=>state.masterPlanDone[t[0]]).length;
+  count.textContent=done+'/'+all.length;
+  host.innerHTML=MASTER_PLAN.map(p=>'<div class="master-phase"><h4>'+p.phase+'</h4>'+p.tasks.map(t=>'<label class="master-task '+(state.masterPlanDone[t[0]]?'done':'')+'"><input type="checkbox" '+(state.masterPlanDone[t[0]]?'checked':'')+' onchange="toggleMasterPlanTask(&quot;'+t[0]+'&quot;,this.checked)"><span>'+t[1]+'</span></label>').join('')+'<p class="master-phase-note">'+p.note+'</p></div>').join('');
+}
+
 function renderAll() {
     renderDNN();
     renderWeekly();
@@ -1983,6 +2050,7 @@ function renderAll() {
     renderTips();
     renderStats();
     renderFocusCard();
+    renderMasterPlan();
 }
 
 function init() {
