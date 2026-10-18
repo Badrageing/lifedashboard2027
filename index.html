@@ -741,7 +741,49 @@
 .networking-hub-empty{padding:13px;background:#fff;border:1px dashed #c8d0dc;border-radius:10px;color:#475467;font-size:.86rem}
 .networking-hub-status{font-size:.76rem;color:#475467;margin-top:8px}
 @media(max-width:650px){.networking-hub{padding:16px}.networking-hub-item{align-items:flex-start;flex-direction:column}.networking-hub-due{white-space:normal}}
-</style>
+
+        .lifeos-secondary-panel {
+            margin: 18px 0;
+            border: 1px solid rgba(148,163,184,.20);
+            border-radius: 16px;
+            background: rgba(15,23,42,.34);
+            overflow: hidden;
+        }
+        .lifeos-secondary-panel > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 17px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            color: #e8edf5;
+            font-weight: 650;
+        }
+        .lifeos-secondary-panel > summary::-webkit-details-marker { display: none; }
+        .lifeos-secondary-panel > summary::after {
+            content: '+';
+            color: #a9b7ca;
+            font-size: 1.25rem;
+            line-height: 1;
+            flex: 0 0 auto;
+        }
+        .lifeos-secondary-panel[open] > summary::after { content: '−'; }
+        .lifeos-secondary-panel > summary small {
+            color: #a7b3c5;
+            font-size: .82rem;
+            font-weight: 400;
+            text-align: right;
+        }
+        .lifeos-secondary-panel[open] > summary { border-bottom: 1px solid rgba(148,163,184,.16); }
+        .lifeos-secondary-panel > :not(summary) { margin-left: 16px; margin-right: 16px; }
+        .lifeos-secondary-panel > .section-title:first-of-type { margin-top: 18px; }
+        @media (max-width: 640px) {
+            .lifeos-secondary-panel > summary { align-items: flex-start; }
+            .lifeos-secondary-panel > summary small { display: none; }
+        }
+
+    </style>
 <style>
 /* LifeOS top-level navigation: keep the dashboard calm and networking in its own workspace */
 .lifeos-tabs{max-width:1400px;margin:0 auto;padding:0 20px 18px;display:flex;gap:8px;align-items:center}
@@ -1005,6 +1047,9 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
     <div class="section-title">⚡ Daily Non-Negotiables</div>
     <div class="dnn-grid" id="dnnGrid"></div>
 
+    <!-- Secondary: weekly review is available when needed, not always competing for attention -->
+    <details class="lifeos-secondary-panel">
+      <summary><span>📅 Wochenübersicht & Rückblick</span><small>Wochenansicht, Lebensbereiche bewerten und Maßnahmen wählen</small></summary>
     <!-- Weekly -->
     <div class="section-title">📅 Diese Woche</div>
     <div class="weekly-grid" id="weeklyGrid"></div>
@@ -1040,6 +1085,8 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
       </details>
     </section>
 
+    </details>
+
     <!-- 90-day master plan -->
     <section class="master-plan-card" id="masterPlanCard">
       <div class="master-plan-heading">
@@ -1052,6 +1099,9 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
       </details>
     </section>
 
+    <!-- Secondary: full planning tools stay available without crowding the daily view -->
+    <details class="lifeos-secondary-panel">
+      <summary><span>🧭 Alle Ziele & Planungswerkzeuge</span><small>Ziele, Ausführungspläne und passende Tipps bei Bedarf öffnen</small></summary>
     <!-- Goals -->
     <div class="section-title">🌟 Lebensbereiche & Ziele</div>
     <div class="goals-grid" id="goalsGrid"></div>
@@ -1072,6 +1122,7 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
         <span class="section-sub">— sortiert nach deinen schwächsten Bereichen</span>
     </div>
     <div class="tips-grid" id="tipsGrid"></div>
+    </details>
 
 </div>
 
