@@ -1106,6 +1106,18 @@ body:not(.lifeos-authed) #lifeosApp{display:none}body.lifeos-authed #lifeosAuth{
       </details>
     </section>
 
+    <!-- 12-week career capability sprint -->
+    <section class="master-plan-card" id="careerSprintCard">
+      <div class="master-plan-heading">
+        <div><div class="master-plan-eyebrow">KARRIEREENTWICKLUNG · 12 WOCHEN · CA. 3 STD./WOCHE</div><h3>12-Wochen-Sprint: PMO & Transformation Leadership</h3><p>Konkrete Arbeitsproben und belastbare Interviewbelege für den nächsten Karriereschritt ab 100.000 € Fixgehalt. Kein Zertifikate-Sammeln.</p></div>
+        <div class="master-plan-count" id="careerSprintCount">0/12</div>
+      </div>
+      <details class="master-plan-details">
+        <summary>Wochenplan anzeigen und Fortschritt abhaken</summary>
+        <div id="careerSprintTasks"></div>
+      </details>
+    </section>
+
     <!-- Secondary: full planning tools stay available without crowding the daily view -->
     <details class="lifeos-secondary-panel">
       <summary><span>🧭 Alle Ziele & Planungswerkzeuge</span><small>Ziele, Ausführungspläne und passende Tipps bei Bedarf öffnen</small></summary>
@@ -2099,6 +2111,39 @@ function renderMasterPlan() {
   host.innerHTML=MASTER_PLAN.map(p=>'<div class="master-phase"><h4>'+p.phase+'</h4>'+p.tasks.map(t=>'<label class="master-task '+(state.masterPlanDone[t[0]]?'done':'')+'"><input type="checkbox" '+(state.masterPlanDone[t[0]]?'checked':'')+' onchange="toggleMasterPlanTask(&quot;'+t[0]+'&quot;,this.checked)"><span>'+t[1]+'</span></label>').join('')+'<p class="master-phase-note">'+p.note+'</p></div>').join('');
 }
 
+const CAREER_SPRINT = [
+  {phase:'WOCHEN 1–3 · WERTBEITRAG MESSBAR MACHEN',note:'Je Woche etwa 45 Minuten Lernen, 60 Minuten Artefakt erstellen, 45 Minuten anwenden und 30 Minuten reflektieren.',tasks:[
+    ['cp_01','Drei Projektfälle dokumentieren: Ausgangsproblem, eigener Beitrag, Ergebnis und Beleg. Zahlen nur verwenden, wenn sie belastbar sind.'],
+    ['cp_02','Ein Portfolio-Priorisierungsmodell bauen: strategischer Nutzen, Aufwand, Risiko, Abhängigkeiten und Kapazität.'],
+    ['cp_03','Ein schlankes Business-Case-Modell erstellen: Nutzen, Kosten, Annahmen, Risiken und Messung nach Umsetzung.']
+  ]},
+  {phase:'WOCHEN 4–6 · STEUERUNG & EINFLUSS',note:'Die Artefakte an einem realen, vertraulichen oder anonymisierten Beispiel testen.',tasks:[
+    ['cp_04','Ein Executive Briefing auf einer Seite formulieren: Entscheidung, Optionen, Empfehlung, Risiken und nächster Schritt.'],
+    ['cp_05','Ein Statusreport in ein Steuerungsformat überführen: Abweichungen, Prognose, Entscheidungen und Eskalationsbedarf.'],
+    ['cp_06','Stakeholder-Map für ein komplexes Vorhaben erstellen: Einfluss, Haltung, Interessen und passende nächste Interaktion.']
+  ]},
+  {phase:'WOCHEN 7–9 · LEADERSHIP & KI',note:'Fokus auf praktische Anwendung, nicht auf Theorie allein.',tasks:[
+    ['cp_07','Zwei schwierige Gesprächssituationen vorbereiten und üben: klare Botschaft, konkrete Beobachtung, Wirkung und Vereinbarung.'],
+    ['cp_08','Ein Beispiel für Führung ohne Weisungsbefugnis dokumentieren: Erwartung klären, Verbindlichkeit schaffen und nachhalten.'],
+    ['cp_09','Einen risikoarmen KI-Anwendungsfall für Projektarbeit auswählen und vorab Datenschutz, Vertraulichkeit, Mitbestimmung und freigegebene Tools prüfen.']
+  ]},
+  {phase:'WOCHEN 10–12 · NACHWEISE & POSITIONIERUNG',note:'Nur freigegebene, anonymisierte oder selbst erstellte Inhalte ins Karriereportfolio übernehmen.',tasks:[
+    ['cp_10','Den KI-Anwendungsfall gegen den bisherigen Prozess testen: Zeit, Qualität, Korrekturaufwand und Fehler vergleichen.'],
+    ['cp_11','Fünf STAR-Interviewgeschichten erstellen: Situation, Aufgabe, eigenes Vorgehen und belegbares Ergebnis.'],
+    ['cp_12','Karriereportfolio finalisieren und CV sowie Interviewbeispiele auf PMO-, Portfolio- und Transformation-Leadership ausrichten.']
+  ]}
+];
+function toggleCareerSprintTask(id,checked) {
+  if(!state.careerSprintDone||typeof state.careerSprintDone!=='object')state.careerSprintDone={};
+  state.careerSprintDone[id]=Boolean(checked);saveState();renderCareerSprint();
+}
+function renderCareerSprint() {
+  const host=document.getElementById('careerSprintTasks'),count=document.getElementById('careerSprintCount');if(!host||!count)return;
+  const all=CAREER_SPRINT.flatMap(p=>p.tasks),done=all.filter(t=>state.careerSprintDone&&state.careerSprintDone[t[0]]).length;
+  count.textContent=done+'/'+all.length;
+  host.innerHTML=CAREER_SPRINT.map(p=>'<div class="master-phase"><h4>'+p.phase+'</h4>'+p.tasks.map(t=>'<label class="master-task '+((state.careerSprintDone&&state.careerSprintDone[t[0]])?'done':'')+'"><input type="checkbox" '+((state.careerSprintDone&&state.careerSprintDone[t[0]])?'checked':'')+' onchange="toggleCareerSprintTask(&quot;'+t[0]+'&quot;,this.checked)"><span>'+t[1]+'</span></label>').join('')+'<p class="master-phase-note">'+p.note+'</p></div>').join('');
+}
+
 function renderAll() {
     renderDNN();
     renderWeekly();
@@ -2109,6 +2154,7 @@ function renderAll() {
     renderStats();
     renderFocusCard();
     renderMasterPlan();
+    renderCareerSprint();
 }
 
 function init() {
