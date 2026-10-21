@@ -30,7 +30,7 @@
   <div class="top-actions"><span class="pill" id="syncPill">● Verbunden</span><button class="btn" id="backLifeOS">← LifeOS</button><button class="btn" id="logout">Abmelden</button></div>
  </header>
  <nav class="tabs" aria-label="Control Center Navigation">
-  <button class="tab active" data-view="home">Übersicht</button><button class="tab" data-view="loops">Open Loops</button><button class="tab" data-view="inbox">AI Inbox <span id="inboxBadge"></span></button><button class="tab" data-view="review">Wochenreview</button><button class="tab" data-view="import">ChatGPT-Import</button>
+  <button class="tab active" data-view="home">Übersicht</button><button class="tab" data-view="loops">Open Loops</button><button class="tab" data-view="projects">Ziele & Projekte</button><button class="tab" data-view="inbox">AI Inbox <span id="inboxBadge"></span></button><button class="tab" data-view="review">Wochenreview</button><button class="tab" data-view="import">ChatGPT-Import</button>
  </nav>
  <section class="view active" id="view-home">
   <div class="grid">
@@ -46,6 +46,10 @@
    <div class="toolbar"><div class="field"><label for="filterStatus">Status</label><select id="filterStatus"><option value="open">Offen (ohne neue Vorschläge)</option><option value="all">Alle</option><option value="new">Neu / AI-Vorschläge</option><option value="active">Aktiv</option><option value="waiting">Wartend</option><option value="parked">Geparkt</option><option value="completed">Erledigt</option><option value="dismissed">Verworfen</option></select></div><div class="field"><label for="filterArea">Lebensbereich</label><select id="filterArea"><option value="all">Alle Bereiche</option><option value="career">Karriere</option><option value="health">Gesundheit</option><option value="family">Familie</option><option value="finances">Finanzen</option><option value="personal_development">Persönliche Entwicklung</option><option value="side_business">Side Business</option></select></div><div class="field"><label for="sortLoops">Sortierung</label><select id="sortLoops"><option value="priority">Priorität</option><option value="due">Fälligkeit</option><option value="recent">Zuletzt geändert</option></select></div></div>
    <div id="loopFormWrap" class="hidden"></div><div id="loopsList" class="list"></div>
   </div>
+ </section>
+ <section class="view" id="view-projects">
+  <div class="grid"><div class="panel span-12"><h2>Bestehende Ziele & Projekte</h2><p class="sub">LifeOS bleibt die Quelle der Wahrheit. Das Control Center referenziert Ziele, statt sie zu kopieren.</p><div id="goalsList" class="list"></div></div>
+   <div class="panel span-12"><h2>Projektstruktur</h2><p class="sub">Im vorhandenen Schema liegen Ziele und Routinen in lifeos_state; eigenständige Projektobjekte sind in der aktuellen Datenstruktur nicht separat erkennbar. Deshalb erfindet das Control Center keine Projektkopien. Open Loops können vorhandenen Ziel-IDs zugeordnet werden; eine separate Projektverwaltung ergänzen wir erst, wenn es eine echte Projektquelle gibt.</p><a class="btn soft" href="./index.html">Bestehende Ziele in LifeOS öffnen →</a></div></div>
  </section>
  <section class="view" id="view-inbox">
   <div class="panel"><h2>AI Inbox</h2><p class="sub">Jeder Vorschlag hat eine Quelle. Prüfe ihn, bevor er Teil deines aktiven Systems wird.</p><div class="notice">Ein Vorschlag ist noch keine Verpflichtung. Unsichere, veraltete oder doppelte Themen kannst du verwerfen oder mit einer vorhandenen Schleife verknüpfen.</div><div id="inboxList" class="list"></div></div>
@@ -85,8 +89,8 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const AREAS={career:'Karriere',health:'Gesundheit',family:'Familie',finances:'Finanzen',personal_development:'Persönliche Entwicklung',side_business:'Side Business'};
 const TYPES={question:'Offene Frage',decision:'Entscheidung',commitment:'Zusage / Verpflichtung',problem:'Problem',follow_up:'Follow-up'};
 const STATUSES={new:'Neu prüfen',active:'Aktiv',waiting:'Wartet',parked:'Geparkt',completed:'Erledigt',dismissed:'Verworfen'};
-const GOALS={salary:'100k+ Jahresgehalt',leadership:'Leadership verbessern',pm:'Projektleiter-Skills verbessern',selfled:'Selbstführung verbessern',biz:'Start a business',idea:'Eine Idee als Experiment umsetzen',beyond:'Beyond the Surface',weight:'80 kg Körpergewicht',bodyfat:'20 % Körperfett',training:'3x/Woche trainieren',ice:'Eisbaden ausprobieren',wife:'Beziehung stärken',family:'Familie stärken',zoo:'Ausflug Wildtierpark Poing',books:'12 Bücher lesen',tattoo:'Tattoo stechen lassen'};
-let user=null,loops=[],sources=[],loopSources=[],imports=[],review=null,reviewItems=[],existingGoalIds=[],busy=false;
+const GOAL_AREA={salary:'career',leadership:'career',pm:'career',selfled:'career',biz:'side_business',idea:'side_business',beyond:'personal_development',weight:'health',bodyfat:'health',training:'health',ice:'health',wife:'family',family:'family',zoo:'family',books:'personal_development',tattoo:'personal_development'};\nconst GOALS={salary:'100k+ Jahresgehalt',leadership:'Leadership verbessern',pm:'Projektleiter-Skills verbessern',selfled:'Selbstführung verbessern',biz:'Start a business',idea:'Eine Idee als Experiment umsetzen',beyond:'Beyond the Surface',weight:'80 kg Körpergewicht',bodyfat:'20 % Körperfett',training:'3x/Woche trainieren',ice:'Eisbaden ausprobieren',wife:'Beziehung stärken',family:'Familie stärken',zoo:'Ausflug Wildtierpark Poing',books:'12 Bücher lesen',tattoo:'Tattoo stechen lassen'};
+let user=null,loops=[],sources=[],loopSources=[],imports=[],review=null,reviewItems=[],existingGoalIds=[],existingGoalState={},busy=false;
 const $=id=>document.getElementById(id);
 function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function showView(view){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+view));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===view));if(view==='review')renderReview();if(view==='inbox')renderInbox();if(view==='loops')renderLoops();window.scrollTo({top:0,behavior:'smooth'})}
@@ -99,19 +103,21 @@ function empty(title,desc){return '<div class="empty"><b>'+esc(title)+'</b>'+esc
 function sourceFor(loopId){const rel=loopSources.filter(x=>x.loop_id===loopId);return rel.map(r=>{const s=sources.find(s=>s.id===r.source_id);return s?{...s,evidence_excerpt:r.evidence_excerpt,relationship:r.relationship}:null}).filter(Boolean)}
 function priorityRank(p){return p==='high'?0:p==='normal'?1:2}
 async function loadData(){
- const [l,s,ls,im]=await Promise.all([
+ const [l,s,ls,im,life]=await Promise.all([
   sb.from('lifeos_open_loops').select('*').order('updated_at',{ascending:false}).limit(1000),
   sb.from('lifeos_sources').select('*').order('created_at',{ascending:false}).limit(1000),
   sb.from('lifeos_loop_sources').select('*').limit(2000),
-  sb.from('lifeos_imports').select('*').order('created_at',{ascending:false}).limit(100)
+  sb.from('lifeos_imports').select('*').order('created_at',{ascending:false}).limit(100),
+  sb.from('lifeos_state').select('state,updated_at').eq('user_id',user.id).maybeSingle()
  ]);
- for(const [r,n] of [[l,'Open Loops'],[s,'Quellen'],[ls,'Quellenverknüpfungen'],[im,'Importe']])if(r.error)throw new Error(n+': '+r.error.message);
+ for(const [r,n] of [[l,'Open Loops'],[s,'Quellen'],[ls,'Quellenverknüpfungen'],[im,'Importe'],[life,'Bestehende LifeOS-Ziele']])if(r.error)throw new Error(n+': '+r.error.message);
  loops=l.data||[];sources=s.data||[];loopSources=ls.data||[];imports=im.data||[];
- const raw=localStorage.getItem('lifeDashV4');let local=null;try{local=raw?JSON.parse(raw):null}catch(_){}
- existingGoalIds=Object.keys(local?.goals||{}).filter(k=>GOALS[k]);
+ existingGoalState=life.data?.state||{};
+ const localRaw=localStorage.getItem('lifeDashV4');let local=null;try{local=localRaw?JSON.parse(localRaw):null}catch(_){}
+ existingGoalIds=Object.keys(existingGoalState.goals||local?.goals||{}).filter(k=>GOALS[k]);
  renderAll();
 }
-function renderAll(){renderHome();renderLoops();renderInbox();renderImports();$('syncPill').textContent='● Synchronisiert';$('todayText').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('inboxBadge').textContent=loops.filter(x=>x.status==='new').length?'('+loops.filter(x=>x.status==='new').length+')':''}
+function renderAll(){renderHome();renderLoops();renderProjects();renderInbox();renderImports();$('syncPill').textContent='● Synchronisiert';$('todayText').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('inboxBadge').textContent=loops.filter(x=>x.status==='new').length?'('+loops.filter(x=>x.status==='new').length+')':''}
 function renderHome(){
  const active=loops.filter(x=>['active','waiting','parked'].includes(x.status));const overdue=active.filter(x=>x.due_date&&x.due_date<dateISO()&&x.status!=='parked');const fresh=loops.filter(x=>x.status==='new');const done=loops.filter(x=>x.status==='completed');
  $('statActive').textContent=active.filter(x=>x.status==='active').length;$('statOverdue').textContent=overdue.length;$('statInbox').textContent=fresh.length;$('statDone').textContent=done.length;
@@ -130,6 +136,16 @@ function renderLoops(){
  let rows=loops.filter(x=>(fs==='all'||(fs==='open'?['active','waiting','parked'].includes(x.status):fs==='new'?x.status==='new':x.status===fs))&&(fa==='all'||x.life_area===fa));
  const sort=$('sortLoops')?.value||'priority';rows.sort((a,b)=>sort==='due'?(a.due_date||'9999').localeCompare(b.due_date||'9999'):sort==='recent'?(b.updated_at||'').localeCompare(a.updated_at||''):priorityRank(a.priority)-priorityRank(b.priority)||(a.due_date||'9999').localeCompare(b.due_date||'9999'));
  $('loopsList').innerHTML=rows.length?rows.map(x=>loopCard(x)).join(''):empty('Keine passenden Open Loops','Passe den Filter an oder lege ein neues Thema an.');
+}
+function renderProjects(){
+ const goalState=existingGoalState.goals||{};
+ const ids=existingGoalIds;
+ $('goalsList').innerHTML=ids.length?ids.map(id=>{
+  const g=goalState[id]||{};const linked=loops.filter(x=>x.goal_ref===id&&!['completed','dismissed'].includes(x.status)).length;
+  const status=g.done?'Erreicht':'In Arbeit';const current=typeof g.current==='number'?' · aktueller Wert '+g.current:'';
+  const area=GOAL_AREA[id]||'career';
+  return '<div class="item"><div class="item-top"><div><h3>'+esc(GOALS[id])+'</h3><p>'+esc(id)+current+'</p></div><span class="tag '+(g.done?'green':'blue')+'">'+status+'</span></div><div class="meta"><span class="tag">'+esc(AREAS[area])+'</span><span class="tag">'+linked+' verknüpfte offene Themen</span></div><div class="item-actions"><button class="btn soft" data-goal-loop="'+esc(id)+'">Open Loop zu diesem Ziel anlegen</button></div></div>';
+ }).join(''):empty('Keine vorhandenen Ziele gefunden','Melde dich im bestehenden LifeOS an und prüfe, ob Ziele in lifeos_state gespeichert sind.');
 }
 function renderInbox(){const rows=loops.filter(x=>x.status==='new').sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));$('inboxList').innerHTML=rows.length?rows.map(x=>loopCard(x)).join(''):empty('Inbox ist leer','Neue AI-Vorschläge erscheinen nach dem Import. Du kannst auch Open Loops manuell anlegen.')}
 function importCard(x){return '<div class="item"><div class="item-top"><h3>'+esc(x.filename||'ChatGPT-Export')+'</h3><span class="tag '+(x.status==='completed'?'green':x.status==='failed'?'red':'blue')+'">'+esc(x.status)+'</span></div><p>'+esc(x.conversation_count)+' Gespräche · '+esc(x.candidate_count)+' Vorschläge</p><div class="source-title">'+esc(fmtDate(x.created_at))+(x.error_summary?' · '+esc(x.error_summary):'')+'</div></div>'}
@@ -245,6 +261,7 @@ $('signup').onclick=async()=>{const email=$('email').value.trim(),password=$('pa
 $('logout').onclick=async()=>{await sb.auth.signOut();location.href='./index.html'};
 $('backLifeOS').onclick=()=>location.href='./index.html';
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+$('goalsList').addEventListener('click',e=>{const b=e.target.closest('[data-goal-loop]');if(b)newLoopForm({goal_ref:b.dataset.goalLoop,life_area:GOAL_AREA[b.dataset.goalLoop]||'career'})});
 $('newLoopBtn').onclick=()=>newLoopForm();$('filterStatus').onchange=renderLoops;$('filterArea').onchange=renderLoops;$('sortLoops').onchange=renderLoops;
 $('loopsList').addEventListener('click',handleLoopAction);$('inboxList').addEventListener('click',handleLoopAction);$('startImport').onclick=runImport;$('saveReview').onclick=()=>saveWeeklyReview().catch(e=>{$('reviewMessage').textContent='Fehler: '+e.message});
 sb.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>onAuth(session),0)});
