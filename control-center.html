@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LifeOS Control Center</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<style>
+:root{color-scheme:light;--bg:#f5f7fb;--panel:#fff;--ink:#152238;--muted:#617087;--line:#e1e7f0;--blue:#2459a9;--blue2:#eaf2ff;--green:#237a45;--amber:#925c00;--red:#b42318;--shadow:0 10px 30px rgba(25,42,70,.06)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:wait}.shell{max-width:1440px;margin:auto;padding:24px clamp(14px,3vw,38px) 48px}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:24px}.brand{display:flex;gap:13px;align-items:center}.logo{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;color:white;background:linear-gradient(135deg,#173b82,#6d5dd3);font-size:22px}.eyebrow{font-size:11px;letter-spacing:.13em;font-weight:800;color:var(--blue);text-transform:uppercase}.brand h1{font-size:clamp(1.45rem,3vw,2rem);letter-spacing:-.035em;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:var(--muted);font-size:12px;background:#fff}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:10px 14px;font-weight:700}.btn:hover{border-color:#9db5df}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.soft{background:var(--blue2);color:var(--blue);border-color:#c8d8f5}.btn.danger{color:var(--red)}.tabs{display:flex;gap:7px;overflow-x:auto;padding:5px 0 14px;margin-bottom:14px;border-bottom:1px solid var(--line)}.tab{white-space:nowrap;border:1px solid transparent;background:transparent;border-radius:10px;padding:10px 13px;color:var(--muted);font-weight:750}.tab.active{background:#fff;border-color:var(--line);box-shadow:0 2px 6px #1b315008;color:var(--blue)}.view{display:none}.view.active{display:block}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}.panel{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:20px;box-shadow:var(--shadow);min-width:0}.panel h2{font-size:1.08rem;letter-spacing:-.02em;margin:0 0 5px}.panel .sub{color:var(--muted);font-size:13px;margin:0 0 16px}.hero{padding:clamp(22px,4vw,36px);background:linear-gradient(120deg,#fff 0%,#f0f5ff 100%);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;right:-55px;top:-85px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,#d9e6ff,transparent 70%);pointer-events:none}.hero h2{font-size:clamp(1.6rem,3vw,2.35rem);max-width:700px;line-height:1.15;margin:7px 0 10px;position:relative;z-index:1}.hero p{max-width:700px;color:var(--muted);margin:0;position:relative;z-index:1}.hero .btn{margin-top:18px;position:relative;z-index:1}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stat{padding:16px;border:1px solid var(--line);border-radius:13px;background:#fff}.stat b{display:block;font-size:1.75rem;letter-spacing:-.04em}.stat span{color:var(--muted);font-size:12px}.area-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.area{border:1px solid var(--line);border-radius:12px;padding:12px}.area strong{display:block;font-size:13px}.area span{color:var(--muted);font-size:12px}.list{display:grid;gap:10px}.item{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fff;min-width:0}.item-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.item h3{font-size:15px;margin:0;line-height:1.35}.item p{margin:7px 0;color:var(--muted);font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;border-radius:999px;padding:4px 8px;background:#f1f4f9;color:#4c5b70}.tag.blue{background:#eaf2ff;color:#2459a9}.tag.green{background:#eaf7ee;color:#237a45}.tag.amber{background:#fff5df;color:#925c00}.tag.red{background:#fff0ee;color:#b42318}.meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.item-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.small{font-size:12px;color:var(--muted)}.field{display:grid;gap:5px;margin-bottom:12px}.field label{font-size:12px;font-weight:800;color:#3b4a60}.field input,.field select,.field textarea{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:10px 11px;background:#fff;color:var(--ink);min-width:0}.field textarea{resize:vertical;min-height:82px}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.notice{padding:13px 15px;border-radius:12px;background:#edf4ff;border:1px solid #c9d9f8;color:#234b8d;font-size:13px;margin-bottom:14px}.notice.warn{background:#fff7e7;border-color:#f1d49b;color:#765000}.notice.error{background:#fff0ee;border-color:#f4c7c2;color:#9b1c13}.notice.ok{background:#ecf8ef;border-color:#c6e7cf;color:#216a3b}.empty{border:1px dashed #cbd5e1;border-radius:13px;padding:28px;text-align:center;color:var(--muted);background:#fafcff}.empty b{display:block;color:var(--ink);margin-bottom:4px}.progress{height:7px;background:#e9eef6;border-radius:99px;overflow:hidden;margin:10px 0}.progress span{height:100%;display:block;background:var(--blue);width:0;transition:width .2s}.login-wrap{max-width:440px;margin:8vh auto;padding:0 16px}.login{background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:var(--shadow)}.login h2{margin:0 0 6px}.hidden{display:none!important}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.toolbar .field{margin:0;min-width:170px}.source-title{font-size:12px;color:var(--muted);margin-top:8px}.check{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:#344054;margin:12px 0}.check input{margin-top:4px;flex-shrink:0}.review-priorities{display:grid;gap:8px}.priority-choice{display:flex;align-items:flex-start;gap:9px;padding:10px;border:1px solid var(--line);border-radius:10px}.priority-choice input{margin-top:4px}.priority-choice span{font-size:13px}.footer{margin-top:24px;color:#8995a6;font-size:11px;text-align:center}
+@media(max-width:900px){.span-8,.span-7,.span-5,.span-4{grid-column:span 12}.span-6{grid-column:span 12}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.area-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.form-row{grid-template-columns:1fr}.panel{padding:15px}.stats{gap:8px}.stat{padding:12px}.stat b{font-size:1.5rem}.area-grid{grid-template-columns:1fr 1fr}.top{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div id="authView" class="login-wrap hidden">
+ <div class="brand" style="margin-bottom:18px"><div class="logo">✦</div><div><div class="eyebrow">LifeOS</div><h1>Control Center</h1><p>Deine offenen Themen. Ein klarer nächster Schritt.</p></div></div>
+ <form id="authForm" class="login">
+  <h2>Willkommen zurück</h2><p class="sub">Melde dich mit demselben LifeOS-Konto an.</p>
+  <div class="field"><label for="email">E-Mail</label><input id="email" type="email" autocomplete="email" required></div>
+  <div class="field"><label for="password">Passwort</label><input id="password" type="password" autocomplete="current-password" minlength="8" required></div>
+  <button class="btn primary" style="width:100%" type="submit">Anmelden</button>
+  <button class="btn" id="signup" type="button" style="width:100%;margin-top:8px">Konto erstellen</button>
+  <p id="authMessage" class="small" role="status" style="margin-top:12px"></p>
+ </form>
+</div>
+<div id="app" class="shell hidden">
+ <header class="top">
+  <div class="brand"><div class="logo">✦</div><div><div class="eyebrow">Personal operating system</div><h1>Control Center</h1><p id="todayText">Weniger offene Schleifen. Mehr Umsetzung.</p></div></div>
+  <div class="top-actions"><span class="pill" id="syncPill">● Verbunden</span><button class="btn" id="backLifeOS">← LifeOS</button><button class="btn" id="logout">Abmelden</button></div>
+ </header>
+ <nav class="tabs" aria-label="Control Center Navigation">
+  <button class="tab active" data-view="home">Übersicht</button><button class="tab" data-view="loops">Open Loops</button><button class="tab" data-view="projects">Ziele & Projekte</button><button class="tab" data-view="inbox">AI Inbox <span id="inboxBadge"></span></button><button class="tab" data-view="review">Wochenreview</button><button class="tab" data-view="import">ChatGPT-Import</button>
+ </nav>
+ <section class="view active" id="view-home">
+  <div class="grid">
+   <div class="panel hero span-12"><div class="eyebrow">Dein Fokus statt noch einer To-do-Liste</div><h2>Was braucht jetzt wirklich deine Aufmerksamkeit?</h2><p>LifeOS macht aus offenen Fragen, Entscheidungen und Zusagen konkrete nächste Schritte. AI schlägt vor – du entscheidest.</p><button class="btn primary" onclick="showView('review')">Wochenreview starten →</button></div>
+   <div class="panel span-12"><div class="stats"><div class="stat"><b id="statActive">0</b><span>Aktive Schleifen</span></div><div class="stat"><b id="statOverdue">0</b><span>Überfällig</span></div><div class="stat"><b id="statInbox">0</b><span>Neue Vorschläge</span></div><div class="stat"><b id="statDone">0</b><span>Erledigt</span></div></div></div>
+   <div class="panel span-8"><h2>Deine nächsten Schritte</h2><p class="sub">Aktive Themen mit klarer Handlung – keine neuen Vorschläge ohne Prüfung.</p><div id="homeNext" class="list"></div></div>
+   <div class="panel span-4"><h2>Lebensbereiche</h2><p class="sub">Alle wichtigen Bereiche im Blick.</p><div id="areaSummary" class="area-grid"></div></div>
+   <div class="panel span-12"><div class="item-top"><div><h2>Zuletzt importiert</h2><p class="sub">Quellenmetadaten bleiben erhalten; vollständige Gesprächsinhalte nicht.</p></div><button class="btn soft" onclick="showView('import')">Export importieren</button></div><div id="recentImports" class="list"></div></div>
+  </div>
+ </section>
+ <section class="view" id="view-loops">
+  <div class="panel"><div class="item-top"><div><h2>Open Loops</h2><p class="sub">Fragen, Entscheidungen, Zusagen und Probleme, die noch Aufmerksamkeit brauchen.</p></div><button class="btn primary" id="newLoopBtn">+ Open Loop</button></div>
+   <div class="toolbar"><div class="field"><label for="filterStatus">Status</label><select id="filterStatus"><option value="open">Offen (ohne neue Vorschläge)</option><option value="all">Alle</option><option value="new">Neu / AI-Vorschläge</option><option value="active">Aktiv</option><option value="waiting">Wartend</option><option value="parked">Geparkt</option><option value="completed">Erledigt</option><option value="dismissed">Verworfen</option></select></div><div class="field"><label for="filterArea">Lebensbereich</label><select id="filterArea"><option value="all">Alle Bereiche</option><option value="career">Karriere</option><option value="health">Gesundheit</option><option value="family">Familie</option><option value="finances">Finanzen</option><option value="personal_development">Persönliche Entwicklung</option><option value="side_business">Side Business</option></select></div><div class="field"><label for="sortLoops">Sortierung</label><select id="sortLoops"><option value="priority">Priorität</option><option value="due">Fälligkeit</option><option value="recent">Zuletzt geändert</option></select></div></div>
+   <div id="loopFormWrap" class="hidden"></div><div id="loopsList" class="list"></div>
+  </div>
+ </section>
+ <section class="view" id="view-projects">
+  <div class="grid"><div class="panel span-12"><h2>Bestehende Ziele & Projekte</h2><p class="sub">LifeOS bleibt die Quelle der Wahrheit. Das Control Center referenziert Ziele, statt sie zu kopieren.</p><div id="goalsList" class="list"></div></div>
+   <div class="panel span-12"><h2>Projektstruktur</h2><p class="sub">Im vorhandenen Schema liegen Ziele und Routinen in lifeos_state; eigenständige Projektobjekte sind in der aktuellen Datenstruktur nicht separat erkennbar. Deshalb erfindet das Control Center keine Projektkopien. Open Loops können vorhandenen Ziel-IDs zugeordnet werden; eine separate Projektverwaltung ergänzen wir erst, wenn es eine echte Projektquelle gibt.</p><a class="btn soft" href="./index.html">Bestehende Ziele in LifeOS öffnen →</a></div></div>
+ </section>
+ <section class="view" id="view-inbox">
+  <div class="panel"><h2>AI Inbox</h2><p class="sub">Jeder Vorschlag hat eine Quelle. Prüfe ihn, bevor er Teil deines aktiven Systems wird.</p><div class="notice">Ein Vorschlag ist noch keine Verpflichtung. Unsichere, veraltete oder doppelte Themen kannst du verwerfen oder mit einer vorhandenen Schleife verknüpfen.</div><div id="inboxList" class="list"></div></div>
+ </section>
+ <section class="view" id="view-review">
+  <div class="grid">
+   <div class="panel span-7"><h2>Dein Wochenreview</h2><p class="sub" id="reviewWeek"></p><div class="field"><label for="reflection">Rückblick: Was hat funktioniert, was nicht?</label><textarea id="reflection" placeholder="Kurz und ehrlich. Was hast du abgeschlossen? Was bleibt offen?"></textarea></div><h2 style="margin-top:20px">Maximal drei Prioritäten</h2><p class="sub">Wähle höchstens drei aktive Schleifen für die kommende Woche.</p><div id="priorityChoices" class="review-priorities"></div><button class="btn primary" id="saveReview" style="margin-top:14px">Review speichern und abschließen</button><p id="reviewMessage" class="small" role="status"></p></div>
+   <div class="panel span-5"><h2>Offene Themen prüfen</h2><p class="sub">Entscheide pro Thema, was diese Woche damit passiert.</p><div id="reviewLoops" class="list"></div></div>
+  </div>
+ </section>
+ <section class="view" id="view-import">
+  <div class="grid">
+   <div class="panel span-7"><h2>ChatGPT-Datenexport importieren</h2><p class="sub">Lade die ZIP-Datei deines ChatGPT-Exports hoch. Der Browser liest die Datei lokal ein; Rohgespräche werden nicht in Supabase gespeichert.</p>
+    <div class="notice warn"><b>Datenschutz vor Analyse</b><br>Für die AI-Analyse werden ausgewählte Gesprächsausschnitte an die OpenAI-API übermittelt. Gespräche können sensible Inhalte enthalten. Schließe beruflich vertrauliche oder andere nicht zu übermittelnde Gespräche aus und starte die Analyse nur, wenn du dazu berechtigt bist. Die Analysefunktion benötigt einen serverseitig hinterlegten API-Schlüssel.</div>
+    <div class="field"><label for="exportFile">ChatGPT-Export (.zip)</label><input id="exportFile" type="file" accept=".zip,application/zip"></div>
+    <div class="field"><label for="excludeKeywords">Gespräche nach Titel ausschließen (optional)</label><input id="excludeKeywords" placeholder="z. B. vertraulich, Kunde X, medizinisch"><p class="small">Kommagetrennte Begriffe. Es werden Gespräche ausgeschlossen, deren Titel einen Begriff enthält. Das erkennt sensible Inhalte im Nachrichtentext nicht zuverlässig.</p></div>
+    <div class="form-row"><div class="field"><label for="maxConversations">Maximale Anzahl neuester Gespräche</label><select id="maxConversations"><option value="50">50 Gespräche</option><option value="100" selected>100 Gespräche</option><option value="250">250 Gespräche</option><option value="500">500 Gespräche</option></select></div><div class="field"><label for="minConfidence">Vorschlagsqualität</label><select id="minConfidence"><option value="0.5">Mehr Vorschläge (ab 50 %)</option><option value="0.65" selected>Ausgewogen (ab 65 %)</option><option value="0.8">Nur hohe Sicherheit (ab 80 %)</option></select></div></div>
+    <label class="check"><input type="checkbox" id="forceAnalysis"><span>Gespräche erneut analysieren, auch wenn sie unverändert sind (kann zusätzliche API-Kosten verursachen).</span></label>
+    <label class="check"><input type="checkbox" id="consentAnalysis"><span>Ich habe die ausgewählten Gespräche geprüft und willige ein, die benötigten Textausschnitte zur Analyse an die OpenAI-API zu senden.</span></label>
+    <button class="btn primary" id="startImport">Export prüfen und importieren</button>
+    <div id="importProgressWrap" class="hidden"><div class="progress"><span id="importProgress"></span></div><p id="importStatus" class="small" role="status"></p></div>
+   </div>
+   <div class="panel span-5"><h2>Was gespeichert wird</h2><p class="sub">Datenminimierung ist Teil des Designs.</p><div class="list">
+    <div class="item"><div class="item-top"><h3>Gespeichert</h3><span class="tag green">Metadaten</span></div><p>Gesprächs-ID, Titel, Zeitstempel, Fingerprint, kurze Belegstelle und von dir bestätigte offene Schleifen.</p></div>
+    <div class="item"><div class="item-top"><h3>Nicht dauerhaft gespeichert</h3><span class="tag blue">Rohtext</span></div><p>Die vollständigen Gesprächsverläufe und die ZIP-Datei werden nicht in Supabase gespeichert. Der Inhalt wird während der Analyse im Browser verarbeitet und an die AI-API gesendet.</p></div>
+    <div class="item"><div class="item-top"><h3>Erneuter Import</h3><span class="tag">Duplikatschutz</span></div><p>Identische Exporte und unveränderte Gespräche werden erkannt. Erneute Analyse ist optional und kann API-Kosten verursachen.</p></div>
+   </div></div>
+   <div class="panel span-12"><h2>Importhistorie</h2><p class="sub">Status und Verarbeitungszahlen früherer Importe.</p><div id="importHistory" class="list"></div></div>
+  </div>
+ </section>
+ <div class="footer">LifeOS Control Center · AI-Vorschläge werden nicht automatisch zu verbindlichen Aufgaben. Prüfe wichtige Informationen selbst.</div>
+</div>
+<script>
+const SUPABASE_URL='https://srgxrkjkexzfjztspibf.supabase.co';
+const SUPABASE_KEY='sb_publishable_CQBqODnDyv7dWEkwqsxBUA_bzf5LqWF';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const AREAS={career:'Karriere',health:'Gesundheit',family:'Familie',finances:'Finanzen',personal_development:'Persönliche Entwicklung',side_business:'Side Business'};
+const TYPES={question:'Offene Frage',decision:'Entscheidung',commitment:'Zusage / Verpflichtung',problem:'Problem',follow_up:'Follow-up'};
+const STATUSES={new:'Neu prüfen',active:'Aktiv',waiting:'Wartet',parked:'Geparkt',completed:'Erledigt',dismissed:'Verworfen'};
+const GOAL_AREA={salary:'career',leadership:'career',pm:'career',selfled:'career',biz:'side_business',idea:'side_business',beyond:'personal_development',weight:'health',bodyfat:'health',training:'health',ice:'health',wife:'family',family:'family',zoo:'family',books:'personal_development',tattoo:'personal_development'};
+const GOALS={salary:'100k+ Jahresgehalt',leadership:'Leadership verbessern',pm:'Projektleiter-Skills verbessern',selfled:'Selbstführung verbessern',biz:'Start a business',idea:'Eine Idee als Experiment umsetzen',beyond:'Beyond the Surface',weight:'80 kg Körpergewicht',bodyfat:'20 % Körperfett',training:'3x/Woche trainieren',ice:'Eisbaden ausprobieren',wife:'Beziehung stärken',family:'Familie stärken',zoo:'Ausflug Wildtierpark Poing',books:'12 Bücher lesen',tattoo:'Tattoo stechen lassen'};
+let user=null,loops=[],sources=[],loopSources=[],imports=[],review=null,reviewItems=[],existingGoalIds=[],existingGoalState={},busy=false;
+const $=id=>document.getElementById(id);
+function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showView(view){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+view));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===view));if(view==='review')renderReview();if(view==='inbox')renderInbox();if(view==='loops')renderLoops();window.scrollTo({top:0,behavior:'smooth'})}
+function setMessage(id,text,kind=''){const el=$(id);if(el){el.textContent=text;el.className=kind?'notice '+kind:'small';}}
+function dateISO(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function mondayISO(d=new Date()){const x=new Date(d);x.setHours(12,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return dateISO(x)}
+function fmtDate(v){if(!v)return 'Kein Termin';const d=new Date(v.length===10?v+'T12:00:00':v);return Number.isNaN(d.getTime())?v:d.toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric'})}
+function statusTag(s){const cls=s==='active'?'green':s==='new'?'blue':s==='waiting'?'amber':s==='completed'?'green':s==='dismissed'?'red':'';return '<span class="tag '+cls+'">'+esc(STATUSES[s]||s)+'</span>'}
+function empty(title,desc){return '<div class="empty"><b>'+esc(title)+'</b>'+esc(desc)+'</div>'}
+function sourceFor(loopId){const rel=loopSources.filter(x=>x.loop_id===loopId);return rel.map(r=>{const s=sources.find(s=>s.id===r.source_id);return s?{...s,evidence_excerpt:r.evidence_excerpt,relationship:r.relationship}:null}).filter(Boolean)}
+function priorityRank(p){return p==='high'?0:p==='normal'?1:2}
+async function loadData(){
+ const [l,s,ls,im,life]=await Promise.all([
+  sb.from('lifeos_open_loops').select('*').order('updated_at',{ascending:false}).limit(1000),
+  sb.from('lifeos_sources').select('*').order('created_at',{ascending:false}).limit(1000),
+  sb.from('lifeos_loop_sources').select('*').limit(2000),
+  sb.from('lifeos_imports').select('*').order('created_at',{ascending:false}).limit(100),
+  sb.from('lifeos_state').select('state,updated_at').eq('user_id',user.id).maybeSingle()
+ ]);
+ for(const [r,n] of [[l,'Open Loops'],[s,'Quellen'],[ls,'Quellenverknüpfungen'],[im,'Importe'],[life,'Bestehende LifeOS-Ziele']])if(r.error)throw new Error(n+': '+r.error.message);
+ loops=l.data||[];sources=s.data||[];loopSources=ls.data||[];imports=im.data||[];
+ existingGoalState=life.data?.state||{};
+ const localRaw=localStorage.getItem('lifeDashV4');let local=null;try{local=localRaw?JSON.parse(localRaw):null}catch(_){}
+ existingGoalIds=Object.keys(existingGoalState.goals||local?.goals||{}).filter(k=>GOALS[k]);
+ renderAll();
+}
+function renderAll(){renderHome();renderLoops();renderProjects();renderInbox();renderImports();$('syncPill').textContent='● Synchronisiert';$('todayText').textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('inboxBadge').textContent=loops.filter(x=>x.status==='new').length?'('+loops.filter(x=>x.status==='new').length+')':''}
+function renderHome(){
+ const active=loops.filter(x=>['active','waiting','parked'].includes(x.status));const overdue=active.filter(x=>x.due_date&&x.due_date<dateISO()&&x.status!=='parked');const fresh=loops.filter(x=>x.status==='new');const done=loops.filter(x=>x.status==='completed');
+ $('statActive').textContent=active.filter(x=>x.status==='active').length;$('statOverdue').textContent=overdue.length;$('statInbox').textContent=fresh.length;$('statDone').textContent=done.length;
+ const picks=active.filter(x=>x.status==='active').sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority)||(a.due_date||'9999').localeCompare(b.due_date||'9999')).slice(0,6);
+ $('homeNext').innerHTML=picks.length?picks.map(x=>'<div class="item"><div class="item-top"><h3>'+esc(x.title)+'</h3>'+statusTag(x.status)+'</div><p>'+esc(x.next_action||x.description||'Nächste Aktion festlegen')+'</p><div class="meta"><span class="tag">'+esc(AREAS[x.life_area])+'</span><span class="tag">'+esc(x.priority==='high'?'Hohe Priorität':x.priority==='low'?'Niedrige Priorität':'Normal')+'</span>'+(x.due_date?'<span class="tag '+(x.due_date<dateISO()?'red':'')+'">'+(x.due_date<dateISO()?'Überfällig · ':'Fällig · ')+esc(fmtDate(x.due_date))+'</span>':'')+'</div></div>').join(''):empty('Kein aktiver nächster Schritt','Prüfe die AI Inbox oder lege eine Open Loop an.');
+ $('areaSummary').innerHTML=Object.entries(AREAS).map(([k,v])=>{const n=loops.filter(x=>x.life_area===k&&['active','waiting','parked'].includes(x.status)).length;return '<div class="area"><strong>'+esc(v)+'</strong><span>'+n+' offene Themen</span></div>'}).join('');
+ $('recentImports').innerHTML=imports.length?imports.slice(0,3).map(importCard).join(''):empty('Noch kein Import','Lade deinen ChatGPT-Datenexport hoch, wenn du bereit bist.');
+}
+function loopCard(x,withEditor=false){
+ const rel=sourceFor(x.id);const evidence=rel.find(r=>r.evidence_excerpt)?.evidence_excerpt;
+ const goal=x.goal_ref?GOALS[x.goal_ref]||('Ziel-ID: '+x.goal_ref):null;
+ return '<article class="item" data-loop="'+esc(x.id)+'"><div class="item-top"><h3>'+esc(x.title)+'</h3>'+statusTag(x.status)+'</div><p>'+esc(x.description||'')+'</p><div class="meta"><span class="tag">'+esc(AREAS[x.life_area]||x.life_area)+'</span><span class="tag">'+esc(TYPES[x.loop_type]||x.loop_type)+'</span><span class="tag">'+esc(x.priority==='high'?'Hohe Priorität':x.priority==='low'?'Niedrige Priorität':'Normal')+'</span>'+(x.due_date?'<span class="tag">'+esc(fmtDate(x.due_date))+'</span>':'')+(goal?'<span class="tag blue">Ziel: '+esc(goal)+'</span>':'')+'</div>'+(evidence?'<p><b>Beleg:</b> „'+esc(evidence)+'“</p>':'')+(rel.length?'<div class="source-title">Quelle: '+rel.map(r=>esc(r.title)).join(' · ')+'</div>':'')+'<div class="item-actions">'+(x.status==='new'?'<button class="btn primary" data-action="accept" data-id="'+esc(x.id)+'">Übernehmen</button>':'')+'<button class="btn" data-action="status" data-value="waiting" data-id="'+esc(x.id)+'">Wartet</button><button class="btn" data-action="status" data-value="parked" data-id="'+esc(x.id)+'">Parken</button><button class="btn soft" data-action="status" data-value="completed" data-id="'+esc(x.id)+'">Erledigt</button>'+(x.status!=='dismissed'?'<button class="btn danger" data-action="status" data-value="dismissed" data-id="'+esc(x.id)+'">Verwerfen</button>':'')+'<button class="btn" data-action="edit" data-id="'+esc(x.id)+'">Bearbeiten</button></div><div class="edit-wrap hidden" id="edit-'+esc(x.id)+'"></div></article>';
+}
+function renderLoops(){
+ const fs=$('filterStatus')?.value||'open',fa=$('filterArea')?.value||'all';
+ let rows=loops.filter(x=>(fs==='all'||(fs==='open'?['active','waiting','parked'].includes(x.status):fs==='new'?x.status==='new':x.status===fs))&&(fa==='all'||x.life_area===fa));
+ const sort=$('sortLoops')?.value||'priority';rows.sort((a,b)=>sort==='due'?(a.due_date||'9999').localeCompare(b.due_date||'9999'):sort==='recent'?(b.updated_at||'').localeCompare(a.updated_at||''):priorityRank(a.priority)-priorityRank(b.priority)||(a.due_date||'9999').localeCompare(b.due_date||'9999'));
+ $('loopsList').innerHTML=rows.length?rows.map(x=>loopCard(x)).join(''):empty('Keine passenden Open Loops','Passe den Filter an oder lege ein neues Thema an.');
+}
+function renderProjects(){
+ const goalState=existingGoalState.goals||{};
+ const ids=existingGoalIds;
+ $('goalsList').innerHTML=ids.length?ids.map(id=>{
+  const g=goalState[id]||{};const linked=loops.filter(x=>x.goal_ref===id&&!['completed','dismissed'].includes(x.status)).length;
+  const status=g.done?'Erreicht':'In Arbeit';const current=typeof g.current==='number'?' · aktueller Wert '+g.current:'';
+  const area=GOAL_AREA[id]||'career';
+  return '<div class="item"><div class="item-top"><div><h3>'+esc(GOALS[id])+'</h3><p>'+esc(id)+current+'</p></div><span class="tag '+(g.done?'green':'blue')+'">'+status+'</span></div><div class="meta"><span class="tag">'+esc(AREAS[area])+'</span><span class="tag">'+linked+' verknüpfte offene Themen</span></div><div class="item-actions"><button class="btn soft" data-goal-loop="'+esc(id)+'">Open Loop zu diesem Ziel anlegen</button></div></div>';
+ }).join(''):empty('Keine vorhandenen Ziele gefunden','Melde dich im bestehenden LifeOS an und prüfe, ob Ziele in lifeos_state gespeichert sind.');
+}
+function renderInbox(){const rows=loops.filter(x=>x.status==='new').sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));$('inboxList').innerHTML=rows.length?rows.map(x=>loopCard(x)).join(''):empty('Inbox ist leer','Neue AI-Vorschläge erscheinen nach dem Import. Du kannst auch Open Loops manuell anlegen.')}
+function importCard(x){return '<div class="item"><div class="item-top"><h3>'+esc(x.filename||'ChatGPT-Export')+'</h3><span class="tag '+(x.status==='completed'?'green':x.status==='failed'?'red':'blue')+'">'+esc(x.status)+'</span></div><p>'+esc(x.conversation_count)+' Gespräche · '+esc(x.candidate_count)+' Vorschläge</p><div class="source-title">'+esc(fmtDate(x.created_at))+(x.error_summary?' · '+esc(x.error_summary):'')+'</div></div>'}
+function renderImports(){$('importHistory').innerHTML=imports.length?imports.map(importCard).join(''):empty('Noch keine Importe','Dein Importverlauf erscheint hier.')}
+function renderReview(){
+ const week=mondayISO();$('reviewWeek').textContent='Woche ab '+fmtDate(week)+' · maximal 3 Prioritäten';$('reflection').value=review?.reflection||'';
+ const candidates=loops.filter(x=>x.status==='active').sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority));
+ const chosen=Array.isArray(review?.top_priorities)?review.top_priorities:[];
+ $('priorityChoices').innerHTML=candidates.length?candidates.map(x=>'<label class="priority-choice"><input type="checkbox" class="priority-check" value="'+esc(x.id)+'" '+(chosen.includes(x.id)?'checked':'')+'><span><b>'+esc(x.title)+'</b><br><span class="small">'+esc(AREAS[x.life_area])+' · '+esc(x.next_action||'Nächste Aktion festlegen')+'</span></span></label>').join(''):empty('Keine aktiven Schleifen','Übernimm Vorschläge oder lege ein Thema an.');
+ document.querySelectorAll('.priority-check').forEach(el=>el.addEventListener('change',()=>{const c=[...document.querySelectorAll('.priority-check:checked')];if(c.length>3){el.checked=false;$('reviewMessage').textContent='Bitte maximal drei Prioritäten auswählen.'}}));
+ const toReview=loops.filter(x=>['active','waiting','parked'].includes(x.status));
+ $('reviewLoops').innerHTML=toReview.length?toReview.map(x=>'<div class="item"><h3>'+esc(x.title)+'</h3><div class="meta">'+statusTag(x.status)+'<span class="tag">'+esc(AREAS[x.life_area])+'</span></div><div class="field" style="margin-top:10px;margin-bottom:0"><label>Entscheidung</label><select data-review-loop="'+esc(x.id)+'"><option value="keep_active" '+(x.status==='active'?'selected':'')+'>Aktiv halten</option><option value="wait" '+(x.status==='waiting'?'selected':'')+'>Warten</option><option value="park" '+(x.status==='parked'?'selected':'')+'>Parken</option><option value="complete">Erledigt</option><option value="dismiss">Verwerfen</option></select></div></div>').join(''):empty('Keine offenen Themen','Das ist eine gute Gelegenheit, neue Vorschläge zu prüfen.');
+}
+async function getReview(){const week=mondayISO();const {data,error}=await sb.from('lifeos_review_sessions').select('*').eq('user_id',user.id).eq('week_start',week).maybeSingle();if(error)throw error;review=data;if(review){const r=await sb.from('lifeos_review_items').select('*').eq('review_id',review.id);if(r.error)throw r.error;reviewItems=r.data||[]}else reviewItems=[]}
+function newLoopForm(existing=null){
+ const wrap=$('loopFormWrap');wrap.classList.remove('hidden');const x=existing||{};const goalOptions=Object.entries(GOALS).map(([id,name])=>'<option value="'+esc(id)+'" '+(x.goal_ref===id?'selected':'')+'>'+esc(name)+'</option>').join('');
+ wrap.innerHTML='<div class="panel" style="margin:14px 0;background:#f8faff"><h2>'+(existing?'Open Loop bearbeiten':'Neue Open Loop')+'</h2><form id="loopForm"><div class="field"><label>Titel *</label><input name="title" required maxlength="180" value="'+esc(x.title||'')+'" placeholder="Was ist noch offen?"></div><div class="field"><label>Beschreibung / Kontext</label><textarea name="description" maxlength="1200" placeholder="Warum ist das relevant?">'+esc(x.description||'')+'</textarea></div><div class="form-row"><div class="field"><label>Lebensbereich</label><select name="life_area">'+Object.entries(AREAS).map(([k,v])=>'<option value="'+k+'" '+((x.life_area||'career')===k?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div class="field"><label>Typ</label><select name="loop_type">'+Object.entries(TYPES).map(([k,v])=>'<option value="'+k+'" '+((x.loop_type||'follow_up')===k?'selected':'')+'>'+v+'</option>').join('')+'</select></div></div><div class="field"><label>Nächste konkrete Aktion</label><input name="next_action" maxlength="500" value="'+esc(x.next_action||'')+'" placeholder="Was ist die kleinste nächste Handlung?"></div><div class="form-row"><div class="field"><label>Priorität</label><select name="priority">'+['low','normal','high'].map(k=>'<option value="'+k+'" '+((x.priority||'normal')===k?'selected':'')+'>'+({'low':'Niedrig','normal':'Normal','high':'Hoch'}[k])+'</option>').join('')+'</select></div><div class="field"><label>Fälligkeit (optional)</label><input name="due_date" type="date" value="'+esc(x.due_date||'')+'"></div></div><div class="field"><label>Bestehendes LifeOS-Ziel (optional)</label><select name="goal_ref"><option value="">Kein Ziel verknüpfen</option>'+goalOptions+'</select><p class="small">Es werden nur Referenzen gespeichert. Bestehende Ziele werden nicht kopiert oder verändert.</p></div><div class="item-actions"><button class="btn primary" type="submit">Speichern</button><button class="btn" type="button" id="cancelLoopForm">Abbrechen</button></div></form></div>';
+ $('cancelLoopForm').onclick=()=>{wrap.classList.add('hidden');wrap.innerHTML=''};
+ $('loopForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);const payload={user_id:user.id,title:String(f.get('title')).trim(),description:String(f.get('description')||'').trim()||null,life_area:f.get('life_area'),loop_type:f.get('loop_type'),next_action:String(f.get('next_action')||'').trim()||null,priority:f.get('priority'),due_date:f.get('due_date')||null,goal_ref:f.get('goal_ref')||null,updated_at:new Date().toISOString()};
+ try{if(existing){const {error}=await sb.from('lifeos_open_loops').update(payload).eq('id',existing.id);if(error)throw error}else{payload.status='active';const {error}=await sb.from('lifeos_open_loops').insert(payload);if(error)throw error}wrap.classList.add('hidden');wrap.innerHTML='';await loadData()}catch(err){alert('Speichern fehlgeschlagen: '+err.message)}};
+ wrap.scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function updateLoop(id,updates){const {error}=await sb.from('lifeos_open_loops').update({...updates,updated_at:new Date().toISOString(),...(updates.status==='completed'?{completed_at:new Date().toISOString()}:{})}).eq('id',id);if(error)throw error;await loadData()}
+async function acceptLoop(id){await updateLoop(id,{status:'active',reviewed_at:new Date().toISOString()})}
+function similarTitle(a,b){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9äöüß ]/gi,' ').split(/\s+/).filter(w=>w.length>2);const A=new Set(norm(a)),B=new Set(norm(b));if(!A.size||!B.size)return false;const overlap=[...A].filter(w=>B.has(w)).length;return overlap/Math.min(A.size,B.size)>=.72}
+async function handleLoopAction(e){
+ const b=e.target.closest('button[data-action]');if(!b)return;const id=b.dataset.id,x=loops.find(x=>x.id===id);if(!x)return;
+ try{if(b.dataset.action==='accept')await acceptLoop(id);else if(b.dataset.action==='status')await updateLoop(id,{status:b.dataset.value});else if(b.dataset.action==='edit')newLoopForm(x)}catch(err){alert('Aktion fehlgeschlagen: '+err.message)}
+}
+async function sha256(buffer){const digest=await crypto.subtle.digest('SHA-256',buffer);return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+function epochDate(v){if(v===null||v===undefined||v==='')return null;let n=Number(v);if(!Number.isFinite(n))return null;if(n>1e12)n/=1000;const d=new Date(n*1000);return Number.isNaN(d.getTime())?null:d.toISOString()}
+function partText(content){if(!content)return '';const parts=Array.isArray(content.parts)?content.parts:[];return parts.map(p=>typeof p==='string'?p:(p&&typeof p.text==='string'?p.text:'')).filter(Boolean).join('\n')}
+function normalizeConversation(c){
+ const title=String(c.title||'Untitled conversation').slice(0,240);const nodes=Object.values(c.mapping||{}).filter(n=>n&&n.message&&n.message.content);
+ const msgs=nodes.map(n=>({m:n.message,t:Number(n.message.create_time)||0})).sort((a,b)=>a.t-b.t).map(({m})=>({role:m.author?.role||'unknown',text:partText(m.content),time:epochDate(m.create_time)})).filter(m=>m.text.trim());
+ const fullText=msgs.map(m=>'['+m.role+'] '+m.text).join('\n').slice(-40000);
+ return {external_id:String(c.id||''),title,created_at:epochDate(c.create_time),updated_at:epochDate(c.update_time)||epochDate(c.create_time),fullText,analysisText:msgs.slice(-35).map(m=>'['+m.role+'] '+m.text).join('\n').slice(-6500)};
+}
+async function readExport(file,limit){
+ if(!window.JSZip)throw new Error('ZIP-Bibliothek konnte nicht geladen werden. Prüfe deine Internetverbindung und lade die Seite neu.');
+ const zip=await JSZip.loadAsync(file);const files=Object.values(zip.files).filter(f=>!f.dir&&/(^|\/)conversations(?:_\d+)?\.json$/i.test(f.name));
+ if(!files.length)throw new Error('Keine conversations.json oder nummerierten Gesprächsdateien im ZIP gefunden.');
+ let all=[];
+ for(const f of files){const raw=await f.async('string');const parsed=JSON.parse(raw);const arr=Array.isArray(parsed)?parsed:(Array.isArray(parsed.conversations)?parsed.conversations:[]);all.push(...arr)}
+ const out=[];for(const c of all){if(!c||typeof c!=='object')continue;const n=normalizeConversation(c);if(!n.fullText)continue;if(!n.external_id)n.external_id='sha:'+await sha256(new TextEncoder().encode(n.title+'|'+n.created_at+'|'+n.fullText));n.content_fingerprint=await sha256(new TextEncoder().encode(n.fullText));out.push(n)}
+ const unique=[...new Map(out.map(c=>[c.external_id,c])).values()];
+ unique.sort((a,b)=>(b.updated_at||'').localeCompare(a.updated_at||''));
+ return {conversations:unique.slice(0,limit),total:unique.length,files:files.map(f=>f.name)};
+}
+async function upsertChunks(table,rows,conflict,select='*'){for(let i=0;i<rows.length;i+=100){const {error}=await sb.from(table).upsert(rows.slice(i,i+100),{onConflict:conflict});if(error)throw error}}
+function setProgress(pct,msg){$('importProgressWrap').classList.remove('hidden');$('importProgress').style.width=Math.max(0,Math.min(100,pct))+'%';$('importStatus').textContent=msg}
+async function analyzeBatch(batch){
+ const {data,error}=await sb.functions.invoke('lifeos-analyze-conversations',{body:{conversations:batch.map(c=>({external_id:c.external_id,title:c.title,text:c.analysisText}))}});
+ if(error){let msg=error.message||'AI-Aufruf fehlgeschlagen';try{if(error.context){const body=await error.context.json();msg=body.message||body.error||msg}}catch(_){}throw new Error(msg)}
+ if(data?.error)throw new Error(data.message||data.error);return data?.candidates||[];
+}
+async function runImport(){
+ if(busy)return;const file=$('exportFile').files[0];if(!file){alert('Bitte wähle zuerst eine ChatGPT-Export-ZIP-Datei aus.');return}
+ if(!$('consentAnalysis').checked){alert('Bitte bestätige, dass du die Gespräche geprüft hast und die Übermittlung der nötigen Ausschnitte erlaubst.');return}
+ if(file.size>500*1024*1024){alert('Der Export ist größer als 500 MB. Bitte exportiere/teile die Daten kleiner oder wähle eine kleinere Datei.');return}
+ busy=true;$('startImport').disabled=true;let importId=null;
+ try{
+  setProgress(3,'ZIP-Datei wird lokal geprüft …');const fileHash=await sha256(await file.arrayBuffer());
+  const {data:imp,error:impError}=await sb.from('lifeos_imports').upsert({user_id:user.id,file_fingerprint:fileHash,filename:file.name,status:'processing',conversation_count:0,candidate_count:0,error_summary:null},{onConflict:'user_id,file_fingerprint'}).select('*').single();
+  if(impError)throw impError;importId=imp.id;
+  setProgress(8,'Gespräche werden im Browser gelesen …');const parsed=await readExport(file,Number($('maxConversations').value));
+  const excludedTerms=$('excludeKeywords').value.split(',').map(x=>x.trim().toLocaleLowerCase('de-DE')).filter(Boolean);
+  parsed.conversations=parsed.conversations.filter(c=>!excludedTerms.some(term=>c.title.toLocaleLowerCase('de-DE').includes(term)));
+  if(!parsed.conversations.length)throw new Error('Nach den Ausschlussfiltern sind keine Textgespräche übrig. Passe die Titelbegriffe oder den Export an.');
+  setProgress(15,parsed.total+' Textgespräche erkannt; '+parsed.conversations.length+' Gespräche nach Titelfilter werden geprüft.');
+  const ids=parsed.conversations.map(c=>c.external_id);const existingMap=new Map();
+  for(let i=0;i<ids.length;i+=100){const {data,error}=await sb.from('lifeos_sources').select('id,external_id,content_fingerprint').in('external_id',ids.slice(i,i+100));if(error)throw error;(data||[]).forEach(s=>existingMap.set(s.external_id,s))}
+  const changed=parsed.conversations.filter(c=>$('forceAnalysis').checked||existingMap.get(c.external_id)?.content_fingerprint!==c.content_fingerprint);
+  const sourceRows=parsed.conversations.map(c=>({user_id:user.id,import_id:importId,source_type:'chatgpt_conversation',external_id:c.external_id,title:c.title,conversation_created_at:c.created_at,conversation_updated_at:c.updated_at,content_fingerprint:c.content_fingerprint,source_locator:null,retention_status:'metadata_only',updated_at:new Date().toISOString()}));
+  await upsertChunks('lifeos_sources',sourceRows,'user_id,external_id');
+  let sourceMap=new Map();for(let i=0;i<ids.length;i+=100){const {data,error}=await sb.from('lifeos_sources').select('id,external_id').in('external_id',ids.slice(i,i+100));if(error)throw error;(data||[]).forEach(s=>sourceMap.set(s.external_id,s.id))}
+  if(!changed.length){await sb.from('lifeos_imports').update({status:'completed',conversation_count:parsed.conversations.length,candidate_count:0,completed_at:new Date().toISOString(),error_summary:'Keine neuen oder geänderten Gespräche; AI-Aufruf übersprungen.'}).eq('id',importId);setProgress(100,'Import abgeschlossen. Alle ausgewählten Gespräche waren bereits bekannt und unverändert.');}
+  else{
+   const threshold=Number($('minConfidence').value);let candidates=[];
+   for(let i=0;i<changed.length;i+=4){const batch=changed.slice(i,i+4);setProgress(20+Math.round((i/changed.length)*68),'AI-Analyse: '+Math.min(i+batch.length,changed.length)+' von '+changed.length+' Gesprächen …');const result=await analyzeBatch(batch);candidates.push(...result.filter(c=>c.confidence>=threshold));}
+   let saved=0,linked=0;const openExisting=loops.filter(l=>['new','active','waiting','parked'].includes(l.status));
+   for(const c of candidates){
+    const sourceId=sourceMap.get(c.external_id);if(!sourceId)continue;
+    const dupe=openExisting.find(l=>similarTitle(l.title,c.title));
+    if(dupe){const {error}=await sb.from('lifeos_loop_sources').upsert({user_id:user.id,loop_id:dupe.id,source_id:sourceId,relationship:'duplicates',evidence_excerpt:String(c.evidence_excerpt||'').slice(0,420)},{onConflict:'loop_id,source_id'});if(error)throw error;linked++;continue}
+    const {data:created,error}=await sb.from('lifeos_open_loops').insert({user_id:user.id,title:c.title,description:String(c.description||'').slice(0,1200)||null,loop_type:c.loop_type,status:'new',life_area:c.life_area,next_action:c.next_action||null,due_date:c.due_date||null,priority:c.priority||'normal'}).select('id').single();
+    if(error)throw error;
+    const {error:relError}=await sb.from('lifeos_loop_sources').insert({user_id:user.id,loop_id:created.id,source_id:sourceId,relationship:'supports',evidence_excerpt:String(c.evidence_excerpt||'').slice(0,420)||null});if(relError)throw relError;saved++;
+   }
+   await sb.from('lifeos_imports').update({status:'completed',conversation_count:parsed.conversations.length,candidate_count:saved,completed_at:new Date().toISOString(),error_summary:linked?linked+' mögliche Dubletten wurden mit vorhandenen Themen verknüpft.':null}).eq('id',importId);
+   setProgress(100,'Fertig: '+parsed.conversations.length+' Gespräche erfasst, '+saved+' neue Vorschläge, '+linked+' mögliche Dubletten mit vorhandenen Themen verknüpft.');
+  }
+  await loadData();showView('inbox');
+ }catch(err){console.error('LifeOS import error',err);const msg=err.message||'Import fehlgeschlagen';setProgress(100,'Fehler: '+msg);if(importId){await sb.from('lifeos_imports').update({status:'failed',error_summary:msg.slice(0,500)}).eq('id',importId)}await loadData().catch(()=>{})}
+ finally{busy=false;$('startImport').disabled=false}
+}
+async function saveWeeklyReview(){
+ const selected=[...document.querySelectorAll('.priority-check:checked')].map(x=>x.value);if(selected.length>3){$('reviewMessage').textContent='Maximal drei Prioritäten.';return}
+ const week=mondayISO();const payload={user_id:user.id,week_start:week,status:'completed',reflection:$('reflection').value.trim()||null,top_priorities:selected,completed_at:new Date().toISOString()};
+ const {data,error}=await sb.from('lifeos_review_sessions').upsert(payload,{onConflict:'user_id,week_start'}).select('*').single();if(error){$('reviewMessage').textContent='Speichern fehlgeschlagen: '+error.message;return}review=data;
+ const decisions=[...document.querySelectorAll('[data-review-loop]')];
+ for(const el of decisions){const decision=el.value;const loopId=el.dataset.reviewLoop;const {error:ie}=await sb.from('lifeos_review_items').upsert({user_id:user.id,review_id:review.id,loop_id:loopId,decision},{onConflict:'review_id,loop_id'});if(ie)throw ie;const statusMap={keep_active:'active',wait:'waiting',park:'parked',complete:'completed',dismiss:'dismissed'};if(statusMap[decision]){const {error:ue}=await sb.from('lifeos_open_loops').update({status:statusMap[decision],updated_at:new Date().toISOString(),...(decision==='complete'?{completed_at:new Date().toISOString()}:{})}).eq('id',loopId);if(ue)throw ue}}
+ $('reviewMessage').textContent='Review gespeichert. '+selected.length+' Prioritäten für die Woche ausgewählt.';await loadData();await getReview();renderReview();
+}
+async function onAuth(session){
+ user=session?.user||null;
+ if(!user){$('app').classList.add('hidden');$('authView').classList.remove('hidden');return}
+ $('authView').classList.add('hidden');$('app').classList.remove('hidden');$('syncPill').textContent='● Lade Daten …';
+ try{await loadData();await getReview();renderReview()}catch(err){$('syncPill').textContent='⚠ Fehler';alert('LifeOS-Daten konnten nicht geladen werden: '+err.message)}
+}
+$('authForm').onsubmit=async e=>{e.preventDefault();$('authMessage').textContent='Anmeldung läuft …';const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});$('authMessage').textContent=error?'Anmeldung fehlgeschlagen: '+error.message:'Angemeldet.'};
+$('signup').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(!email||password.length<8){$('authMessage').textContent='Bitte E-Mail und Passwort (mindestens 8 Zeichen) eingeben.';return}const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.href}});$('authMessage').textContent=error?'Konto konnte nicht erstellt werden: '+error.message:(data.session?'Konto erstellt.':'Bitte bestätige den Link in deiner E-Mail und melde dich danach an.')};
+$('logout').onclick=async()=>{await sb.auth.signOut();location.href='./index.html'};
+$('backLifeOS').onclick=()=>location.href='./index.html';
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+$('goalsList').addEventListener('click',e=>{const b=e.target.closest('[data-goal-loop]');if(b)newLoopForm({goal_ref:b.dataset.goalLoop,life_area:GOAL_AREA[b.dataset.goalLoop]||'career'})});
+$('newLoopBtn').onclick=()=>newLoopForm();$('filterStatus').onchange=renderLoops;$('filterArea').onchange=renderLoops;$('sortLoops').onchange=renderLoops;
+$('loopsList').addEventListener('click',handleLoopAction);$('inboxList').addEventListener('click',handleLoopAction);$('startImport').onclick=runImport;$('saveReview').onclick=()=>saveWeeklyReview().catch(e=>{$('reviewMessage').textContent='Fehler: '+e.message});
+sb.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>onAuth(session),0)});
+sb.auth.getSession().then(({data,error})=>{if(error){$('authView').classList.remove('hidden');$('authMessage').textContent=error.message;return}onAuth(data.session)});
+</script>
+</body>
+</html>

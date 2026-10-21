@@ -1,0 +1,52 @@
+name: Control Center checks
+on:
+  push:
+    branches: [main, "feature/lifeos-control-center-mvp"]
+  pull_request:
+    branches: [main]
+jobs:
+  inline-javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check inline JavaScript in HTML files
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.in_script = False
+                  self.external = False
+                  self.current = []
+                  self.scripts = []
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == "script":
+                      self.in_script = True
+                      self.external = any(k.lower() == "src" for k, _ in attrs)
+                      self.current = []
+              def handle_data(self, data):
+                  if self.in_script and not self.external:
+                      self.current.append(data)
+              def handle_endtag(self, tag):
+                  if tag.lower() == "script" and self.in_script:
+                      if not self.external and "".join(self.current).strip():
+                          self.scripts.append("".join(self.current))
+                      self.in_script = False
+                      self.external = False
+          for name in ("index.html", "linkedin-networking.html", "control-center.html"):
+              parser = Scripts()
+              parser.feed(Path(name).read_text(encoding="utf-8"))
+              for i, script in enumerate(parser.scripts):
+                  Path(f"/tmp/{name}.{i}.js").write_text(script, encoding="utf-8")
+                  print(f"Checking {name} inline script {i}")
+          PY
+          for f in /tmp/index.html.*.js /tmp/linkedin-networking.html.*.js /tmp/control-center.html.*.js; do
+            [ -f "$f" ] || continue
+            node --check "$f"
+          done
