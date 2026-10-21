@@ -24,7 +24,7 @@ Deno.serve(async (req: Request) => {
   const { data: authData, error: authError } = await supabase.auth.getUser(auth.slice(7));
   if (authError || !authData.user) return json({ error: "AUTH_REQUIRED" }, 401);
   const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) return json({ error: "AI_NOT_CONFIGURED", message: "Die sichere AI-Funktion ist bereit, aber OPENAI_API_KEY ist in Supabase noch nicht konfiguriert. Es wurden keine Gesprächsinhalte gespeichert oder versendet." }, 503);
+  if (!apiKey) return json({ error: "AI_NOT_CONFIGURED", message: "Die sichere AI-Funktion ist bereit, aber OPENAI_API_KEY ist in Supabase noch nicht konfiguriert. Es wurden keine Gesprächsinhalte dauerhaft gespeichert oder an OpenAI weitergeleitet." }, 503);
 
   let payload: { conversations?: unknown };
   try { payload = await req.json(); } catch { return json({ error: "INVALID_JSON" }, 400); }
