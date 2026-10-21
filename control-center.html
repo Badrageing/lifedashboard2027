@@ -61,6 +61,7 @@
    <div class="panel span-7"><h2>ChatGPT-Datenexport importieren</h2><p class="sub">Lade die ZIP-Datei deines ChatGPT-Exports hoch. Der Browser liest die Datei lokal ein; Rohgespräche werden nicht in Supabase gespeichert.</p>
     <div class="notice warn"><b>Datenschutz vor Analyse</b><br>Für die AI-Analyse werden ausgewählte Gesprächsausschnitte an die OpenAI-API übermittelt. Gespräche können sensible Inhalte enthalten. Schließe beruflich vertrauliche oder andere nicht zu übermittelnde Gespräche aus und starte die Analyse nur, wenn du dazu berechtigt bist. Die Analysefunktion benötigt einen serverseitig hinterlegten API-Schlüssel.</div>
     <div class="field"><label for="exportFile">ChatGPT-Export (.zip)</label><input id="exportFile" type="file" accept=".zip,application/zip"></div>
+    <div class="field"><label for="excludeKeywords">Gespräche nach Titel ausschließen (optional)</label><input id="excludeKeywords" placeholder="z. B. vertraulich, Kunde X, medizinisch"><p class="small">Kommagetrennte Begriffe. Es werden Gespräche ausgeschlossen, deren Titel einen Begriff enthält. Das erkennt sensible Inhalte im Nachrichtentext nicht zuverlässig.</p></div>
     <div class="form-row"><div class="field"><label for="maxConversations">Maximale Anzahl neuester Gespräche</label><select id="maxConversations"><option value="50">50 Gespräche</option><option value="100" selected>100 Gespräche</option><option value="250">250 Gespräche</option><option value="500">500 Gespräche</option></select></div><div class="field"><label for="minConfidence">Vorschlagsqualität</label><select id="minConfidence"><option value="0.5">Mehr Vorschläge (ab 50 %)</option><option value="0.65" selected>Ausgewogen (ab 65 %)</option><option value="0.8">Nur hohe Sicherheit (ab 80 %)</option></select></div></div>
     <label class="check"><input type="checkbox" id="forceAnalysis"><span>Gespräche erneut analysieren, auch wenn sie unverändert sind (kann zusätzliche API-Kosten verursachen).</span></label>
     <label class="check"><input type="checkbox" id="consentAnalysis"><span>Ich habe die ausgewählten Gespräche geprüft und willige ein, die benötigten Textausschnitte zur Analyse an die OpenAI-API zu senden.</span></label>
@@ -195,8 +196,10 @@ async function runImport(){
   const {data:imp,error:impError}=await sb.from('lifeos_imports').upsert({user_id:user.id,file_fingerprint:fileHash,filename:file.name,status:'processing',conversation_count:0,candidate_count:0,error_summary:null},{onConflict:'user_id,file_fingerprint'}).select('*').single();
   if(impError)throw impError;importId=imp.id;
   setProgress(8,'Gespräche werden im Browser gelesen …');const parsed=await readExport(file,Number($('maxConversations').value));
-  if(!parsed.conversations.length)throw new Error('Keine Textgespräche im Export gefunden.');
-  setProgress(15,parsed.total+' Textgespräche erkannt; '+parsed.conversations.length+' neueste werden geprüft.');
+  const excludedTerms=$('excludeKeywords').value.split(',').map(x=>x.trim().toLocaleLowerCase('de-DE')).filter(Boolean);
+  parsed.conversations=parsed.conversations.filter(c=>!excludedTerms.some(term=>c.title.toLocaleLowerCase('de-DE').includes(term)));
+  if(!parsed.conversations.length)throw new Error('Nach den Ausschlussfiltern sind keine Textgespräche übrig. Passe die Titelbegriffe oder den Export an.');
+  setProgress(15,parsed.total+' Textgespräche erkannt; '+parsed.conversations.length+' Gespräche nach Titelfilter werden geprüft.');
   const ids=parsed.conversations.map(c=>c.external_id);const existingMap=new Map();
   for(let i=0;i<ids.length;i+=100){const {data,error}=await sb.from('lifeos_sources').select('id,external_id,content_fingerprint').in('external_id',ids.slice(i,i+100));if(error)throw error;(data||[]).forEach(s=>existingMap.set(s.external_id,s))}
   const changed=parsed.conversations.filter(c=>$('forceAnalysis').checked||existingMap.get(c.external_id)?.content_fingerprint!==c.content_fingerprint);
