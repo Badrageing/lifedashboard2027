@@ -130,7 +130,8 @@ function renderHome(){
 function loopCard(x,withEditor=false){
  const rel=sourceFor(x.id);const evidence=rel.find(r=>r.evidence_excerpt)?.evidence_excerpt;
  const goal=x.goal_ref?GOALS[x.goal_ref]||('Ziel-ID: '+x.goal_ref):null;
- return '<article class="item" data-loop="'+esc(x.id)+'"><div class="item-top"><h3>'+esc(x.title)+'</h3>'+statusTag(x.status)+'</div><p>'+esc(x.description||'')+'</p><div class="meta"><span class="tag">'+esc(AREAS[x.life_area]||x.life_area)+'</span><span class="tag">'+esc(TYPES[x.loop_type]||x.loop_type)+'</span><span class="tag">'+esc(x.priority==='high'?'Hohe Priorität':x.priority==='low'?'Niedrige Priorität':'Normal')+'</span>'+(x.due_date?'<span class="tag">'+esc(fmtDate(x.due_date))+'</span>':'')+(goal?'<span class="tag blue">Ziel: '+esc(goal)+'</span>':'')+'</div>'+(evidence?'<p><b>Beleg:</b> „'+esc(evidence)+'“</p>':'')+(rel.length?'<div class="source-title">Quelle: '+rel.map(r=>esc(r.title)).join(' · ')+'</div>':'')+'<div class="item-actions">'+(x.status==='new'?'<button class="btn primary" data-action="accept" data-id="'+esc(x.id)+'">Übernehmen</button>':'')+'<button class="btn" data-action="status" data-value="waiting" data-id="'+esc(x.id)+'">Wartet</button><button class="btn" data-action="status" data-value="parked" data-id="'+esc(x.id)+'">Parken</button><button class="btn soft" data-action="status" data-value="completed" data-id="'+esc(x.id)+'">Erledigt</button>'+(x.status!=='dismissed'?'<button class="btn danger" data-action="status" data-value="dismissed" data-id="'+esc(x.id)+'">Verwerfen</button>':'')+'<button class="btn" data-action="edit" data-id="'+esc(x.id)+'">Bearbeiten</button></div><div class="edit-wrap hidden" id="edit-'+esc(x.id)+'"></div></article>';
+ const duplicate=x.status==='new'?loops.find(other=>other.id!==x.id&&!['completed','dismissed'].includes(other.status)&&similarTitle(other.title,x.title)):null;
+ return '<article class="item" data-loop="'+esc(x.id)+'"><div class="item-top"><h3>'+esc(x.title)+'</h3>'+statusTag(x.status)+'</div><p>'+esc(x.description||'')+'</p>'+(duplicate?'<div class="notice warn" style="margin:10px 0"><b>Mögliche Dublette:</b> '+esc(duplicate.title)+'<br><button class="btn soft" style="margin-top:8px" data-action="link-duplicate" data-id="'+esc(x.id)+'" data-target="'+esc(duplicate.id)+'">Quelle mit bestehendem Thema verknüpfen und Vorschlag verwerfen</button></div>':'')+'<div class="meta"><span class="tag">'+esc(AREAS[x.life_area]||x.life_area)+'</span><span class="tag">'+esc(TYPES[x.loop_type]||x.loop_type)+'</span><span class="tag">'+esc(x.priority==='high'?'Hohe Priorität':x.priority==='low'?'Niedrige Priorität':'Normal')+'</span>'+(x.due_date?'<span class="tag">'+esc(fmtDate(x.due_date))+'</span>':'')+(goal?'<span class="tag blue">Ziel: '+esc(goal)+'</span>':'')+'</div>'+(evidence?'<p><b>Beleg:</b> „'+esc(evidence)+'“</p>':'')+(rel.length?'<div class="source-title">Quelle: '+rel.map(r=>esc(r.title)).join(' · ')+'</div>':'')+'<div class="item-actions">'+(x.status==='new'?'<button class="btn primary" data-action="accept" data-id="'+esc(x.id)+'">Übernehmen</button>':'')+'<button class="btn" data-action="status" data-value="waiting" data-id="'+esc(x.id)+'">Wartet</button><button class="btn" data-action="status" data-value="parked" data-id="'+esc(x.id)+'">Parken</button><button class="btn soft" data-action="status" data-value="completed" data-id="'+esc(x.id)+'">Erledigt</button>'+(x.status!=='dismissed'?'<button class="btn danger" data-action="status" data-value="dismissed" data-id="'+esc(x.id)+'">Verwerfen</button>':'')+'<button class="btn" data-action="edit" data-id="'+esc(x.id)+'">Bearbeiten</button></div><div class="edit-wrap hidden" id="edit-'+esc(x.id)+'"></div></article>';
 }
 function renderLoops(){
  const fs=$('filterStatus')?.value||'open',fa=$('filterArea')?.value||'all';
@@ -174,7 +175,7 @@ async function acceptLoop(id){await updateLoop(id,{status:'active',reviewed_at:n
 function similarTitle(a,b){const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9äöüß ]/gi,' ').split(/\s+/).filter(w=>w.length>2);const A=new Set(norm(a)),B=new Set(norm(b));if(!A.size||!B.size)return false;const overlap=[...A].filter(w=>B.has(w)).length;return overlap/Math.min(A.size,B.size)>=.72}
 async function handleLoopAction(e){
  const b=e.target.closest('button[data-action]');if(!b)return;const id=b.dataset.id,x=loops.find(x=>x.id===id);if(!x)return;
- try{if(b.dataset.action==='accept')await acceptLoop(id);else if(b.dataset.action==='status')await updateLoop(id,{status:b.dataset.value});else if(b.dataset.action==='edit')newLoopForm(x)}catch(err){alert('Aktion fehlgeschlagen: '+err.message)}
+ try{if(b.dataset.action==='accept')await acceptLoop(id);else if(b.dataset.action==='status')await updateLoop(id,{status:b.dataset.value});else if(b.dataset.action==='edit')newLoopForm(x);else if(b.dataset.action==='link-duplicate'){const target=b.dataset.target;const relations=sourceFor(id);for(const rel of relations){const {error}=await sb.from('lifeos_loop_sources').upsert({user_id:user.id,loop_id:target,source_id:rel.id,relationship:'duplicates',evidence_excerpt:rel.evidence_excerpt||null},{onConflict:'loop_id,source_id'});if(error)throw error}await updateLoop(id,{status:'dismissed'})}}catch(err){alert('Aktion fehlgeschlagen: '+err.message)}
 }
 async function sha256(buffer){const digest=await crypto.subtle.digest('SHA-256',buffer);return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 function epochDate(v){if(v===null||v===undefined||v==='')return null;let n=Number(v);if(!Number.isFinite(n))return null;if(n>1e12)n/=1000;const d=new Date(n*1000);return Number.isNaN(d.getTime())?null:d.toISOString()}
@@ -227,22 +228,22 @@ async function runImport(){
   else{
    const threshold=Number($('minConfidence').value);let candidates=[];
    for(let i=0;i<changed.length;i+=4){const batch=changed.slice(i,i+4);setProgress(20+Math.round((i/changed.length)*68),'AI-Analyse: '+Math.min(i+batch.length,changed.length)+' von '+changed.length+' Gesprächen …');const result=await analyzeBatch(batch);candidates.push(...result.filter(c=>c.confidence>=threshold));}
-   let saved=0,linked=0;const openExisting=loops.filter(l=>['new','active','waiting','parked'].includes(l.status));
+   let saved=0,possibleDuplicates=0;const openExisting=loops.filter(l=>['new','active','waiting','parked'].includes(l.status));
    for(const c of candidates){
     const sourceId=sourceMap.get(c.external_id);if(!sourceId)continue;
-    const dupe=openExisting.find(l=>similarTitle(l.title,c.title));
-    if(dupe){const {error}=await sb.from('lifeos_loop_sources').upsert({user_id:user.id,loop_id:dupe.id,source_id:sourceId,relationship:'duplicates',evidence_excerpt:String(c.evidence_excerpt||'').slice(0,420)},{onConflict:'loop_id,source_id'});if(error)throw error;linked++;continue}
+    if(openExisting.some(l=>similarTitle(l.title,c.title)))possibleDuplicates++;
     const {data:created,error}=await sb.from('lifeos_open_loops').insert({user_id:user.id,title:c.title,description:String(c.description||'').slice(0,1200)||null,loop_type:c.loop_type,status:'new',life_area:c.life_area,next_action:c.next_action||null,due_date:c.due_date||null,priority:c.priority||'normal'}).select('id').single();
     if(error)throw error;
     const {error:relError}=await sb.from('lifeos_loop_sources').insert({user_id:user.id,loop_id:created.id,source_id:sourceId,relationship:'supports',evidence_excerpt:String(c.evidence_excerpt||'').slice(0,420)||null});if(relError)throw relError;saved++;
    }
-   await sb.from('lifeos_imports').update({status:'completed',conversation_count:parsed.conversations.length,candidate_count:saved,completed_at:new Date().toISOString(),error_summary:linked?linked+' mögliche Dubletten wurden mit vorhandenen Themen verknüpft.':null}).eq('id',importId);
-   setProgress(100,'Fertig: '+parsed.conversations.length+' Gespräche erfasst, '+saved+' neue Vorschläge, '+linked+' mögliche Dubletten mit vorhandenen Themen verknüpft.');
+   await sb.from('lifeos_imports').update({status:'completed',conversation_count:parsed.conversations.length,candidate_count:saved,completed_at:new Date().toISOString(),error_summary:possibleDuplicates?possibleDuplicates+' mögliche Dubletten wurden zur manuellen Prüfung markiert.':null}).eq('id',importId);
+   setProgress(100,'Fertig: '+parsed.conversations.length+' Gespräche erfasst, '+saved+' neue Vorschläge'+(possibleDuplicates?', darunter '+possibleDuplicates+' mögliche Dubletten zur Prüfung.':'.'));
   }
   await loadData();showView('inbox');
  }catch(err){console.error('LifeOS import error',err);const msg=err.message||'Import fehlgeschlagen';setProgress(100,'Fehler: '+msg);if(importId){await sb.from('lifeos_imports').update({status:'failed',error_summary:msg.slice(0,500)}).eq('id',importId)}await loadData().catch(()=>{})}
- finally{busy=false;$('startImport').disabled=false}
+ finally{busy=false;$('startImport').disabled=false;$('consentAnalysis').checked=false}
 }
+$('exportFile').addEventListener('change',()=>{$('consentAnalysis').checked=false});
 async function saveWeeklyReview(){
  const selected=[...document.querySelectorAll('.priority-check:checked')].map(x=>x.value);if(selected.length>3){$('reviewMessage').textContent='Maximal drei Prioritäten.';return}
  const week=mondayISO();const payload={user_id:user.id,week_start:week,status:'completed',reflection:$('reflection').value.trim()||null,top_priorities:selected,completed_at:new Date().toISOString()};
